@@ -11,16 +11,14 @@ import {
   Box,
   useColorModeValue,
   Divider,
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
-import {
-  Building2,
-  Users,
-  Mail,
-  Phone,
-  Globe,
-  MapPin,
-  Briefcase,
-} from 'lucide-react';
+import { Building2, Users, Mail, Phone, Globe, MapPin, Briefcase, Eye, CreditCard as Edit, Trash2, MoveVertical as MoreVertical, UserPlus, FileText } from 'lucide-react';
 
 interface CompanyCardProps {
   id: string;
@@ -33,6 +31,11 @@ interface CompanyCardProps {
   employeeCount: number;
   isActive: boolean;
   onViewDetails?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onAddEmployee?: (id: string) => void;
+  onViewEmployees?: (id: string) => void;
+  onGenerateReport?: (id: string) => void;
 }
 
 export default function CompanyCard({
@@ -46,11 +49,23 @@ export default function CompanyCard({
   employeeCount,
   isActive,
   onViewDetails,
+  onEdit,
+  onDelete,
+  onAddEmployee,
+  onViewEmployees,
+  onGenerateReport,
 }: CompanyCardProps) {
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const iconBg = useColorModeValue('blue.50', 'blue.900');
   const iconColor = useColorModeValue('blue.500', 'blue.200');
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('[data-action-button]')) {
+      return;
+    }
+    onViewDetails?.(id);
+  };
 
   return (
     <Card
@@ -62,7 +77,7 @@ export default function CompanyCard({
       cursor="pointer"
       _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
       transition="all 0.2s"
-      onClick={() => onViewDetails?.(id)}
+      onClick={handleCardClick}
     >
       <CardBody>
         <VStack align="stretch" spacing={4}>
@@ -85,9 +100,61 @@ export default function CompanyCard({
                 )}
               </Box>
             </HStack>
-            <Badge colorScheme={isActive ? 'green' : 'red'} fontSize="xs">
-              {isActive ? 'Activa' : 'Inactiva'}
-            </Badge>
+            <HStack spacing={2}>
+              <Badge colorScheme={isActive ? 'green' : 'red'} fontSize="xs">
+                {isActive ? 'Activa' : 'Inactiva'}
+              </Badge>
+              <Box data-action-button>
+                <Menu>
+                  <MenuButton
+                    as={IconButton}
+                    icon={<MoreVertical size={16} />}
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Más opciones"
+                  />
+                  <MenuList>
+                    <MenuItem
+                      icon={<Eye size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewDetails?.(id);
+                      }}
+                    >
+                      Ver Perfil
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Edit size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit?.(id);
+                      }}
+                    >
+                      Editar
+                    </MenuItem>
+                    <MenuItem
+                      icon={<FileText size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onGenerateReport?.(id);
+                      }}
+                    >
+                      Generar Reporte
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Trash2 size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete?.(id);
+                      }}
+                      color="red.500"
+                    >
+                      Eliminar
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Box>
+            </HStack>
           </HStack>
 
           <Divider />
@@ -139,6 +206,56 @@ export default function CompanyCard({
               </HStack>
             )}
           </VStack>
+
+          <Divider />
+
+          <HStack spacing={2} justify="space-between">
+            <Tooltip label="Ver empleados" placement="top">
+              <Box data-action-button>
+                <IconButton
+                  icon={<Users size={18} />}
+                  aria-label="Ver empleados"
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="blue"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewEmployees?.(id);
+                  }}
+                />
+              </Box>
+            </Tooltip>
+            <Tooltip label="Agregar empleado" placement="top">
+              <Box data-action-button>
+                <IconButton
+                  icon={<UserPlus size={18} />}
+                  aria-label="Agregar empleado"
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="green"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddEmployee?.(id);
+                  }}
+                />
+              </Box>
+            </Tooltip>
+            <Tooltip label="Ver perfil completo" placement="top">
+              <Box data-action-button>
+                <IconButton
+                  icon={<Eye size={18} />}
+                  aria-label="Ver perfil"
+                  size="sm"
+                  variant="solid"
+                  colorScheme="blue"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetails?.(id);
+                  }}
+                />
+              </Box>
+            </Tooltip>
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

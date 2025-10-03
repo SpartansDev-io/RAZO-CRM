@@ -254,6 +254,11 @@ export default function CompaniesPage() {
                 employeeCount={company.employeeCount}
                 isActive={company.isActive}
                 onViewDetails={(id) => console.log('Ver detalles:', id)}
+                onEdit={(id) => console.log('Editar empresa:', id)}
+                onDelete={(id) => console.log('Eliminar empresa:', id)}
+                onAddEmployee={(id) => console.log('Agregar empleado a:', id)}
+                onViewEmployees={(id) => console.log('Ver empleados de:', id)}
+                onGenerateReport={(id) => console.log('Generar reporte de:', id)}
               />
             ))}
           </Grid>
