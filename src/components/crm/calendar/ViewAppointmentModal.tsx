@@ -23,22 +23,7 @@ import {
   FormControl,
   FormLabel,
 } from '@chakra-ui/react';
-import {
-  Calendar,
-  Clock,
-  User,
-  FileText,
-  MapPin,
-  Video,
-  Home,
-  Building,
-  Copy,
-  ExternalLink,
-  Edit,
-  Trash2,
-  Save,
-  X,
-} from 'lucide-react';
+import { Calendar, Clock, User, FileText, MapPin, Video, Home, Building, Copy, ExternalLink, CreditCard as Edit, Trash2, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
@@ -52,7 +37,7 @@ interface Appointment {
   endTime: Date;
   notes?: string;
   meetLink?: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
 }
 
 interface ViewAppointmentModalProps {

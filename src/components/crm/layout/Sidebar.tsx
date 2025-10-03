@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Brain,
+  Building2,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useDashboardStore } from '@/stores/dashboard.store';
@@ -114,6 +115,7 @@ export default function Sidebar() {
   const navigation = [
     { name: 'Dashboard', icon: Home, href: '/crm/dashboard' },
     { name: 'Pacientes', icon: Users, href: '/crm/patients' },
+    { name: 'Empresas', icon: Building2, href: '/crm/companies' },
     { name: 'Calendario', icon: Calendar, href: '/crm/calendar' },
     { name: 'Historiales', icon: FileText, href: '/crm/records' },
     { name: 'Reportes', icon: BarChart3, href: '/crm/reports' },
