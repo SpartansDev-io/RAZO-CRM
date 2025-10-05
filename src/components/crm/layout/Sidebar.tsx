@@ -127,17 +127,19 @@ export default function Sidebar() {
       bg={bg}
       borderRight="1px"
       borderColor={borderColor}
-      w={isSidebarOpen ? "250px" : "70px"}
+      w={{ base: isSidebarOpen ? "280px" : "0", md: isSidebarOpen ? "250px" : "70px" }}
       h="full"
       display="block"
       position={{ base: 'fixed', md: 'relative' }}
-      zIndex={{ base: 20, md: 'auto' }}
-      shadow={{ base: 'lg', md: 'none' }}
+      zIndex={{ base: 30, md: 'auto' }}
+      shadow={{ base: 'xl', md: 'none' }}
       transition="width 0.3s ease"
+      left={{ base: 0, md: 'auto' }}
+      top={{ base: 0, md: 'auto' }}
     >
       <VStack spacing={0} align="stretch" h="full">
         {/* Logo */}
-        <Box p={6} borderBottom="1px" borderColor={borderColor}>
+        <Box p={{ base: 4, md: 6 }} borderBottom="1px" borderColor={borderColor}>
           {isSidebarOpen ? (
             <HStack spacing={3}>
               <Brain size={32} color="#2196F3" />
@@ -171,7 +173,7 @@ export default function Sidebar() {
         </Box>
 
         {/* Navigation */}
-        <Box flex="1" p={4}>
+        <Box flex="1" p={{ base: 3, md: 4 }} overflowY="auto">
           <VStack spacing={2} align="stretch">
             {navigation.map((item) => (
               <NavItem

@@ -46,10 +46,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           left="0"
           w="full"
           h="full"
-          bg="blackAlpha.600"
-          zIndex={20}
+          bg="blackAlpha.700"
+          zIndex={25}
           display={{ base: 'block', md: 'none' }}
           onClick={toggleSidebar}
+          animation="fadeIn 0.2s"
         />
       )}
     </Box>
