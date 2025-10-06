@@ -178,7 +178,7 @@ export default function Sidebar() {
           />
         </Box>
 
-        {/* Navigation - Always expanded on mobile */}
+        {/* Navigation */}
         <Box flex="1" p={{ base: 3, md: 4 }} overflowY="auto">
           <VStack spacing={2} align="stretch">
             {navigation.map((item) => (
@@ -187,7 +187,7 @@ export default function Sidebar() {
                 icon={item.icon}
                 href={item.href}
                 isActive={pathname === item.href}
-                isCollapsed={false}
+                isCollapsed={!isSidebarOpen}
               >
                 {item.name}
               </NavItem>
