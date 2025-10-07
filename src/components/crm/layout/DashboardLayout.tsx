@@ -17,9 +17,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <Box minH="100vh" bg="gray.50">
       <Box display="flex" h="100vh">
-        {/* Sidebar */}
+        {/* Sidebar - Hidden on mobile when closed, full width when open */}
         <Box
-          width={{ base: isSidebarOpen ? "250px" : "0", md: isSidebarOpen ? "250px" : "70px" }}
+          display={{ base: isSidebarOpen ? 'block' : 'none', md: 'block' }}
+          width={{ base: "280px", md: isSidebarOpen ? "250px" : "70px" }}
           transition="width 0.3s ease"
           overflow="hidden"
         >
@@ -46,10 +47,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           left="0"
           w="full"
           h="full"
-          bg="blackAlpha.600"
-          zIndex={20}
+          bg="blackAlpha.700"
+          zIndex={25}
           display={{ base: 'block', md: 'none' }}
           onClick={toggleSidebar}
+          animation="fadeIn 0.2s"
         />
       )}
     </Box>

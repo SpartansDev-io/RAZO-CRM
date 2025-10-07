@@ -35,15 +35,16 @@ interface NavItemProps {
   onClick?: () => void;
 }
 
-function NavItem({ 
-  icon, 
-  children, 
-  href, 
-  isActive = false, 
+function NavItem({
+  icon,
+  children,
+  href,
+  isActive = false,
   isCollapsed = false,
-  onClick 
+  onClick
 }: NavItemProps) {
   const router = useRouter();
+  const { toggleSidebar } = useDashboardStore();
   const activeBg = useColorModeValue('primary.50', 'primary.900');
   const activeColor = useColorModeValue('primary.600', 'primary.200');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
@@ -53,6 +54,10 @@ function NavItem({
       onClick();
     } else if (href) {
       router.push(href);
+      // Close sidebar on mobile after navigation
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
     }
   };
 
@@ -127,18 +132,20 @@ export default function Sidebar() {
       bg={bg}
       borderRight="1px"
       borderColor={borderColor}
-      w={isSidebarOpen ? "250px" : "70px"}
+      w={{ base: "280px", md: isSidebarOpen ? "250px" : "70px" }}
       h="full"
       display="block"
       position={{ base: 'fixed', md: 'relative' }}
-      zIndex={{ base: 20, md: 'auto' }}
-      shadow={{ base: 'lg', md: 'none' }}
-      transition="width 0.3s ease"
+      zIndex={{ base: 30, md: 'auto' }}
+      shadow={{ base: 'xl', md: 'none' }}
+      transition="all 0.3s ease"
+      left={{ base: 0, md: 'auto' }}
+      top={{ base: 0, md: 'auto' }}
     >
       <VStack spacing={0} align="stretch" h="full">
-        {/* Logo */}
-        <Box p={6} borderBottom="1px" borderColor={borderColor}>
-          {isSidebarOpen ? (
+        {/* Logo - Always show full on mobile */}
+        <Box p={{ base: 4, md: 6 }} borderBottom="1px" borderColor={borderColor}>
+          <Box display={{ base: 'block', md: isSidebarOpen ? 'block' : 'none' }}>
             <HStack spacing={3}>
               <Brain size={32} color="#2196F3" />
               <Box>
@@ -150,11 +157,12 @@ export default function Sidebar() {
                 </Text>
               </Box>
             </HStack>
-          ) : (
+          </Box>
+          <Box display={{ base: 'none', md: !isSidebarOpen ? 'block' : 'none' }}>
             <Flex justify="center">
               <Brain size={32} color="#2196F3" />
             </Flex>
-          )}
+          </Box>
         </Box>
 
         {/* Toggle Button - Desktop only */}
@@ -171,7 +179,7 @@ export default function Sidebar() {
         </Box>
 
         {/* Navigation */}
-        <Box flex="1" p={4}>
+        <Box flex="1" p={{ base: 3, md: 4 }} overflowY="auto">
           <VStack spacing={2} align="stretch">
             {navigation.map((item) => (
               <NavItem
@@ -187,14 +195,17 @@ export default function Sidebar() {
           </VStack>
         </Box>
 
-        {/* Footer */}
-        {isSidebarOpen && (
-          <Box p={4} borderTop="1px" borderColor={borderColor}>
-            <Text fontSize="xs" color="gray.500" textAlign="center">
-              © 2024 Razo Morales & Asociados
-            </Text>
-          </Box>
-        )}
+        {/* Footer - Always show on mobile */}
+        <Box
+          p={4}
+          borderTop="1px"
+          borderColor={borderColor}
+          display={{ base: 'block', md: isSidebarOpen ? 'block' : 'none' }}
+        >
+          <Text fontSize="xs" color="gray.500" textAlign="center">
+            © 2024 Razo Morales & Asociados
+          </Text>
+        </Box>
       </VStack>
     </Box>
   );

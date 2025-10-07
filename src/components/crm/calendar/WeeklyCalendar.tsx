@@ -375,7 +375,7 @@ export default function WeeklyCalendar() {
                 return (
                   <Box
                     key={`${day.toISOString()}-${timeSlot.time}`}
-                    minH="80px"
+                    minH={{ base: '60px', md: '80px' }}
                     position="relative"
                     cursor="pointer"
                     bg={isSelected ? selectedSlotBg : availableSlotBg}
@@ -408,7 +408,7 @@ export default function WeeklyCalendar() {
                           height={`${spanInfo.height}%`}
                           bg={spanInfo.showContent ? bookedSlotBg : 'blue.400'}
                           borderRadius="md"
-                          p={spanInfo.showContent ? 2 : 0}
+                          p={spanInfo.showContent ? { base: 1, md: 2 } : 0}
                           zIndex={2}
                           border="1px solid"
                           borderColor={spanInfo.showContent ? "blue.600" : "blue.500"}
@@ -427,23 +427,24 @@ export default function WeeklyCalendar() {
                           cursor="pointer"
                         >
                           {spanInfo.showContent && (
-                            <VStack spacing={1} align="stretch" h="full" justify="flex-start">
-                              <HStack spacing={1} justify="space-between">
+                            <VStack spacing={{ base: 0.5, md: 1 }} align="stretch" h="full" justify="flex-start">
+                              <HStack spacing={1} justify="space-between" display={{ base: 'none', sm: 'flex' }}>
                                 <Text fontSize="xs" color="blue.100">
-                                  {appointment.appointmentType === 'videollamada' ? '💻' : 
+                                  {appointment.appointmentType === 'videollamada' ? '💻' :
                                    appointment.appointmentType === 'visita' ? '🏠' : '🏢'}
                                 </Text>
                                 <Badge
                                   size="xs"
                                   colorScheme={getStatusColor(appointment.status)}
                                   variant="solid"
+                                  fontSize={{ base: '9px', md: 'xs' }}
                                 >
-                                  {appointment.status === 'confirmed' ? 'Confirmada' : 
+                                  {appointment.status === 'confirmed' ? 'Confirmada' :
                                    appointment.status === 'pending' ? 'Pendiente' : 'Cancelada'}
                                 </Badge>
                               </HStack>
                               <Text
-                                fontSize="xs"
+                                fontSize={{ base: '9px', sm: 'xs' }}
                                 fontWeight="bold"
                                 color="white"
                                 noOfLines={1}
@@ -451,7 +452,7 @@ export default function WeeklyCalendar() {
                                 {appointment.patientName}
                               </Text>
                               <Text
-                                fontSize="xs"
+                                fontSize={{ base: '9px', sm: 'xs' }}
                                 color="blue.100"
                                 noOfLines={1}
                               >

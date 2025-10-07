@@ -7,7 +7,7 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Video as LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface QuickActionButtonProps {
   icon: LucideIcon;
