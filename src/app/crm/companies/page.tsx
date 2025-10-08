@@ -27,8 +27,10 @@ import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import CompanyCard from '@/components/crm/companies/CompanyCard';
 import QuickActionButton from '@/components/crm/companies/QuickActionButton';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CompaniesPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const inputBg = useColorModeValue('white', 'gray.800');
@@ -137,7 +139,7 @@ export default function CompaniesPage() {
               icon={Plus}
               label="Nueva Empresa"
               color="blue"
-              onClick={() => console.log('Nueva empresa')}
+              onClick={() => router.push('/crm/companies/new')}
             />
             <QuickActionButton
               icon={Mail}
@@ -227,7 +229,7 @@ export default function CompaniesPage() {
             <Button
               leftIcon={<Plus size={18} />}
               colorScheme="blue"
-              onClick={() => console.log('Nueva empresa')}
+              onClick={() => router.push('/crm/companies/new')}
             >
               Nueva Empresa
             </Button>
