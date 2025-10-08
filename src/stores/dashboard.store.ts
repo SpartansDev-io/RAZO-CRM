@@ -9,7 +9,7 @@ interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
-  isSidebarOpen: true, // Default to open on desktop
+  isSidebarOpen: false,
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   setSidebarOpen: (open: boolean) => set({ isSidebarOpen: open }),
 }));
