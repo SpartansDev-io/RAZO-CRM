@@ -12,6 +12,7 @@ import {
   Grid,
   HStack,
   Switch,
+  Select,
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react';
@@ -39,8 +40,9 @@ export default function NewCompanyPage() {
     isActive: true,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : type === 'number' ? parseInt(value) || 0 : value,
@@ -188,13 +190,34 @@ export default function NewCompanyPage() {
 
                 <FormControl>
                   <FormLabel>Industria</FormLabel>
-                  <Input
+                  <Select
                     name="industry"
                     value={formData.industry}
                     onChange={handleChange}
-                    placeholder="Tecnología"
+                    placeholder="Selecciona una industria"
                     bg={inputBg}
-                  />
+                  >
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Consultoría">Consultoría</option>
+                    <option value="Desarrollo de Software">Desarrollo de Software</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Recursos Humanos">Recursos Humanos</option>
+                    <option value="Finanzas">Finanzas</option>
+                    <option value="Salud">Salud</option>
+                    <option value="Educación">Educación</option>
+                    <option value="Manufactura">Manufactura</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Logística">Logística</option>
+                    <option value="Turismo">Turismo</option>
+                    <option value="Construcción">Construcción</option>
+                    <option value="Inmobiliaria">Inmobiliaria</option>
+                    <option value="Legal">Legal</option>
+                    <option value="Contabilidad">Contabilidad</option>
+                    <option value="Telecomunicaciones">Telecomunicaciones</option>
+                    <option value="Energía">Energía</option>
+                    <option value="Alimentación">Alimentación</option>
+                    <option value="Otra">Otra</option>
+                  </Select>
                 </FormControl>
 
                 <FormControl>
