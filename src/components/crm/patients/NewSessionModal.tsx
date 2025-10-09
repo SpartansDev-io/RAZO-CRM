@@ -194,7 +194,7 @@ export default function NewSessionModal({
                   <FormControl isRequired isInvalid={!!errors.sessionDate}>
                       <HStack spacing={2}>
                         <Calendar size={16} />
-                        <Text>Fecha</Text>
+                        <FormLabel>Fecha</FormLabel>
                       </HStack>
                     <Input
                       type="date"
