@@ -146,8 +146,7 @@ export default function AppointmentModal({
         isClosable: true,
       });
 
-      reset();
-      onClose();
+      handleClose();
     } catch (error) {
       toast({
         title: 'Error al crear la cita',

@@ -135,8 +135,7 @@ export default function NewSessionModal({
         isClosable: true,
       });
 
-      reset();
-      onClose();
+      handleClose();
     } catch (error) {
       toast({
         title: 'Error al guardar el registro',
