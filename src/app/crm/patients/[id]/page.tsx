@@ -43,6 +43,7 @@ import {
   AlertCircle,
   Edit,
   Building,
+  Paperclip,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -53,6 +54,7 @@ import AppointmentModal from '@/components/crm/calendar/AppointmentModal';
 import NewSessionModal from '@/components/crm/patients/NewSessionModal';
 import PatientAppointments from '@/components/crm/patients/PatientAppointments';
 import PatientMedicalHistory from '@/components/crm/patients/PatientMedicalHistory';
+import PatientAttachments from '@/components/crm/patients/PatientAttachments';
 
 interface Patient {
   id: string;
@@ -371,6 +373,12 @@ export default function PatientProfilePage() {
                       <Text>Historial Clínico</Text>
                     </HStack>
                   </Tab>
+                  <Tab>
+                    <HStack spacing={2}>
+                      <Paperclip size={16} />
+                      <Text>Archivos Adjuntos</Text>
+                    </HStack>
+                  </Tab>
                 </TabList>
 
                 <TabPanels>
@@ -515,6 +523,11 @@ export default function PatientProfilePage() {
                   {/* Medical History Tab */}
                   <TabPanel p={6}>
                     <PatientMedicalHistory patientId={patient.id} />
+                  </TabPanel>
+
+                  {/* Attachments Tab */}
+                  <TabPanel p={6}>
+                    <PatientAttachments patientId={patient.id} />
                   </TabPanel>
                 </TabPanels>
               </Tabs>

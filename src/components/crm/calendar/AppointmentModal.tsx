@@ -146,8 +146,7 @@ export default function AppointmentModal({
         isClosable: true,
       });
 
-      reset();
-      onClose();
+      handleClose();
     } catch (error) {
       toast({
         title: 'Error al crear la cita',
@@ -201,12 +200,10 @@ export default function AppointmentModal({
                   <HStack spacing={4}>
                     {/* Date Field */}
                     <FormControl isRequired flex="1">
-                      <FormLabel>
                         <HStack spacing={2}>
                           <CalendarIcon size={16} />
-                          <Text>Fecha</Text>
+                          <FormLabel>Fecha</FormLabel>
                         </HStack>
-                      </FormLabel>
                       <Input
                         type="date"
                         isReadOnly={true}
@@ -223,12 +220,10 @@ export default function AppointmentModal({
 
                     {/* Time Field */}
                     <FormControl isRequired flex="1">
-                      <FormLabel>
                         <HStack spacing={2}>
                           <Clock size={16} />
-                          <Text>Hora</Text>
+                          <FormLabel>Hora</FormLabel>
                         </HStack>
-                      </FormLabel>
                       <Input
                         type="time"
                         step="900" // 15 minute intervals
@@ -243,12 +238,10 @@ export default function AppointmentModal({
                   <HStack spacing={4}>
                     {/* Date Field */}
                     <FormControl isRequired flex="1">
-                      <FormLabel>
                         <HStack spacing={2}>
                           <CalendarIcon size={16} />
-                          <Text>Fecha</Text>
+                          <FormLabel>Fecha</FormLabel>
                         </HStack>
-                      </FormLabel>
                       <Input
                         type="date"
                         {...register('date', { required: 'Seleccione una fecha' })}
@@ -262,12 +255,10 @@ export default function AppointmentModal({
 
                     {/* Time Field */}
                     <FormControl isRequired flex="1">
-                      <FormLabel>
                         <HStack spacing={2}>
                           <Clock size={16} />
-                          <Text>Hora</Text>
+                          <FormLabel>Hora</FormLabel>
                         </HStack>
-                      </FormLabel>
                       <Input
                         type="time"
                         step="900" // 15 minute intervals
@@ -280,12 +271,10 @@ export default function AppointmentModal({
 
               {/* Patient Selection */}
               <FormControl isRequired isInvalid={!!errors.patientId}>
-                <FormLabel>
                   <HStack spacing={2}>
                     <User size={16} />
-                    <Text>Paciente</Text>
+                    <FormLabel>Paciente</FormLabel>
                   </HStack>
-                </FormLabel>
                 <Select
                   placeholder="Seleccionar paciente"
                   {...register('patientId', { required: 'Seleccione un paciente' })}

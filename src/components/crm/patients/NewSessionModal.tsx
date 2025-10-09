@@ -135,8 +135,7 @@ export default function NewSessionModal({
         isClosable: true,
       });
 
-      reset();
-      onClose();
+      handleClose();
     } catch (error) {
       toast({
         title: 'Error al guardar el registro',
@@ -192,12 +191,10 @@ export default function NewSessionModal({
                 </Text>
                 <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={4}>
                   <FormControl isRequired isInvalid={!!errors.sessionDate}>
-                    <FormLabel>
                       <HStack spacing={2}>
                         <Calendar size={16} />
-                        <Text>Fecha</Text>
+                        <FormLabel>Fecha</FormLabel>
                       </HStack>
-                    </FormLabel>
                     <Input
                       type="date"
                       {...register('sessionDate', { required: 'Seleccione una fecha' })}
@@ -210,12 +207,10 @@ export default function NewSessionModal({
                   </FormControl>
 
                   <FormControl isRequired isInvalid={!!errors.sessionTime}>
-                    <FormLabel>
                       <HStack spacing={2}>
                         <Clock size={16} />
-                        <Text>Hora</Text>
+                        <FormLabel>Hora</FormLabel>
                       </HStack>
-                    </FormLabel>
                     <Input
                       type="time"
                       {...register('sessionTime', { required: 'Seleccione una hora' })}
