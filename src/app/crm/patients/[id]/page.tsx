@@ -76,6 +76,20 @@ interface Patient {
   occupation: string;
   referredBy?: string;
   notes?: string;
+  maritalStatus?: string;
+  educationLevel?: string;
+  nationality?: string;
+  religion?: string;
+  livingSituation?: string;
+  hasChildren?: boolean;
+  childrenCount?: number;
+  reasonForTherapy?: string;
+  previousTherapy?: boolean;
+  previousTherapyDetails?: string;
+  currentMedications?: string;
+  medicalConditions?: string;
+  familyHistory?: string;
+  expectations?: string;
 }
 
 // Mock patient data - In real app, this would come from API
@@ -101,6 +115,20 @@ const getMockPatient = (id: string): Patient | null => {
       occupation: 'Desarrolladora de Software',
       referredBy: 'Dr. Pérez',
       notes: 'Paciente muy colaborativa, responde bien al tratamiento cognitivo-conductual.',
+      maritalStatus: 'Soltera',
+      educationLevel: 'Licenciatura',
+      nationality: 'Española',
+      religion: 'Católica',
+      livingSituation: 'Vive sola',
+      hasChildren: false,
+      childrenCount: 0,
+      reasonForTherapy: 'Ansiedad relacionada con el trabajo y dificultades para manejar el estrés. Ha experimentado ataques de pánico ocasionales en el último año, especialmente durante períodos de alta carga laboral. También menciona dificultad para establecer límites en el trabajo.',
+      previousTherapy: true,
+      previousTherapyDetails: 'Asistió a terapia hace 3 años durante 6 meses para trabajar temas de autoestima',
+      currentMedications: 'Ninguna',
+      medicalConditions: 'Migraña ocasional',
+      familyHistory: 'Madre con historial de trastorno de ansiedad. Padre sin antecedentes psiquiátricos.',
+      expectations: 'Aprender técnicas para manejar la ansiedad, mejorar la gestión del estrés laboral, y desarrollar habilidades de comunicación asertiva.',
     },
     {
       id: '2',
@@ -122,6 +150,20 @@ const getMockPatient = (id: string): Patient | null => {
       occupation: 'Gerente de Proyectos',
       referredBy: 'Programa de Bienestar Empresarial',
       notes: 'Trabaja en terapia de pareja junto con su esposa Ana.',
+      maritalStatus: 'Casado',
+      educationLevel: 'Maestría',
+      nationality: 'Española',
+      religion: 'Agnóstico',
+      livingSituation: 'Vive con su esposa',
+      hasChildren: true,
+      childrenCount: 2,
+      reasonForTherapy: 'Problemas de comunicación en la relación de pareja. Discusiones frecuentes sobre la crianza de los hijos y distribución de responsabilidades domésticas. Busca mejorar la conexión emocional con su pareja.',
+      previousTherapy: false,
+      previousTherapyDetails: '',
+      currentMedications: 'Ninguna',
+      medicalConditions: 'Ninguna',
+      familyHistory: 'Sin antecedentes psiquiátricos familiares conocidos',
+      expectations: 'Mejorar la comunicación con su pareja, aprender a resolver conflictos de manera constructiva, y fortalecer la relación.',
     },
   ];
 
@@ -422,6 +464,55 @@ export default function PatientProfilePage() {
 
                         <Divider />
 
+                        {/* Sociodemographic Information */}
+                        <Box>
+                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                            Datos Sociodemográficos
+                          </Text>
+                          <VStack spacing={4} align="stretch">
+                            {patient.maritalStatus && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Estado Civil:</Text>
+                                <Text fontWeight="medium">{patient.maritalStatus}</Text>
+                              </HStack>
+                            )}
+                            {patient.educationLevel && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Nivel Educativo:</Text>
+                                <Text fontWeight="medium">{patient.educationLevel}</Text>
+                              </HStack>
+                            )}
+                            {patient.nationality && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Nacionalidad:</Text>
+                                <Text fontWeight="medium">{patient.nationality}</Text>
+                              </HStack>
+                            )}
+                            {patient.religion && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Religión:</Text>
+                                <Text fontWeight="medium">{patient.religion}</Text>
+                              </HStack>
+                            )}
+                            {patient.livingSituation && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Situación de Vivienda:</Text>
+                                <Text fontWeight="medium">{patient.livingSituation}</Text>
+                              </HStack>
+                            )}
+                            {patient.hasChildren !== undefined && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600" fontSize="sm">Hijos:</Text>
+                                <Text fontWeight="medium">
+                                  {patient.hasChildren ? `Sí (${patient.childrenCount})` : 'No'}
+                                </Text>
+                              </HStack>
+                            )}
+                          </VStack>
+                        </Box>
+
+                        <Divider />
+
                         {/* Contact Information */}
                         <Box>
                           <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
@@ -513,6 +604,130 @@ export default function PatientProfilePage() {
                         )}
                       </VStack>
                     </Grid>
+
+                    <Divider my={8} />
+
+                    {/* Therapy Intake Section */}
+                    <VStack spacing={6} align="stretch">
+                      <Box>
+                        <Text fontSize="xl" fontWeight="bold" mb={2} color="gray.800">
+                          Evaluación Inicial de Terapia
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Información recopilada durante la primera consulta
+                        </Text>
+                      </Box>
+
+                      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={8}>
+                        {/* Reason for Therapy */}
+                        <Box>
+                          <Card bg={cardBg} borderLeft="4px" borderLeftColor="blue.500">
+                            <CardBody>
+                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                                Motivo de Consulta
+                              </Text>
+                              {patient.reasonForTherapy ? (
+                                <Text fontSize="sm" lineHeight="1.8" color="gray.700">
+                                  {patient.reasonForTherapy}
+                                </Text>
+                              ) : (
+                                <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                                  No especificado
+                                </Text>
+                              )}
+                            </CardBody>
+                          </Card>
+                        </Box>
+
+                        {/* Expectations */}
+                        <Box>
+                          <Card bg={cardBg} borderLeft="4px" borderLeftColor="green.500">
+                            <CardBody>
+                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                                Expectativas del Tratamiento
+                              </Text>
+                              {patient.expectations ? (
+                                <Text fontSize="sm" lineHeight="1.8" color="gray.700">
+                                  {patient.expectations}
+                                </Text>
+                              ) : (
+                                <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                                  No especificado
+                                </Text>
+                              )}
+                            </CardBody>
+                          </Card>
+                        </Box>
+                      </Grid>
+
+                      {/* Previous Therapy History */}
+                      {patient.previousTherapy !== undefined && (
+                        <Card bg={cardBg}>
+                          <CardBody>
+                            <VStack spacing={3} align="stretch">
+                              <HStack justify="space-between">
+                                <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                                  Historial de Terapia Previa
+                                </Text>
+                                <Badge colorScheme={patient.previousTherapy ? "blue" : "gray"}>
+                                  {patient.previousTherapy ? "Sí" : "No"}
+                                </Badge>
+                              </HStack>
+                              {patient.previousTherapy && patient.previousTherapyDetails && (
+                                <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                  {patient.previousTherapyDetails}
+                                </Text>
+                              )}
+                            </VStack>
+                          </CardBody>
+                        </Card>
+                      )}
+
+                      {/* Medical Information */}
+                      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+                        {/* Current Medications */}
+                        {patient.currentMedications && (
+                          <Card bg={cardBg}>
+                            <CardBody>
+                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                                Medicación Actual
+                              </Text>
+                              <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                {patient.currentMedications}
+                              </Text>
+                            </CardBody>
+                          </Card>
+                        )}
+
+                        {/* Medical Conditions */}
+                        {patient.medicalConditions && (
+                          <Card bg={cardBg}>
+                            <CardBody>
+                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                                Condiciones Médicas
+                              </Text>
+                              <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                {patient.medicalConditions}
+                              </Text>
+                            </CardBody>
+                          </Card>
+                        )}
+                      </Grid>
+
+                      {/* Family History */}
+                      {patient.familyHistory && (
+                        <Card bg={cardBg} borderLeft="4px" borderLeftColor="orange.500">
+                          <CardBody>
+                            <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                              Historial Familiar Psiquiátrico
+                            </Text>
+                            <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                              {patient.familyHistory}
+                            </Text>
+                          </CardBody>
+                        </Card>
+                      )}
+                    </VStack>
                   </TabPanel>
 
                   {/* Appointments Tab */}
