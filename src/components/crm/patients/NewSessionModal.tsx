@@ -210,12 +210,12 @@ export default function NewSessionModal({
                   </FormControl>
 
                   <FormControl isRequired isInvalid={!!errors.sessionTime}>
-                    <FormLabel>
+                    
                       <HStack spacing={2}>
                         <Clock size={16} />
                         <FormLabel>Hora</FormLabel>
                       </HStack>
-                    </FormLabel>
+                 
                     <Input
                       type="time"
                       {...register('sessionTime', { required: 'Seleccione una hora' })}
