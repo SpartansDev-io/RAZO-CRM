@@ -213,7 +213,7 @@ export default function NewSessionModal({
                     <FormLabel>
                       <HStack spacing={2}>
                         <Clock size={16} />
-                        <Text>Hora</Text>
+                        <FormLabel>Hora</FormLabel>
                       </HStack>
                     </FormLabel>
                     <Input
