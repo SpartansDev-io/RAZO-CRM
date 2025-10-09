@@ -192,12 +192,10 @@ export default function NewSessionModal({
                 </Text>
                 <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={4}>
                   <FormControl isRequired isInvalid={!!errors.sessionDate}>
-                    <FormLabel>
                       <HStack spacing={2}>
                         <Calendar size={16} />
                         <Text>Fecha</Text>
                       </HStack>
-                    </FormLabel>
                     <Input
                       type="date"
                       {...register('sessionDate', { required: 'Seleccione una fecha' })}
@@ -210,12 +208,10 @@ export default function NewSessionModal({
                   </FormControl>
 
                   <FormControl isRequired isInvalid={!!errors.sessionTime}>
-                    
                       <HStack spacing={2}>
                         <Clock size={16} />
                         <FormLabel>Hora</FormLabel>
                       </HStack>
-                 
                     <Input
                       type="time"
                       {...register('sessionTime', { required: 'Seleccione una hora' })}
