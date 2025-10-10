@@ -489,7 +489,7 @@ export default function CompanyProfilePage() {
                               </HStack>
                             )}
                             {company.address && (
-                              <VStack align="stretch" spacing={1}>
+                              <HStack align="stretch" spacing={1}>
                                 <HStack spacing={2}>
                                   <MapPin size={14} color="#718096" />
                                   <Text color="gray.600" fontSize="sm">Dirección:</Text>
@@ -497,7 +497,7 @@ export default function CompanyProfilePage() {
                                 <Text fontWeight="medium" color="blue.600">
                                   {company.address}
                                 </Text>
-                              </VStack>
+                              </HStack>
                             )}
                           </VStack>
                         </Box>
