@@ -55,6 +55,10 @@ interface Patient {
   company: string;
   emergencyContact: string;
   emergencyPhone: string;
+  maritalStatus?: string;
+  educationLevel?: string;
+  occupation?: string;
+  reasonForTherapy?: string;
 }
 
 interface PatientProfileModalProps {
@@ -255,6 +259,50 @@ export default function PatientProfileModal({
 
             <Divider />
 
+            {/* Sociodemographic Information */}
+            <Box>
+              <HStack spacing={3} mb={4}>
+                <Users size={20} color="#805AD5" />
+                <Text fontSize="lg" fontWeight="semibold">
+                  Datos Sociodemográficos
+                </Text>
+              </HStack>
+              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                {patient.maritalStatus && (
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" mb={1}>Estado Civil</Text>
+                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                      {patient.maritalStatus}
+                    </Text>
+                  </Box>
+                )}
+                {patient.educationLevel && (
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" mb={1}>Nivel Educativo</Text>
+                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                      {patient.educationLevel}
+                    </Text>
+                  </Box>
+                )}
+                {patient.occupation && (
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" mb={1}>Ocupación</Text>
+                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                      {patient.occupation}
+                    </Text>
+                  </Box>
+                )}
+                <Box>
+                  <Text fontSize="sm" color="gray.600" mb={1}>Empresa</Text>
+                  <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                    {patient.company}
+                  </Text>
+                </Box>
+              </Grid>
+            </Box>
+
+            <Divider />
+
             {/* Therapy Information */}
             <Box>
               <HStack spacing={3} mb={4}>
@@ -280,6 +328,18 @@ export default function PatientProfileModal({
                   </HStack>
                 </Box>
               </Grid>
+              {patient.reasonForTherapy && (
+                <Box mt={4}>
+                  <Text fontSize="sm" color="gray.600" mb={2}>Motivo de Consulta</Text>
+                  <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
+                    <CardBody p={3}>
+                      <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                        {patient.reasonForTherapy}
+                      </Text>
+                    </CardBody>
+                  </Card>
+                </Box>
+              )}
             </Box>
 
             {/* Quick Actions */}
