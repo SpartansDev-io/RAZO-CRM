@@ -44,6 +44,9 @@ import {
   Edit,
   Building,
   Paperclip,
+  Home,
+  Cake,
+  Briefcase
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -436,13 +439,19 @@ export default function PatientProfilePage() {
                           <VStack spacing={4} align="stretch">
                             <HStack justify="space-between">
                               <Text color="gray.600" fontSize="sm">Fecha de Nacimiento:</Text>
-                              <Text fontWeight="medium">
-                                {format(patient.birthDate, 'dd MMMM yyyy', { locale: es })}
-                              </Text>
+                              <HStack spacing={1}>
+                                <Cake size={14} color="#718096" />
+                                <Text fontWeight="medium">
+                                  {format(patient.birthDate, 'dd MMMM yyyy', { locale: es })}
+                                </Text>
+                              </HStack>
                             </HStack>
                             <HStack justify="space-between">
                               <Text color="gray.600" fontSize="sm">Ocupación:</Text>
-                              <Text fontWeight="medium">{patient.occupation}</Text>
+                              <HStack spacing={1}>
+                                <Briefcase size={14} color="#718096" />
+                                <Text fontWeight="medium">{patient.occupation}</Text>
+                              </HStack>
                             </HStack>
                             <HStack justify="space-between">
                               <Text color="gray.600" fontSize="sm">Empresa:</Text>
@@ -452,12 +461,15 @@ export default function PatientProfilePage() {
                               </HStack>
                             </HStack>
                             {patient.address && (
-                              <VStack align="stretch" spacing={1}>
+                              <HStack justify="space-between">
                                 <Text color="gray.600" fontSize="sm">Dirección:</Text>
-                                <Text fontWeight="medium" fontSize="sm">
-                                  {patient.address}
-                                </Text>
-                              </VStack>
+                                <HStack spacing={1}>
+                                  <Home size={14} color="#718096" />
+                                  <Text fontWeight="medium" fontSize="sm">
+                                    {patient.address}
+                                  </Text>
+                                </HStack>
+                              </HStack>
                             )}
                           </VStack>
                         </Box>
@@ -669,15 +681,17 @@ export default function PatientProfilePage() {
                                 <Text fontSize="md" fontWeight="semibold" color="gray.800">
                                   Historial de Terapia Previa
                                 </Text>
-                                <Badge colorScheme={patient.previousTherapy ? "blue" : "gray"}>
-                                  {patient.previousTherapy ? "Sí" : "No"}
-                                </Badge>
                               </HStack>
-                              {patient.previousTherapy && patient.previousTherapyDetails && (
-                                <Text fontSize="sm" lineHeight="1.6" color="gray.700">
-                                  {patient.previousTherapyDetails}
-                                </Text>
-                              )}
+                              {patient.previousTherapy && patient.previousTherapyDetails ? (
+                                  <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                    {patient.previousTherapyDetails}
+                                  </Text>
+                                ) : (
+                                  <Text fontSize="sm" lineHeight="1.6" color="gray.500" fontStyle="italic">
+                                    No tiene historial de terapia previa
+                                  </Text>
+                                )
+                              }
                             </VStack>
                           </CardBody>
                         </Card>
