@@ -209,22 +209,7 @@ export default function CompanyCard({
 
           <Divider />
 
-          <HStack spacing={2} justify="space-between">
-            <Tooltip label="Ver empleados" placement="top">
-              <Box data-action-button>
-                <IconButton
-                  icon={<Users size={18} />}
-                  aria-label="Ver empleados"
-                  size="sm"
-                  variant="ghost"
-                  colorScheme="blue"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onViewEmployees?.(id);
-                  }}
-                />
-              </Box>
-            </Tooltip>
+          <HStack spacing={2} justify="flex-end" align="center">
             <Tooltip label="Agregar empleado" placement="top">
               <Box data-action-button>
                 <IconButton

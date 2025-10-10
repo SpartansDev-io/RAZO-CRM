@@ -118,9 +118,6 @@ export default function TopBar() {
               <MenuItem icon={<User size={16} />}>
                 Mi Perfil
               </MenuItem>
-              <MenuItem icon={<Settings size={16} />}>
-                Configuración
-              </MenuItem>
               <MenuDivider />
               <MenuItem
                 icon={<LogOut size={16} />}
