@@ -209,7 +209,7 @@ export default function CompanyCard({
 
           <Divider />
 
-          <HStack spacing={2} >
+          <HStack spacing={2} justify="flex-end" align="center">
             <Tooltip label="Agregar empleado" placement="top">
               <Box data-action-button>
                 <IconButton
