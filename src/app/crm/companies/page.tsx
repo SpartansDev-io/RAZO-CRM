@@ -121,6 +121,10 @@ export default function CompaniesPage() {
   );
   const activeCompanies = mockCompanies.filter((c) => c.isActive).length;
 
+  const handleViewDetails = (companyId: string) => {
+    router.push(`/crm/companies/${companyId}`);
+  };
+
   return (
     <AuthLayout>
       <DashboardLayout>
@@ -255,7 +259,7 @@ export default function CompaniesPage() {
                 industry={company.industry}
                 employeeCount={company.employeeCount}
                 isActive={company.isActive}
-                onViewDetails={(id) => console.log('Ver detalles:', id)}
+                onViewDetails={handleViewDetails}
                 onEdit={(id) => console.log('Editar empresa:', id)}
                 onDelete={(id) => console.log('Eliminar empresa:', id)}
                 onAddEmployee={(id) => console.log('Agregar empleado a:', id)}
