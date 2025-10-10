@@ -122,9 +122,7 @@ export default function Sidebar() {
     { name: 'Pacientes', icon: Users, href: '/crm/patients' },
     { name: 'Empresas', icon: Building2, href: '/crm/companies' },
     { name: 'Calendario', icon: Calendar, href: '/crm/calendar' },
-    { name: 'Historiales', icon: FileText, href: '/crm/records' },
     { name: 'Reportes', icon: BarChart3, href: '/crm/reports' },
-    { name: 'Configuración', icon: Settings, href: '/crm/settings' },
   ];
 
   return (
