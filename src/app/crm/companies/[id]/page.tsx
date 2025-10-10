@@ -483,7 +483,9 @@ export default function CompanyProfilePage() {
                                   <Globe size={14} color="#718096" />
                                   <Text color="gray.600" fontSize="sm">Sitio Web:</Text>
                                 </HStack>
-                                <Text fontWeight="medium" color="blue.600">{company.website}</Text>
+                                <Text fontWeight="medium" color="blue.600">    
+                                  {company.website}
+                                </Text>
                               </HStack>
                             )}
                             {company.address && (
@@ -492,7 +494,7 @@ export default function CompanyProfilePage() {
                                   <MapPin size={14} color="#718096" />
                                   <Text color="gray.600" fontSize="sm">Dirección:</Text>
                                 </HStack>
-                                <Text fontWeight="medium" fontSize="sm" pl={6}>
+                                <Text fontWeight="medium" color="blue.600">
                                   {company.address}
                                 </Text>
                               </VStack>
