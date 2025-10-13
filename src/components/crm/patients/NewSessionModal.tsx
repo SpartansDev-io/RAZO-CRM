@@ -25,7 +25,7 @@ import {
   Badge,
   Divider,
 } from '@chakra-ui/react';
-import { FileText, Calendar, Clock, User, Target, Zap } from 'lucide-react';
+import { FileText, Calendar, Clock, User, Target, Zap, DollarSign, CreditCard, Banknote, Building } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -43,6 +43,11 @@ interface SessionFormData {
   homework: string;
   nextSessionPlan: string;
   progress: string;
+  contractId: string;
+  sessionCost: number;
+  paymentAmount: number;
+  paymentMethod: 'transfer' | 'cash' | 'none';
+  paymentNotes: string;
 }
 
 interface NewSessionModalProps {
@@ -52,6 +57,15 @@ interface NewSessionModalProps {
     id: string;
     name: string;
   };
+  showPatientSelector?: boolean;
+}
+
+interface Contract {
+  id: string;
+  name: string;
+  company: string;
+  sessionCost: number;
+  sessionsRemaining: number;
 }
 
 // Session types
@@ -92,6 +106,30 @@ const progressOptions = [
   { value: 'regression', label: 'Retroceso', color: 'red' },
 ];
 
+const mockContracts: Contract[] = [
+  {
+    id: '1',
+    name: 'Contrato Premium',
+    company: 'TechCorp Solutions',
+    sessionCost: 1500,
+    sessionsRemaining: 8,
+  },
+  {
+    id: '2',
+    name: 'Contrato Básico',
+    company: 'TechCorp Solutions',
+    sessionCost: 1000,
+    sessionsRemaining: 5,
+  },
+  {
+    id: '3',
+    name: 'Sin Contrato',
+    company: 'Pago Individual',
+    sessionCost: 1200,
+    sessionsRemaining: 0,
+  },
+];
+
 export default function NewSessionModal({
   isOpen,
   onClose,
@@ -105,6 +143,7 @@ export default function NewSessionModal({
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, isValid },
   } = useForm<SessionFormData>({
     defaultValues: {
@@ -114,11 +153,31 @@ export default function NewSessionModal({
       duration: 60,
       patientMood: 'good',
       progress: 'moderate',
+      contractId: '',
+      sessionCost: 0,
+      paymentAmount: 0,
+      paymentMethod: 'none',
+      paymentNotes: '',
     },
   });
 
   const watchedMood = watch('patientMood');
   const watchedProgress = watch('progress');
+  const watchedContractId = watch('contractId');
+  const watchedSessionCost = watch('sessionCost');
+  const watchedPaymentAmount = watch('paymentAmount');
+  const watchedPaymentMethod = watch('paymentMethod');
+
+  const handleContractChange = (contractId: string) => {
+    const contract = mockContracts.find(c => c.id === contractId);
+    if (contract) {
+      setValue('sessionCost', contract.sessionCost);
+      setValue('paymentAmount', contract.sessionCost);
+    } else {
+      setValue('sessionCost', 0);
+      setValue('paymentAmount', 0);
+    }
+  };
 
   const onSubmit = async (data: SessionFormData) => {
     setIsLoading(true);
@@ -341,6 +400,197 @@ export default function NewSessionModal({
                       />
                     </FormControl>
                   </Grid>
+                </VStack>
+              </Box>
+
+              <Divider />
+
+              {/* Billing Information */}
+              <Box>
+                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                  <HStack spacing={2}>
+                    <DollarSign size={20} />
+                    <Text>Información de Cobro</Text>
+                  </HStack>
+                </Text>
+
+                <VStack spacing={4} align="stretch">
+                  {/* Contract Selection */}
+                  <FormControl isRequired isInvalid={!!errors.contractId}>
+                    <FormLabel>
+                      <HStack spacing={2}>
+                        <Building size={16} />
+                        <Text>Contrato / Plan</Text>
+                      </HStack>
+                    </FormLabel>
+                    <Select
+                      placeholder="Seleccionar contrato o plan"
+                      {...register('contractId', { required: 'Seleccione un contrato o plan' })}
+                      onChange={(e) => handleContractChange(e.target.value)}
+                    >
+                      {mockContracts.map((contract) => (
+                        <option key={contract.id} value={contract.id}>
+                          {contract.name} - {contract.company} (${contract.sessionCost.toLocaleString()} MXN)
+                          {contract.sessionsRemaining > 0 && ` - ${contract.sessionsRemaining} sesiones restantes`}
+                        </option>
+                      ))}
+                    </Select>
+                    {errors.contractId && (
+                      <Text fontSize="sm" color="red.500" mt={1}>
+                        {errors.contractId.message}
+                      </Text>
+                    )}
+                  </FormControl>
+
+                  {/* Session Cost */}
+                  <FormControl isRequired isInvalid={!!errors.sessionCost}>
+                    <FormLabel>Costo de la Sesión</FormLabel>
+                    <HStack>
+                      <Text fontSize="lg" color="gray.600">$</Text>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        {...register('sessionCost', {
+                          required: 'El costo es requerido',
+                          min: { value: 0, message: 'El costo debe ser mayor o igual a 0' },
+                        })}
+                        readOnly={watchedContractId !== ''}
+                        bg={watchedContractId !== '' ? 'gray.100' : 'white'}
+                      />
+                      <Text fontSize="lg" color="gray.600">MXN</Text>
+                    </HStack>
+                    {errors.sessionCost && (
+                      <Text fontSize="sm" color="red.500" mt={1}>
+                        {errors.sessionCost.message}
+                      </Text>
+                    )}
+                  </FormControl>
+
+                  {/* Payment Method */}
+                  <FormControl isRequired>
+                    <FormLabel>
+                      <HStack spacing={2}>
+                        <CreditCard size={16} />
+                        <Text>Método de Pago</Text>
+                      </HStack>
+                    </FormLabel>
+                    <Select
+                      {...register('paymentMethod')}
+                      onChange={(e) => {
+                        const method = e.target.value as 'transfer' | 'cash' | 'none';
+                        if (method === 'none') {
+                          setValue('paymentAmount', 0);
+                        } else if (watchedPaymentAmount === 0 && watchedSessionCost > 0) {
+                          setValue('paymentAmount', watchedSessionCost);
+                        }
+                      }}
+                    >
+                      <option value="none">Pendiente de pago</option>
+                      <option value="transfer">Transferencia Bancaria</option>
+                      <option value="cash">Efectivo</option>
+                    </Select>
+                  </FormControl>
+
+                  {/* Payment Amount - Only show if payment method is selected */}
+                  {watchedPaymentMethod !== 'none' && (
+                    <FormControl isRequired isInvalid={!!errors.paymentAmount}>
+                      <FormLabel>Monto Pagado</FormLabel>
+                      <HStack>
+                        <Text fontSize="lg" color="gray.600">$</Text>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          {...register('paymentAmount', {
+                            required: 'El monto es requerido',
+                            min: { value: 0.01, message: 'El monto debe ser mayor a 0' },
+                            max: { value: watchedSessionCost, message: 'El monto no puede exceder el costo de la sesión' },
+                          })}
+                        />
+                        <Text fontSize="lg" color="gray.600">MXN</Text>
+                      </HStack>
+                      {errors.paymentAmount && (
+                        <Text fontSize="sm" color="red.500" mt={1}>
+                          {errors.paymentAmount.message}
+                        </Text>
+                      )}
+                      {watchedSessionCost > 0 && (
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          Costo de sesión: ${watchedSessionCost.toLocaleString()} MXN
+                        </Text>
+                      )}
+                      {watchedPaymentAmount > 0 && watchedPaymentAmount < watchedSessionCost && (
+                        <Badge colorScheme="orange" mt={2} fontSize="xs">
+                          Pago Parcial - Adeudo: ${(watchedSessionCost - watchedPaymentAmount).toLocaleString()} MXN
+                        </Badge>
+                      )}
+                      {watchedPaymentAmount > 0 && watchedPaymentAmount === watchedSessionCost && (
+                        <Badge colorScheme="green" mt={2} fontSize="xs">
+                          Pago Completo
+                        </Badge>
+                      )}
+                    </FormControl>
+                  )}
+
+                  {/* Payment Notes */}
+                  {watchedPaymentMethod !== 'none' && (
+                    <FormControl>
+                      <FormLabel>Notas de Pago (opcional)</FormLabel>
+                      <Input
+                        placeholder="Ej: Referencia de transferencia, número de recibo, etc."
+                        {...register('paymentNotes')}
+                      />
+                    </FormControl>
+                  )}
+
+                  {/* Payment Status Summary */}
+                  {watchedSessionCost > 0 && (
+                    <Box
+                      p={4}
+                      borderRadius="md"
+                      bg={watchedPaymentMethod === 'none' ? 'orange.50' : 'green.50'}
+                      borderWidth="1px"
+                      borderColor={watchedPaymentMethod === 'none' ? 'orange.200' : 'green.200'}
+                    >
+                      <VStack spacing={2} align="stretch">
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" fontWeight="semibold">
+                            {watchedPaymentMethod === 'none' ? 'Estado: Pendiente de Pago' : 'Estado: Pago Registrado'}
+                          </Text>
+                          <Badge
+                            colorScheme={watchedPaymentMethod === 'none' ? 'orange' : 'green'}
+                            variant="solid"
+                          >
+                            {watchedPaymentMethod === 'none' ? 'Pendiente' : watchedPaymentMethod === 'transfer' ? 'Transferencia' : 'Efectivo'}
+                          </Badge>
+                        </HStack>
+                        <Divider />
+                        <HStack justify="space-between" fontSize="sm">
+                          <Text color="gray.600">Costo de sesión:</Text>
+                          <Text fontWeight="bold">${watchedSessionCost.toLocaleString()} MXN</Text>
+                        </HStack>
+                        {watchedPaymentMethod !== 'none' && (
+                          <>
+                            <HStack justify="space-between" fontSize="sm">
+                              <Text color="gray.600">Monto pagado:</Text>
+                              <Text fontWeight="bold" color="green.600">${watchedPaymentAmount.toLocaleString()} MXN</Text>
+                            </HStack>
+                            {watchedPaymentAmount < watchedSessionCost && (
+                              <HStack justify="space-between" fontSize="sm">
+                                <Text color="orange.600">Adeudo restante:</Text>
+                                <Text fontWeight="bold" color="orange.600">${(watchedSessionCost - watchedPaymentAmount).toLocaleString()} MXN</Text>
+                              </HStack>
+                            )}
+                          </>
+                        )}
+                        {watchedPaymentMethod === 'none' && (
+                          <HStack justify="space-between" fontSize="sm">
+                            <Text color="orange.600">Adeudo total:</Text>
+                            <Text fontWeight="bold" color="orange.600">${watchedSessionCost.toLocaleString()} MXN</Text>
+                          </HStack>
+                        )}
+                      </VStack>
+                    </Box>
+                  )}
                 </VStack>
               </Box>
 
