@@ -38,6 +38,21 @@ import NewSessionModal from '@/components/crm/patients/NewSessionModal';
 
 export default function DashboardPage() {
   const { isOpen: isSessionModalOpen, onOpen: onSessionModalOpen, onClose: onSessionModalClose } = useDisclosure();
+  const [selectedPatient, setSelectedPatient] = useState<{ id: string; name: string } | null>(null);
+
+  const handleOpenSessionModal = (patient?: { id: string; name: string }) => {
+    if (patient) {
+      setSelectedPatient(patient);
+    } else {
+      setSelectedPatient(null);
+    }
+    onSessionModalOpen();
+  };
+
+  const handleCloseSessionModal = () => {
+    setSelectedPatient(null);
+    onSessionModalClose();
+  };
 
   return (
     <AuthLayout>
@@ -93,7 +108,7 @@ export default function DashboardPage() {
           <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
             {/* Recent Appointments */}
             <GridItem>
-              <RecentAppointments />
+              <RecentAppointments onNewSession={handleOpenSessionModal} />
             </GridItem>
 
             {/* Recent Patients */}
@@ -146,7 +161,7 @@ export default function DashboardPage() {
                   cursor="pointer"
                   _hover={{ bg: "purple.100" }}
                   transition="all 0.2s"
-                  onClick={onSessionModalOpen}
+                  onClick={() => handleOpenSessionModal()}
                 >
                   <HStack>
                     <CheckCircle size={20} color="#805AD5" />
@@ -162,8 +177,9 @@ export default function DashboardPage() {
 
         <NewSessionModal
           isOpen={isSessionModalOpen}
-          onClose={onSessionModalClose}
-          showPatientSelector={true}
+          onClose={handleCloseSessionModal}
+          patient={selectedPatient}
+          showPatientSelector={!selectedPatient}
         />
       </DashboardLayout>
     </AuthLayout>
