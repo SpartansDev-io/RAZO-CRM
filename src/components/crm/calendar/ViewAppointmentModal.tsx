@@ -52,7 +52,7 @@ interface Appointment {
   endTime: Date;
   notes?: string;
   meetLink?: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
 }
 
 interface ViewAppointmentModalProps {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Box,
   Grid,
@@ -18,6 +19,7 @@ import {
   Badge,
   Avatar,
   Divider,
+  useDisclosure,
 } from '@chakra-ui/react';
 import {
   Users,
@@ -32,8 +34,11 @@ import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import StatisticsCard from '@/components/crm/dashboard/StatisticsCard';
 import RecentAppointments from '@/components/crm/dashboard/RecentAppointments';
 import RecentPatients from '@/components/crm/dashboard/RecentPatients';
+import NewSessionModal from '@/components/crm/dashboard/NewSessionModal';
 
 export default function DashboardPage() {
+  const { isOpen: isSessionModalOpen, onOpen: onSessionModalOpen, onClose: onSessionModalClose } = useDisclosure();
+
   return (
     <AuthLayout>
       <DashboardLayout>
@@ -141,11 +146,12 @@ export default function DashboardPage() {
                   cursor="pointer"
                   _hover={{ bg: "purple.100" }}
                   transition="all 0.2s"
+                  onClick={onSessionModalOpen}
                 >
                   <HStack>
                     <CheckCircle size={20} color="#805AD5" />
                     <Text fontWeight="medium" color="purple.700">
-                      Completar Sesión
+                      Nueva Sesión
                     </Text>
                   </HStack>
                 </Box>
@@ -153,6 +159,11 @@ export default function DashboardPage() {
             </CardBody>
           </Card>
         </VStack>
+
+        <NewSessionModal
+          isOpen={isSessionModalOpen}
+          onClose={onSessionModalClose}
+        />
       </DashboardLayout>
     </AuthLayout>
   );
