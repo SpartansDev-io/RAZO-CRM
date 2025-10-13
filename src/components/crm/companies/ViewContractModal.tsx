@@ -19,6 +19,12 @@ import {
   Card,
   CardBody,
   useColorModeValue,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useDisclosure,
 } from '@chakra-ui/react';
 import {
   FileText,
@@ -27,9 +33,13 @@ import {
   CreditCard,
   AlertCircle,
   CheckCircle,
+  TrendingUp,
+  History,
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import GenerateMonthlyReportModal from './GenerateMonthlyReportModal';
+import MonthlyReportsHistory from './MonthlyReportsHistory';
 
 interface Contract {
   id?: string;
@@ -47,14 +57,23 @@ interface ViewContractModalProps {
   isOpen: boolean;
   onClose: () => void;
   contract: Contract | null;
+  companyId: string;
+  companyName: string;
 }
 
 export default function ViewContractModal({
   isOpen,
   onClose,
   contract,
+  companyId,
+  companyName,
 }: ViewContractModalProps) {
   const cardBg = useColorModeValue('gray.50', 'gray.700');
+  const {
+    isOpen: isGenerateOpen,
+    onOpen: onGenerateOpen,
+    onClose: onGenerateClose
+  } = useDisclosure();
 
   if (!contract) return null;
 
@@ -94,24 +113,50 @@ export default function ViewContractModal({
   const progressPercentage = Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      <ModalOverlay bg="blackAlpha.600" />
-      <ModalContent maxH="90vh" overflowY="auto">
-        <ModalHeader>
-          <HStack spacing={3}>
-            <FileText size={24} color="#3182CE" />
-            <VStack spacing={0} align="start">
-              <Text>Detalles del Contrato</Text>
-              <Text fontSize="sm" fontWeight="normal" color="gray.600">
-                {contract.contractName}
-              </Text>
-            </VStack>
-          </HStack>
-        </ModalHeader>
-        <ModalCloseButton />
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+        <ModalOverlay bg="blackAlpha.600" />
+        <ModalContent maxH="90vh" overflowY="auto">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <FileText size={24} color="#3182CE" />
+              <VStack spacing={0} align="start">
+                <Text>Detalles del Contrato</Text>
+                <Text fontSize="sm" fontWeight="normal" color="gray.600">
+                  {contract.contractName}
+                </Text>
+              </VStack>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
 
-        <ModalBody>
-          <VStack spacing={6} align="stretch">
+          <ModalBody>
+            <Tabs colorScheme="blue">
+              <TabList>
+                <Tab>
+                  <HStack spacing={2}>
+                    <FileText size={16} />
+                    <Text>Información del Contrato</Text>
+                  </HStack>
+                </Tab>
+                <Tab>
+                  <HStack spacing={2}>
+                    <TrendingUp size={16} />
+                    <Text>Generar Reporte</Text>
+                  </HStack>
+                </Tab>
+                <Tab>
+                  <HStack spacing={2}>
+                    <History size={16} />
+                    <Text>Historial de Reportes</Text>
+                  </HStack>
+                </Tab>
+              </TabList>
+
+              <TabPanels>
+                {/* Tab 1: Contract Information */}
+                <TabPanel>
+                  <VStack spacing={6} align="stretch">
             <Card bg={cardBg}>
               <CardBody>
                 <HStack spacing={4} justify="space-between" align="center">
@@ -284,16 +329,65 @@ export default function ViewContractModal({
                   </Grid>
                 </VStack>
               </CardBody>
-            </Card>
-          </VStack>
-        </ModalBody>
+                    </Card>
+                  </VStack>
+                </TabPanel>
 
-        <ModalFooter>
-          <Button onClick={onClose}>
-            Cerrar
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+                {/* Tab 2: Generate Report */}
+                <TabPanel>
+                  <VStack spacing={6} align="stretch">
+                    <Box>
+                      <Text fontSize="lg" fontWeight="semibold" mb={2} color="gray.800">
+                        Generar Reporte Mensual
+                      </Text>
+                      <Text fontSize="sm" color="gray.600" mb={4}>
+                        Genera un reporte de las sesiones del mes para facturar a la empresa
+                      </Text>
+                      <Button
+                        leftIcon={<TrendingUp size={20} />}
+                        colorScheme="blue"
+                        size="lg"
+                        onClick={onGenerateOpen}
+                      >
+                        Generar Nuevo Reporte
+                      </Button>
+                    </Box>
+                  </VStack>
+                </TabPanel>
+
+                {/* Tab 3: Reports History */}
+                <TabPanel>
+                  {contract.id && (
+                    <MonthlyReportsHistory
+                      contractId={contract.id}
+                      companyName={companyName}
+                      contractName={contract.contractName}
+                    />
+                  )}
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button onClick={onClose}>
+              Cerrar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Generate Monthly Report Modal */}
+      {contract.id && (
+        <GenerateMonthlyReportModal
+          isOpen={isGenerateOpen}
+          onClose={onGenerateClose}
+          contractId={contract.id}
+          companyId={companyId}
+          companyName={companyName}
+          contractName={contract.contractName}
+        />
+      )}
+    </>
   );
 }
