@@ -24,8 +24,10 @@ import {
   Box,
   Badge,
   Divider,
+  Card,
+  CardBody,
 } from '@chakra-ui/react';
-import { FileText, Calendar, Clock, User, Target, Zap } from 'lucide-react';
+import { FileText, Calendar, Clock, User, Target, Zap, DollarSign, CreditCard } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -44,6 +46,9 @@ interface SessionFormData {
   homework: string;
   nextSessionPlan: string;
   progress: string;
+  paymentType: string;
+  customAmount?: number;
+  paymentStatus: string;
 }
 
 interface Patient {
@@ -106,6 +111,21 @@ const mockPatients: Patient[] = [
   { id: '5', name: 'Laura Sánchez', company: 'Innovate Industries' },
 ];
 
+interface Contract {
+  id: string;
+  contractName: string;
+  costPerSession: number;
+  companyId: string;
+  companyName: string;
+}
+
+const mockContracts: Contract[] = [
+  { id: '1', contractName: 'Contrato Premium - Tech Solutions', costPerSession: 1500, companyId: 'tech-solutions', companyName: 'Tech Solutions SA' },
+  { id: '2', contractName: 'Contrato Básico - Tech Solutions', costPerSession: 1000, companyId: 'tech-solutions', companyName: 'Tech Solutions SA' },
+  { id: '3', contractName: 'Contrato Ejecutivo - Innovate', costPerSession: 2000, companyId: 'innovate', companyName: 'Innovate Industries' },
+  { id: '4', contractName: 'Contrato Estándar - Innovate', costPerSession: 1200, companyId: 'innovate', companyName: 'Innovate Industries' },
+];
+
 export default function NewSessionModal({
   isOpen,
   onClose,
@@ -114,6 +134,8 @@ export default function NewSessionModal({
 }: NewSessionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patient || null);
+  const [availableContracts, setAvailableContracts] = useState<Contract[]>([]);
+  const [showCustomAmount, setShowCustomAmount] = useState(false);
   const toast = useToast();
 
   const {
@@ -132,6 +154,8 @@ export default function NewSessionModal({
       duration: 60,
       patientMood: 'good',
       progress: 'moderate',
+      paymentType: '',
+      paymentStatus: 'pending',
     },
   });
 
@@ -140,10 +164,36 @@ export default function NewSessionModal({
     const foundPatient = mockPatients.find(p => p.id === patientId);
     setSelectedPatient(foundPatient || null);
     setValue('patientId', patientId);
+
+    if (foundPatient?.company) {
+      const companyContracts = mockContracts.filter(
+        c => c.companyName === foundPatient.company
+      );
+      setAvailableContracts(companyContracts);
+      setValue('paymentType', '');
+    } else {
+      setAvailableContracts([]);
+      setValue('paymentType', '');
+    }
+    setShowCustomAmount(false);
+  };
+
+  const handlePaymentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setShowCustomAmount(value === 'other');
+    setValue('paymentType', value);
   };
 
   const watchedMood = watch('patientMood');
   const watchedProgress = watch('progress');
+  const watchedPaymentType = watch('paymentType');
+  const watchedPaymentStatus = watch('paymentStatus');
+
+  const getSelectedContractAmount = () => {
+    if (watchedPaymentType === 'other' || !watchedPaymentType) return null;
+    const contract = mockContracts.find(c => c.id === watchedPaymentType);
+    return contract?.costPerSession || null;
+  };
 
   const onSubmit = async (data: SessionFormData) => {
     setIsLoading(true);
@@ -178,6 +228,8 @@ export default function NewSessionModal({
   const handleClose = () => {
     reset();
     setSelectedPatient(patient || null);
+    setAvailableContracts([]);
+    setShowCustomAmount(false);
     onClose();
   };
 
@@ -477,6 +529,118 @@ export default function NewSessionModal({
                       </Badge>
                     </HStack>
                   </FormControl>
+                </VStack>
+              </Box>
+
+              <Divider />
+
+              {/* Payment Section */}
+              <Box>
+                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                  <HStack spacing={2}>
+                    <DollarSign size={20} />
+                    <Text>Información de Cobro</Text>
+                  </HStack>
+                </Text>
+
+                <VStack spacing={4} align="stretch">
+                  <Grid templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={4}>
+                    <FormControl isRequired isInvalid={!!errors.paymentType}>
+                      <FormLabel>Tipo de Cobro</FormLabel>
+                      <Select
+                        placeholder="Selecciona el tipo de cobro"
+                        {...register('paymentType', { required: 'Seleccione el tipo de cobro' })}
+                        onChange={handlePaymentTypeChange}
+                      >
+                        {availableContracts.length > 0 && (
+                          <optgroup label="Contratos de la Empresa">
+                            {availableContracts.map((contract) => (
+                              <option key={contract.id} value={contract.id}>
+                                {contract.contractName} - ${contract.costPerSession.toLocaleString()} MXN
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        <option value="other">Otro (Monto Manual)</option>
+                      </Select>
+                      {errors.paymentType && (
+                        <Text fontSize="sm" color="red.500" mt={1}>
+                          {errors.paymentType.message}
+                        </Text>
+                      )}
+                      {!selectedPatient?.company && (
+                        <Text fontSize="xs" color="orange.600" mt={1}>
+                          Selecciona un paciente para ver los contratos disponibles
+                        </Text>
+                      )}
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel>
+                        <HStack spacing={2}>
+                          <CreditCard size={16} />
+                          <Text>Estado del Pago</Text>
+                        </HStack>
+                      </FormLabel>
+                      <Select {...register('paymentStatus', { required: true })}>
+                        <option value="pending">Pendiente</option>
+                        <option value="paid">Pagado</option>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {showCustomAmount && (
+                    <FormControl isRequired={showCustomAmount} isInvalid={!!errors.customAmount}>
+                      <FormLabel>Monto Personalizado</FormLabel>
+                      <HStack>
+                        <Text fontSize="lg" color="gray.600">$</Text>
+                        <Input
+                          type="number"
+                          placeholder="Ingresa el monto"
+                          {...register('customAmount', {
+                            required: showCustomAmount ? 'Ingrese el monto' : false,
+                            min: { value: 0, message: 'El monto debe ser mayor a 0' },
+                          })}
+                        />
+                        <Text fontSize="lg" color="gray.600">MXN</Text>
+                      </HStack>
+                      {errors.customAmount && (
+                        <Text fontSize="sm" color="red.500" mt={1}>
+                          {errors.customAmount.message}
+                        </Text>
+                      )}
+                    </FormControl>
+                  )}
+
+                  {/* Payment Summary */}
+                  {(getSelectedContractAmount() || watchedPaymentType === 'other') && (
+                    <Card bg="green.50" borderWidth="1px" borderColor="green.200">
+                      <CardBody>
+                        <VStack spacing={2} align="stretch">
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                              Resumen del Cobro
+                            </Text>
+                            <Badge
+                              colorScheme={watchedPaymentStatus === 'paid' ? 'green' : 'orange'}
+                              variant="solid"
+                              px={3}
+                              py={1}
+                            >
+                              {watchedPaymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
+                            </Badge>
+                          </HStack>
+                          <Divider />
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">Monto de la Sesión:</Text>
+                            <Text fontSize="lg" fontWeight="bold" color="green.700">
+                              ${getSelectedContractAmount()?.toLocaleString() || '0'} MXN
+                            </Text>
+                          </HStack>
+                        </VStack>
+                      </CardBody>
+                    </Card>
+                  )}
                 </VStack>
               </Box>
 
