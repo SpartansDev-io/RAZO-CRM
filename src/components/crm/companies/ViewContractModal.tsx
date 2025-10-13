@@ -130,7 +130,7 @@ export default function ViewContractModal({
           </ModalHeader>
           <ModalCloseButton />
 
-          <ModalBody>
+          <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
             <Tabs colorScheme="blue">
               <TabList>
                 <Tab>

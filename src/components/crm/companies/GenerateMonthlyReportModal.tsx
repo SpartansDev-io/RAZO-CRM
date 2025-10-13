@@ -257,7 +257,7 @@ export default function GenerateMonthlyReportModal({
           </ModalHeader>
           <ModalCloseButton />
 
-          <ModalBody>
+          <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
             <VStack spacing={6} align="stretch">
               {/* Contract Info */}
               <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
