@@ -245,9 +245,9 @@ export default function GenerateMonthlyReportModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="4xl">
+    <Modal isOpen={isOpen} onClose={handleClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" />
-      <ModalContent maxH="90vh" overflowY="auto">
+      <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader>
             <HStack spacing={2}>
@@ -257,7 +257,7 @@ export default function GenerateMonthlyReportModal({
           </ModalHeader>
           <ModalCloseButton />
 
-          <ModalBody>
+          <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
             <VStack spacing={6} align="stretch">
               {/* Contract Info */}
               <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">

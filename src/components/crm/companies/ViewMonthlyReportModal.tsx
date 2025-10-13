@@ -128,9 +128,9 @@ export default function ViewMonthlyReportModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" />
-      <ModalContent maxH="90vh" overflowY="auto">
+      <ModalContent maxH="90vh">
         <ModalHeader>
           <HStack spacing={2}>
             <FileText size={24} color="#3182CE" />
@@ -139,7 +139,7 @@ export default function ViewMonthlyReportModal({
         </ModalHeader>
         <ModalCloseButton />
 
-        <ModalBody>
+        <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
           <VStack spacing={6} align="stretch">
             {/* Company and Contract Info */}
             <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">

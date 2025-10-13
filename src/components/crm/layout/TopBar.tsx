@@ -22,18 +22,24 @@ import {
   User,
   Menu as MenuIcon,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useDashboardStore } from '@/stores/dashboard.store';
 
 export default function TopBar() {
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const { toggleSidebar } = useDashboardStore();
+  const router = useRouter();
 
   // Static user data
   const user = {
     firstName: 'Dr. María',
     lastName: 'González',
     role: { name: 'Psicólogo' }
+  };
+
+  const handleProfileClick = () => {
+    router.push('/crm/profile');
   };
 
   const logout = () => {
@@ -115,7 +121,7 @@ export default function TopBar() {
               </HStack>
             </MenuButton>
             <MenuList>
-              <MenuItem icon={<User size={16} />}>
+              <MenuItem icon={<User size={16} />} onClick={handleProfileClick}>
                 Mi Perfil
               </MenuItem>
               <MenuDivider />
