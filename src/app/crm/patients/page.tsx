@@ -37,6 +37,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  UserPlus,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
@@ -44,6 +45,7 @@ import { es } from 'date-fns/locale';
 import { AuthLayout } from '@/components/layout/auth-layout';
 import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import PatientProfileModal from '@/components/crm/patients/PatientProfileModal';
+import NewPatientModal from '@/components/crm/patients/NewPatientModal';
 
 interface Patient {
   id: string;
@@ -206,6 +208,11 @@ export default function PatientsPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isNewPatientOpen,
+    onOpen: onNewPatientOpen,
+    onClose: onNewPatientClose
+  } = useDisclosure();
 
   // Filter and search logic
   const filteredPatients = useMemo(() => {
@@ -264,17 +271,27 @@ export default function PatientsPage() {
       <DashboardLayout>
         <VStack spacing={6} align="stretch">
           {/* Header */}
-          <Box>
-            <HStack spacing={3} mb={2}>
-              <Users size={24} color="#3182CE" />
-              <Heading size="lg" color="gray.800">
-                Gestión de Pacientes
-              </Heading>
-            </HStack>
-            <Text color="gray.600">
-              Administra la información de tus pacientes
-            </Text>
-          </Box>
+          <Flex justify="space-between" align="center">
+            <Box>
+              <HStack spacing={3} mb={2}>
+                <Users size={24} color="#3182CE" />
+                <Heading size="lg" color="gray.800">
+                  Gestión de Pacientes
+                </Heading>
+              </HStack>
+              <Text color="gray.600">
+                Administra la información de tus pacientes
+              </Text>
+            </Box>
+            <Button
+              leftIcon={<UserPlus size={20} />}
+              colorScheme="blue"
+              size="lg"
+              onClick={onNewPatientOpen}
+            >
+              Nuevo Paciente
+            </Button>
+          </Flex>
 
           {/* Filters */}
           <Card>
@@ -546,6 +563,12 @@ export default function PatientsPage() {
           isOpen={isOpen}
           onClose={onClose}
           patient={selectedPatient}
+        />
+
+        {/* New Patient Modal */}
+        <NewPatientModal
+          isOpen={isNewPatientOpen}
+          onClose={onNewPatientClose}
         />
       </DashboardLayout>
     </AuthLayout>
