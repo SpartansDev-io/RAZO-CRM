@@ -27,7 +27,7 @@ import {
   Card,
   CardBody,
 } from '@chakra-ui/react';
-import { FileText, Calendar, Clock, User, Target, Zap, DollarSign, CreditCard } from 'lucide-react';
+import { FileText, Calendar, Clock, User, Target, Zap, DollarSign, CreditCard, Banknote } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -49,6 +49,9 @@ interface SessionFormData {
   paymentType: string;
   customAmount?: number;
   paymentStatus: string;
+  paymentMethod?: 'transfer' | 'cash' | 'none';
+  paidAmount?: number;
+  paymentNotes?: string;
 }
 
 interface Patient {
@@ -156,6 +159,8 @@ export default function NewSessionModal({
       progress: 'moderate',
       paymentType: '',
       paymentStatus: 'pending',
+      paymentMethod: 'none',
+      paidAmount: 0,
     },
   });
 
@@ -188,6 +193,9 @@ export default function NewSessionModal({
   const watchedProgress = watch('progress');
   const watchedPaymentType = watch('paymentType');
   const watchedPaymentStatus = watch('paymentStatus');
+  const watchedPaymentMethod = watch('paymentMethod');
+  const watchedPaidAmount = watch('paidAmount');
+  const watchedCustomAmount = watch('customAmount');
 
   const getSelectedContractAmount = () => {
     if (watchedPaymentType === 'other' || !watchedPaymentType) return null;
@@ -574,19 +582,33 @@ export default function NewSessionModal({
                       <FormLabel>
                         <HStack spacing={2}>
                           <CreditCard size={16} />
-                          <Text>Estado del Pago</Text>
+                          <Text>Método de Pago</Text>
                         </HStack>
                       </FormLabel>
-                      <Select {...register('paymentStatus', { required: true })}>
-                        <option value="pending">Pendiente</option>
-                        <option value="paid">Pagado</option>
+                      <Select
+                        {...register('paymentMethod')}
+                        onChange={(e) => {
+                          const method = e.target.value as 'transfer' | 'cash' | 'none';
+                          setValue('paymentMethod', method);
+                          if (method === 'none') {
+                            setValue('paymentStatus', 'pending');
+                            setValue('paidAmount', 0);
+                          } else {
+                            const sessionCost = getSelectedContractAmount() || watchedCustomAmount || 0;
+                            setValue('paidAmount', sessionCost);
+                          }
+                        }}
+                      >
+                        <option value="none">Pendiente de pago</option>
+                        <option value="transfer">Transferencia</option>
+                        <option value="cash">Efectivo</option>
                       </Select>
                     </FormControl>
                   </Grid>
 
                   {showCustomAmount && (
                     <FormControl isRequired={showCustomAmount} isInvalid={!!errors.customAmount}>
-                      <FormLabel>Monto Personalizado</FormLabel>
+                      <FormLabel>Monto Personalizado (Costo de Sesión)</FormLabel>
                       <HStack>
                         <Text fontSize="lg" color="gray.600">$</Text>
                         <Input
@@ -595,6 +617,7 @@ export default function NewSessionModal({
                           {...register('customAmount', {
                             required: showCustomAmount ? 'Ingrese el monto' : false,
                             min: { value: 0, message: 'El monto debe ser mayor a 0' },
+                            valueAsNumber: true,
                           })}
                         />
                         <Text fontSize="lg" color="gray.600">MXN</Text>
@@ -607,31 +630,125 @@ export default function NewSessionModal({
                     </FormControl>
                   )}
 
+                  {/* Payment Amount - Only show if payment method is selected */}
+                  {watchedPaymentMethod !== 'none' && (getSelectedContractAmount() || watchedCustomAmount) && (
+                    <FormControl isRequired isInvalid={!!errors.paidAmount}>
+                      <FormLabel>
+                        <HStack spacing={2}>
+                          <Banknote size={16} />
+                          <Text>Monto Pagado</Text>
+                        </HStack>
+                      </FormLabel>
+                      <HStack>
+                        <Text fontSize="lg" color="gray.600">$</Text>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          {...register('paidAmount', {
+                            required: 'El monto pagado es requerido',
+                            min: { value: 0.01, message: 'El monto debe ser mayor a 0' },
+                            max: {
+                              value: getSelectedContractAmount() || watchedCustomAmount || 0,
+                              message: 'El monto no puede exceder el costo de la sesión'
+                            },
+                            valueAsNumber: true,
+                          })}
+                        />
+                        <Text fontSize="lg" color="gray.600">MXN</Text>
+                      </HStack>
+                      {errors.paidAmount && (
+                        <Text fontSize="sm" color="red.500" mt={1}>
+                          {errors.paidAmount.message}
+                        </Text>
+                      )}
+                      {(getSelectedContractAmount() || watchedCustomAmount) && (
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          Costo de sesión: ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
+                        </Text>
+                      )}
+                      {watchedPaidAmount && watchedPaidAmount > 0 && watchedPaidAmount < (getSelectedContractAmount() || watchedCustomAmount || 0) && (
+                        <Badge colorScheme="orange" mt={2} fontSize="xs">
+                          Pago Parcial - Adeudo: ${((getSelectedContractAmount() || watchedCustomAmount || 0) - watchedPaidAmount).toLocaleString()} MXN
+                        </Badge>
+                      )}
+                      {watchedPaidAmount && watchedPaidAmount === (getSelectedContractAmount() || watchedCustomAmount) && (
+                        <Badge colorScheme="green" mt={2} fontSize="xs">
+                          Pago Completo
+                        </Badge>
+                      )}
+                    </FormControl>
+                  )}
+
+                  {/* Payment Notes */}
+                  {watchedPaymentMethod !== 'none' && (
+                    <FormControl>
+                      <FormLabel>Notas de Pago (opcional)</FormLabel>
+                      <Input
+                        placeholder="Ej: Referencia de transferencia, número de recibo, etc."
+                        {...register('paymentNotes')}
+                      />
+                    </FormControl>
+                  )}
+
                   {/* Payment Summary */}
-                  {(getSelectedContractAmount() || watchedPaymentType === 'other') && (
-                    <Card bg="green.50" borderWidth="1px" borderColor="green.200">
+                  {(getSelectedContractAmount() || watchedCustomAmount) && (
+                    <Card
+                      bg={watchedPaymentMethod === 'none' ? 'orange.50' : 'green.50'}
+                      borderWidth="1px"
+                      borderColor={watchedPaymentMethod === 'none' ? 'orange.200' : 'green.200'}
+                    >
                       <CardBody>
                         <VStack spacing={2} align="stretch">
                           <HStack justify="space-between">
                             <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                              Resumen del Cobro
+                              {watchedPaymentMethod === 'none' ? 'Estado: Pendiente de Pago' : 'Estado: Pago Registrado'}
                             </Text>
                             <Badge
-                              colorScheme={watchedPaymentStatus === 'paid' ? 'green' : 'orange'}
+                              colorScheme={watchedPaymentMethod === 'none' ? 'orange' : 'green'}
                               variant="solid"
                               px={3}
                               py={1}
                             >
-                              {watchedPaymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
+                              {watchedPaymentMethod === 'none'
+                                ? 'Pendiente'
+                                : watchedPaymentMethod === 'transfer'
+                                ? 'Transferencia'
+                                : 'Efectivo'}
                             </Badge>
                           </HStack>
                           <Divider />
-                          <HStack justify="space-between">
-                            <Text fontSize="sm" color="gray.600">Monto de la Sesión:</Text>
-                            <Text fontSize="lg" fontWeight="bold" color="green.700">
-                              ${getSelectedContractAmount()?.toLocaleString() || '0'} MXN
+                          <HStack justify="space-between" fontSize="sm">
+                            <Text color="gray.600">Costo de sesión:</Text>
+                            <Text fontWeight="bold">
+                              ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
                             </Text>
                           </HStack>
+                          {watchedPaymentMethod !== 'none' && watchedPaidAmount !== undefined && (
+                            <>
+                              <HStack justify="space-between" fontSize="sm">
+                                <Text color="gray.600">Monto pagado:</Text>
+                                <Text fontWeight="bold" color="green.600">
+                                  ${(watchedPaidAmount || 0).toLocaleString()} MXN
+                                </Text>
+                              </HStack>
+                              {watchedPaidAmount < (getSelectedContractAmount() || watchedCustomAmount || 0) && (
+                                <HStack justify="space-between" fontSize="sm">
+                                  <Text color="orange.600">Adeudo restante:</Text>
+                                  <Text fontWeight="bold" color="orange.600">
+                                    ${((getSelectedContractAmount() || watchedCustomAmount || 0) - watchedPaidAmount).toLocaleString()} MXN
+                                  </Text>
+                                </HStack>
+                              )}
+                            </>
+                          )}
+                          {watchedPaymentMethod === 'none' && (
+                            <HStack justify="space-between" fontSize="sm">
+                              <Text color="orange.600">Adeudo total:</Text>
+                              <Text fontWeight="bold" color="orange.600">
+                                ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
+                              </Text>
+                            </HStack>
+                          )}
                         </VStack>
                       </CardBody>
                     </Card>
