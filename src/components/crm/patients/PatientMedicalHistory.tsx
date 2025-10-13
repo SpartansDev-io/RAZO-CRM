@@ -28,6 +28,8 @@ import {
   Edit,
   Trash2,
   Eye,
+  DollarSign,
+  CreditCard,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -48,6 +50,9 @@ interface MedicalRecord {
   patientMood: 'excellent' | 'good' | 'neutral' | 'poor' | 'very_poor';
   progress: 'significant' | 'moderate' | 'minimal' | 'none' | 'regression';
   attachments?: string[];
+  paymentStatus: 'paid' | 'pending';
+  paymentAmount: number;
+  contractName?: string;
 }
 
 interface PatientMedicalHistoryProps {
@@ -78,6 +83,9 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Revisar registro de pensamientos. Introducir técnicas de exposición gradual.',
       patientMood: 'good',
       progress: 'moderate',
+      paymentStatus: 'pending',
+      paymentAmount: 1500,
+      contractName: 'Contrato Premium - TechCorp',
     },
     {
       id: '2',
@@ -100,6 +108,9 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Trabajar en situaciones específicas de exposición social.',
       patientMood: 'good',
       progress: 'significant',
+      paymentStatus: 'pending',
+      paymentAmount: 1500,
+      contractName: 'Contrato Premium - TechCorp',
     },
     {
       id: '3',
@@ -122,6 +133,9 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Revisar implementación de rutinas. Trabajar en habilidades sociales.',
       patientMood: 'excellent',
       progress: 'moderate',
+      paymentStatus: 'paid',
+      paymentAmount: 1000,
+      contractName: 'Contrato Básico - TechCorp',
     },
     {
       id: '4',
@@ -144,6 +158,8 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Evaluar efectividad de estrategias aplicadas. Reforzar técnicas exitosas.',
       patientMood: 'neutral',
       progress: 'moderate',
+      paymentStatus: 'paid',
+      paymentAmount: 1500,
     },
   ];
 };
@@ -262,7 +278,7 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
               <CardBody p={6}>
                 <VStack spacing={4} align="stretch">
                   {/* Header */}
-                  <HStack justify="space-between" align="center">
+                  <HStack justify="space-between" align="start">
                     <HStack spacing={4}>
                       <VStack spacing={1} align="start">
                         <HStack spacing={2}>
@@ -287,35 +303,61 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                         </HStack>
                       </VStack>
                     </HStack>
-                    
-                    <HStack spacing={2}>
-                      <Badge
-                        colorScheme={getMoodColor(record.patientMood)}
-                        variant="subtle"
-                        px={3}
-                        py={1}
-                      >
-                        Estado: {getMoodText(record.patientMood)}
-                      </Badge>
-                      <Badge
-                        colorScheme={getProgressColor(record.progress)}
-                        variant="solid"
-                        px={3}
-                        py={1}
-                      >
-                        Progreso: {getProgressText(record.progress)}
-                      </Badge>
-                    </HStack>
+
+                    <VStack spacing={2} align="end">
+                      <HStack spacing={2}>
+                        <Badge
+                          colorScheme={getMoodColor(record.patientMood)}
+                          variant="subtle"
+                          px={3}
+                          py={1}
+                        >
+                          Estado: {getMoodText(record.patientMood)}
+                        </Badge>
+                        <Badge
+                          colorScheme={getProgressColor(record.progress)}
+                          variant="solid"
+                          px={3}
+                          py={1}
+                        >
+                          Progreso: {getProgressText(record.progress)}
+                        </Badge>
+                      </HStack>
+                      <HStack spacing={2}>
+                        <Badge
+                          colorScheme={record.paymentStatus === 'paid' ? 'green' : 'red'}
+                          variant="solid"
+                          px={3}
+                          py={1}
+                          fontSize="xs"
+                        >
+                          {record.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
+                        </Badge>
+                        <Text fontSize="xs" fontWeight="bold" color="gray.700">
+                          ${record.paymentAmount.toLocaleString()} MXN
+                        </Text>
+                      </HStack>
+                    </VStack>
                   </HStack>
 
                   <Divider />
 
-                  {/* Session Type */}
-                  <Box>
-                    <Text fontSize="md" fontWeight="medium" color="blue.600">
-                      {record.sessionType}
-                    </Text>
-                  </Box>
+                  {/* Session Type and Contract */}
+                  <HStack justify="space-between" align="center">
+                    <Box>
+                      <Text fontSize="md" fontWeight="medium" color="blue.600">
+                        {record.sessionType}
+                      </Text>
+                    </Box>
+                    {record.contractName && (
+                      <HStack spacing={2}>
+                        <CreditCard size={14} color="#718096" />
+                        <Text fontSize="xs" color="gray.600">
+                          {record.contractName}
+                        </Text>
+                      </HStack>
+                    )}
+                  </HStack>
 
                   {/* Session Notes */}
                   <Box>

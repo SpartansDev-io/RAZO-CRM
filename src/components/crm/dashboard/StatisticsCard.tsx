@@ -12,7 +12,7 @@ import {
   Box,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { DivideIcon as LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 interface StatisticsCardProps {
   title: string;

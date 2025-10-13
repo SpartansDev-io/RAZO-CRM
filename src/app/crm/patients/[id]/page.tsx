@@ -43,6 +43,9 @@ import {
   AlertCircle,
   Edit,
   Building,
+  DollarSign,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -343,7 +346,64 @@ export default function PatientProfilePage() {
                       </Stat>
                     </CardBody>
                   </Card>
+
+                  <Card bg={cardBg}>
+                    <CardBody>
+                      <Stat>
+                        <StatLabel fontSize="sm" color="gray.600">
+                          <HStack spacing={1}>
+                            <Building size={14} />
+                            <Text>Empresa</Text>
+                          </HStack>
+                        </StatLabel>
+                        <StatNumber fontSize="sm" color="orange.600">
+                          {patient.company}
+                        </StatNumber>
+                      </Stat>
+                    </CardBody>
+                  </Card>
                 </Grid>
+
+                {/* Payment Status Alert */}
+                <Card
+                  bg="orange.50"
+                  borderWidth="1px"
+                  borderColor="orange.200"
+                  borderLeftWidth="4px"
+                  borderLeftColor="orange.500"
+                >
+                  <CardBody>
+                    <HStack spacing={4} align="start">
+                      <Box pt={1}>
+                        <AlertCircle size={20} color="#DD6B20" />
+                      </Box>
+                      <VStack spacing={2} align="start" flex="1">
+                        <HStack spacing={2}>
+                          <Text fontSize="md" fontWeight="bold" color="orange.800">
+                            Estado de Pagos
+                          </Text>
+                          <Badge colorScheme="orange" variant="solid" fontSize="xs">
+                            Adeudo Pendiente
+                          </Badge>
+                        </HStack>
+                        <Text fontSize="sm" color="orange.700">
+                          El paciente tiene un adeudo de <strong>$3,000 MXN</strong> correspondiente a <strong>2 sesiones</strong> pendientes de pago.
+                        </Text>
+                        <HStack spacing={3} pt={1}>
+                          <Badge colorScheme="red" variant="subtle" fontSize="xs">
+                            Sesión 08/01/2024 - $1,500 MXN
+                          </Badge>
+                          <Badge colorScheme="red" variant="subtle" fontSize="xs">
+                            Sesión 15/01/2024 - $1,500 MXN
+                          </Badge>
+                        </HStack>
+                      </VStack>
+                      <Button size="sm" colorScheme="orange" leftIcon={<DollarSign size={14} />}>
+                        Registrar Pago
+                      </Button>
+                    </HStack>
+                  </CardBody>
+                </Card>
               </VStack>
             </CardBody>
           </Card>
