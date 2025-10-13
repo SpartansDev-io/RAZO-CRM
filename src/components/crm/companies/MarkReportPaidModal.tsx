@@ -124,9 +124,9 @@ export default function MarkReportPaidModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+    <Modal isOpen={isOpen} onClose={handleClose} size="xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" />
-      <ModalContent>
+      <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader>
             <HStack spacing={2}>

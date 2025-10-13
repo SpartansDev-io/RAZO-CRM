@@ -114,9 +114,9 @@ export default function ViewContractModal({
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
         <ModalOverlay bg="blackAlpha.600" />
-        <ModalContent maxH="90vh" overflowY="auto">
+        <ModalContent maxH="90vh">
           <ModalHeader>
             <HStack spacing={3}>
               <FileText size={24} color="#3182CE" />
