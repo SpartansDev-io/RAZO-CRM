@@ -19,7 +19,7 @@ interface StatisticsCardProps {
   value: string;
   change: string;
   changeType: 'increase' | 'decrease';
-  icon: LucideIcon;
+  icon: any;
   color: string;
 }
 
