@@ -3,7 +3,7 @@ export interface DashboardStats {
   activePatients: StatItem;
   appointmentsToday: StatItem;
   revenueThisMonth: RevenueStatItem;
-  attendanceRate: StatItem;
+  attendanceRate: AttendanceStatItem;
 }
 
 export interface StatItem {
@@ -14,6 +14,10 @@ export interface StatItem {
 }
 
 export interface RevenueStatItem extends StatItem {
+  formatted: string;
+}
+
+export interface AttendanceStatItem extends StatItem {
   formatted: string;
 }
 
