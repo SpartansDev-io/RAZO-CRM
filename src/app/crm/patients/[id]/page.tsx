@@ -57,6 +57,7 @@ import { AuthLayout } from '@/components/layout/auth-layout';
 import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import AppointmentModal from '@/components/crm/calendar/AppointmentModal';
 import NewSessionModal from '@/components/crm/patients/NewSessionModal';
+import RegisterPaymentModal from '@/components/crm/patients/RegisterPaymentModal';
 import PatientAppointments from '@/components/crm/patients/PatientAppointments';
 import PatientMedicalHistory from '@/components/crm/patients/PatientMedicalHistory';
 import PatientAttachments from '@/components/crm/patients/PatientAttachments';
@@ -186,16 +187,22 @@ export default function PatientProfilePage() {
 
   const [activeTab, setActiveTab] = useState(0);
   
-  const { 
-    isOpen: isAppointmentOpen, 
-    onOpen: onAppointmentOpen, 
-    onClose: onAppointmentClose 
+  const {
+    isOpen: isAppointmentOpen,
+    onOpen: onAppointmentOpen,
+    onClose: onAppointmentClose
   } = useDisclosure();
-  
-  const { 
-    isOpen: isSessionOpen, 
-    onOpen: onSessionOpen, 
-    onClose: onSessionClose 
+
+  const {
+    isOpen: isSessionOpen,
+    onOpen: onSessionOpen,
+    onClose: onSessionClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isPaymentOpen,
+    onOpen: onPaymentOpen,
+    onClose: onPaymentClose
   } = useDisclosure();
 
   const bg = useColorModeValue('white', 'gray.800');
@@ -297,6 +304,7 @@ export default function PatientProfilePage() {
                     leftIcon={<DollarSign size={16} />}
                     colorScheme="orange"
                     size="md"
+                    onClick={onPaymentOpen}
                   >
                     Registrar Pago
                   </Button>
@@ -815,6 +823,14 @@ export default function PatientProfilePage() {
           isOpen={isSessionOpen}
           onClose={onSessionClose}
           patient={patient}
+        />
+
+        <RegisterPaymentModal
+          isOpen={isPaymentOpen}
+          onClose={onPaymentClose}
+          patientId={patient.id}
+          patientName={patient.name}
+          totalDebt={patient.totalDebt || 0}
         />
       </DashboardLayout>
     </AuthLayout>

@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState } from 'react';
 import NewSessionModal from './NewSessionModal';
+import RegisterPaymentModal from './RegisterPaymentModal';
 
 interface MedicalRecord {
   id: string;
@@ -191,8 +192,14 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
 export default function PatientMedicalHistory({ patientId }: PatientMedicalHistoryProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
-  
+  const [selectedSessionForPayment, setSelectedSessionForPayment] = useState<string | null>(null);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isPaymentOpen,
+    onOpen: onPaymentOpen,
+    onClose: onPaymentClose
+  } = useDisclosure();
   
   const bg = useColorModeValue('white', 'gray.800');
   const cardBg = useColorModeValue('gray.50', 'gray.700');
@@ -560,28 +567,46 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                   )}
 
                   {/* Actions */}
-                  <HStack spacing={2} justify="flex-end" pt={2}>
-                    <IconButton
-                      aria-label="Ver detalles"
-                      icon={<Eye size={14} />}
-                      size="sm"
-                      variant="outline"
-                      colorScheme="blue"
-                    />
-                    <IconButton
-                      aria-label="Editar registro"
-                      icon={<Edit size={14} />}
-                      size="sm"
-                      variant="outline"
-                      colorScheme="green"
-                    />
-                    <IconButton
-                      aria-label="Eliminar registro"
-                      icon={<Trash2 size={14} />}
-                      size="sm"
-                      variant="outline"
-                      colorScheme="red"
-                    />
+                  <HStack spacing={2} justify="space-between" pt={2}>
+                    <Box>
+                      {record.paymentInfo && record.paymentInfo.paymentStatus !== 'paid' && (
+                        <Button
+                          leftIcon={<DollarSign size={14} />}
+                          size="sm"
+                          colorScheme="orange"
+                          variant="solid"
+                          onClick={() => {
+                            setSelectedSessionForPayment(record.id);
+                            onPaymentOpen();
+                          }}
+                        >
+                          Registrar Pago
+                        </Button>
+                      )}
+                    </Box>
+                    <HStack spacing={2}>
+                      <IconButton
+                        aria-label="Ver detalles"
+                        icon={<Eye size={14} />}
+                        size="sm"
+                        variant="outline"
+                        colorScheme="blue"
+                      />
+                      <IconButton
+                        aria-label="Editar registro"
+                        icon={<Edit size={14} />}
+                        size="sm"
+                        variant="outline"
+                        colorScheme="green"
+                      />
+                      <IconButton
+                        aria-label="Eliminar registro"
+                        icon={<Trash2 size={14} />}
+                        size="sm"
+                        variant="outline"
+                        colorScheme="red"
+                      />
+                    </HStack>
                   </HStack>
                 </VStack>
               </CardBody>
@@ -596,6 +621,29 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
         onClose={onClose}
         patient={{ id: patientId, name: 'Paciente' }}
       />
+
+      {/* Register Payment Modal */}
+      <RegisterPaymentModal
+        isOpen={isPaymentOpen}
+        onClose={() => {
+          setSelectedSessionForPayment(null);
+          onPaymentClose();
+        }}
+        patientId={patientId}
+        patientName="Paciente"
+        totalDebt={pendingSessions.reduce((acc, s) => acc + s.remainingDebt, 0)}
+      />
     </VStack>
   );
 }
+
+const pendingSessions = [
+  {
+    id: '3',
+    remainingDebt: 1500,
+  },
+  {
+    id: '2',
+    remainingDebt: 700,
+  },
+];
