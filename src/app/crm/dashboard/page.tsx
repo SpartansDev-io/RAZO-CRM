@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Box,
   Grid,
@@ -18,6 +19,7 @@ import {
   Badge,
   Avatar,
   Divider,
+  useDisclosure,
 } from '@chakra-ui/react';
 import {
   Users,
@@ -32,8 +34,26 @@ import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import StatisticsCard from '@/components/crm/dashboard/StatisticsCard';
 import RecentAppointments from '@/components/crm/dashboard/RecentAppointments';
 import RecentPatients from '@/components/crm/dashboard/RecentPatients';
+import NewSessionModal from '@/components/crm/patients/NewSessionModal';
 
 export default function DashboardPage() {
+  const { isOpen: isSessionModalOpen, onOpen: onSessionModalOpen, onClose: onSessionModalClose } = useDisclosure();
+  const [selectedPatient, setSelectedPatient] = useState<{ id: string; name: string } | null>(null);
+
+  const handleOpenSessionModal = (patient?: { id: string; name: string }) => {
+    if (patient) {
+      setSelectedPatient(patient);
+    } else {
+      setSelectedPatient(null);
+    }
+    onSessionModalOpen();
+  };
+
+  const handleCloseSessionModal = () => {
+    setSelectedPatient(null);
+    onSessionModalClose();
+  };
+
   return (
     <AuthLayout>
       <DashboardLayout>
@@ -88,7 +108,7 @@ export default function DashboardPage() {
           <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
             {/* Recent Appointments */}
             <GridItem>
-              <RecentAppointments />
+              <RecentAppointments onNewSession={handleOpenSessionModal} />
             </GridItem>
 
             {/* Recent Patients */}
@@ -141,11 +161,12 @@ export default function DashboardPage() {
                   cursor="pointer"
                   _hover={{ bg: "purple.100" }}
                   transition="all 0.2s"
+                  onClick={() => handleOpenSessionModal()}
                 >
                   <HStack>
                     <CheckCircle size={20} color="#805AD5" />
                     <Text fontWeight="medium" color="purple.700">
-                      Completar Sesión
+                      Nueva Sesión
                     </Text>
                   </HStack>
                 </Box>
@@ -153,6 +174,13 @@ export default function DashboardPage() {
             </CardBody>
           </Card>
         </VStack>
+
+        <NewSessionModal
+          isOpen={isSessionModalOpen}
+          onClose={handleCloseSessionModal}
+          patient={selectedPatient}
+          showPatientSelector={!selectedPatient}
+        />
       </DashboardLayout>
     </AuthLayout>
   );

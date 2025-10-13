@@ -12,12 +12,15 @@ import {
   Box,
   Divider,
   useColorModeValue,
+  IconButton,
+  Tooltip,
 } from '@chakra-ui/react';
-import { Clock, Calendar } from 'lucide-react';
+import { Clock, Calendar, FileText } from 'lucide-react';
 
 const mockAppointments = [
   {
     id: 1,
+    patientId: '1',
     patientName: 'María González',
     time: '09:00',
     type: 'Terapia Individual',
@@ -25,6 +28,7 @@ const mockAppointments = [
   },
   {
     id: 2,
+    patientId: '2',
     patientName: 'Carlos Rodríguez',
     time: '10:30',
     type: 'Evaluación Inicial',
@@ -32,6 +36,7 @@ const mockAppointments = [
   },
   {
     id: 3,
+    patientId: '3',
     patientName: 'Ana López',
     time: '14:00',
     type: 'Terapia Familiar',
@@ -39,6 +44,7 @@ const mockAppointments = [
   },
   {
     id: 4,
+    patientId: '4',
     patientName: 'Pedro Martínez',
     time: '15:30',
     type: 'Seguimiento',
@@ -46,7 +52,11 @@ const mockAppointments = [
   },
 ];
 
-export default function RecentAppointments() {
+interface RecentAppointmentsProps {
+  onNewSession?: (patient: { id: string; name: string }) => void;
+}
+
+export default function RecentAppointments({ onNewSession }: RecentAppointmentsProps) {
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
@@ -116,6 +126,19 @@ export default function RecentAppointments() {
                     {getStatusText(appointment.status)}
                   </Badge>
                 </VStack>
+                <Tooltip label="Registrar sesión" placement="top">
+                  <IconButton
+                    aria-label="Registrar sesión"
+                    icon={<FileText size={16} />}
+                    size="sm"
+                    colorScheme="blue"
+                    variant="ghost"
+                    onClick={() => onNewSession?.({
+                      id: appointment.patientId,
+                      name: appointment.patientName
+                    })}
+                  />
+                </Tooltip>
               </HStack>
               {index < mockAppointments.length - 1 && (
                 <Divider mt={4} borderColor={borderColor} />
