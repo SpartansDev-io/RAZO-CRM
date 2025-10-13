@@ -56,6 +56,7 @@ model UserProfile {
   reportsPaid                  MonthlyContractReport[]      @relation("ReportPaidBy")
   reportsGenerated             MonthlyContractReport[]      @relation("ReportGeneratedBy")
   reportsSent                  MonthlyContractReport[]      @relation("ReportSentBy")
+  monthlyReportSessionsAsTherapist MonthlyReportSession[]
 
   @@map("user_profiles")
 }
@@ -179,7 +180,7 @@ model Patient {
   referredBy                  String?   @map("referred_by")
   referralSource              String?   @map("referral_source")
   reasonForTherapy            String    @map("reason_for_therapy")
-  therapeuticGoals            String?   @map("therapeutic_goals")
+  therapeuticGoalsText        String?   @map("therapeutic_goals")
   expectations                String?
   previousTherapy             Boolean   @default(false) @map("previous_therapy")
   previousTherapyDetails      String?   @map("previous_therapy_details")
