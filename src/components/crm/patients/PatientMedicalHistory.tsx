@@ -28,6 +28,9 @@ import {
   Edit,
   Trash2,
   Eye,
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -48,6 +51,14 @@ interface MedicalRecord {
   patientMood: 'excellent' | 'good' | 'neutral' | 'poor' | 'very_poor';
   progress: 'significant' | 'moderate' | 'minimal' | 'none' | 'regression';
   attachments?: string[];
+  paymentInfo?: {
+    sessionCost: number;
+    paidAmount: number;
+    paymentMethod?: 'transfer' | 'cash' | 'none';
+    paymentStatus: 'paid' | 'partial' | 'pending';
+    paymentDate?: Date;
+    paymentNotes?: string;
+  };
 }
 
 interface PatientMedicalHistoryProps {
@@ -78,6 +89,14 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Revisar registro de pensamientos. Introducir técnicas de exposición gradual.',
       patientMood: 'good',
       progress: 'moderate',
+      paymentInfo: {
+        sessionCost: 1500,
+        paidAmount: 1500,
+        paymentMethod: 'transfer',
+        paymentStatus: 'paid',
+        paymentDate: new Date('2024-01-15T12:30:00'),
+        paymentNotes: 'Transferencia REF: 12345',
+      },
     },
     {
       id: '2',
@@ -100,6 +119,14 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Trabajar en situaciones específicas de exposición social.',
       patientMood: 'good',
       progress: 'significant',
+      paymentInfo: {
+        sessionCost: 1500,
+        paidAmount: 800,
+        paymentMethod: 'cash',
+        paymentStatus: 'partial',
+        paymentDate: new Date('2024-01-08T11:00:00'),
+        paymentNotes: 'Pago parcial en efectivo',
+      },
     },
     {
       id: '3',
@@ -122,6 +149,12 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Revisar implementación de rutinas. Trabajar en habilidades sociales.',
       patientMood: 'excellent',
       progress: 'moderate',
+      paymentInfo: {
+        sessionCost: 1500,
+        paidAmount: 0,
+        paymentMethod: 'none',
+        paymentStatus: 'pending',
+      },
     },
     {
       id: '4',
@@ -144,6 +177,13 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       nextSessionPlan: 'Evaluar efectividad de estrategias aplicadas. Reforzar técnicas exitosas.',
       patientMood: 'neutral',
       progress: 'moderate',
+      paymentInfo: {
+        sessionCost: 1500,
+        paidAmount: 1500,
+        paymentMethod: 'transfer',
+        paymentStatus: 'paid',
+        paymentDate: new Date('2024-01-13T15:00:00'),
+      },
     },
   ];
 };
@@ -371,7 +411,7 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                             </Text>
                           </Box>
                         )}
-                        
+
                         {record.nextSessionPlan && (
                           <Box>
                             <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
@@ -383,6 +423,139 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                           </Box>
                         )}
                       </Grid>
+                    </>
+                  )}
+
+                  {/* Payment Information */}
+                  {record.paymentInfo && (
+                    <>
+                      <Divider />
+                      <Box
+                        p={3}
+                        borderRadius="md"
+                        bg={
+                          record.paymentInfo.paymentStatus === 'paid'
+                            ? 'green.50'
+                            : record.paymentInfo.paymentStatus === 'partial'
+                            ? 'orange.50'
+                            : 'red.50'
+                        }
+                        borderWidth="1px"
+                        borderColor={
+                          record.paymentInfo.paymentStatus === 'paid'
+                            ? 'green.200'
+                            : record.paymentInfo.paymentStatus === 'partial'
+                            ? 'orange.200'
+                            : 'red.200'
+                        }
+                      >
+                        <VStack spacing={2} align="stretch">
+                          <HStack justify="space-between">
+                            <HStack spacing={2}>
+                              <DollarSign size={16} color={
+                                record.paymentInfo.paymentStatus === 'paid'
+                                  ? '#38A169'
+                                  : record.paymentInfo.paymentStatus === 'partial'
+                                  ? '#DD6B20'
+                                  : '#E53E3E'
+                              } />
+                              <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                                Información de Pago
+                              </Text>
+                            </HStack>
+                            <Badge
+                              colorScheme={
+                                record.paymentInfo.paymentStatus === 'paid'
+                                  ? 'green'
+                                  : record.paymentInfo.paymentStatus === 'partial'
+                                  ? 'orange'
+                                  : 'red'
+                              }
+                              variant="solid"
+                              fontSize="xs"
+                            >
+                              {record.paymentInfo.paymentStatus === 'paid' && (
+                                <HStack spacing={1}>
+                                  <CheckCircle size={12} />
+                                  <Text>Pagado</Text>
+                                </HStack>
+                              )}
+                              {record.paymentInfo.paymentStatus === 'partial' && (
+                                <HStack spacing={1}>
+                                  <AlertCircle size={12} />
+                                  <Text>Pago Parcial</Text>
+                                </HStack>
+                              )}
+                              {record.paymentInfo.paymentStatus === 'pending' && (
+                                <HStack spacing={1}>
+                                  <AlertCircle size={12} />
+                                  <Text>Pendiente</Text>
+                                </HStack>
+                              )}
+                            </Badge>
+                          </HStack>
+
+                          <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={3} fontSize="xs">
+                            <HStack justify="space-between">
+                              <Text color="gray.600">Costo de sesión:</Text>
+                              <Text fontWeight="bold" color="gray.800">
+                                ${record.paymentInfo.sessionCost.toLocaleString()} MXN
+                              </Text>
+                            </HStack>
+
+                            <HStack justify="space-between">
+                              <Text color="gray.600">Monto pagado:</Text>
+                              <Text
+                                fontWeight="bold"
+                                color={
+                                  record.paymentInfo.paymentStatus === 'paid'
+                                    ? 'green.600'
+                                    : record.paymentInfo.paymentStatus === 'partial'
+                                    ? 'orange.600'
+                                    : 'gray.600'
+                                }
+                              >
+                                ${record.paymentInfo.paidAmount.toLocaleString()} MXN
+                              </Text>
+                            </HStack>
+
+                            {record.paymentInfo.paymentStatus !== 'paid' && (
+                              <HStack justify="space-between">
+                                <Text color="gray.600">Adeudo:</Text>
+                                <Text fontWeight="bold" color="red.600">
+                                  ${(record.paymentInfo.sessionCost - record.paymentInfo.paidAmount).toLocaleString()} MXN
+                                </Text>
+                              </HStack>
+                            )}
+                          </Grid>
+
+                          {record.paymentInfo.paymentMethod && record.paymentInfo.paymentMethod !== 'none' && (
+                            <HStack spacing={2} fontSize="xs">
+                              <Text color="gray.600">Método:</Text>
+                              <Badge colorScheme="blue" variant="subtle">
+                                {record.paymentInfo.paymentMethod === 'transfer' ? 'Transferencia' : 'Efectivo'}
+                              </Badge>
+                              {record.paymentInfo.paymentDate && (
+                                <>
+                                  <Text color="gray.600">•</Text>
+                                  <Text color="gray.600">
+                                    Pagado: {format(record.paymentInfo.paymentDate, 'dd/MM/yyyy HH:mm', { locale: es })}
+                                  </Text>
+                                </>
+                              )}
+                            </HStack>
+                          )}
+
+                          {record.paymentInfo.paymentNotes && (
+                            <HStack spacing={2} fontSize="xs">
+                              <Text color="gray.600">Nota:</Text>
+                              <Text color="gray.700" fontStyle="italic">
+                                {record.paymentInfo.paymentNotes}
+                              </Text>
+                            </HStack>
+                          )}
+                        </VStack>
+                      </Box>
                     </>
                   )}
 

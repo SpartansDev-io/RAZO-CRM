@@ -46,7 +46,9 @@ import {
   Paperclip,
   Home,
   Cake,
-  Briefcase
+  Briefcase,
+  DollarSign,
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -93,6 +95,7 @@ interface Patient {
   medicalConditions?: string;
   familyHistory?: string;
   expectations?: string;
+  totalDebt?: number;
 }
 
 // Mock patient data - In real app, this would come from API
@@ -132,6 +135,7 @@ const getMockPatient = (id: string): Patient | null => {
       medicalConditions: 'Migraña ocasional',
       familyHistory: 'Madre con historial de trastorno de ansiedad. Padre sin antecedentes psiquiátricos.',
       expectations: 'Aprender técnicas para manejar la ansiedad, mejorar la gestión del estrés laboral, y desarrollar habilidades de comunicación asertiva.',
+      totalDebt: 2500,
     },
     {
       id: '2',
@@ -167,6 +171,7 @@ const getMockPatient = (id: string): Patient | null => {
       medicalConditions: 'Ninguna',
       familyHistory: 'Sin antecedentes psiquiátricos familiares conocidos',
       expectations: 'Mejorar la comunicación con su pareja, aprender a resolver conflictos de manera constructiva, y fortalecer la relación.',
+      totalDebt: 0,
     },
   ];
 
@@ -263,6 +268,42 @@ export default function PatientProfilePage() {
               </Text>
             </Box>
           </HStack>
+
+          {/* Debt Alert */}
+          {patient.totalDebt && patient.totalDebt > 0 && (
+            <Card bg="orange.50" borderWidth="2px" borderColor="orange.400" shadow="md">
+              <CardBody>
+                <HStack spacing={4} align="center">
+                  <Box bg="orange.500" p={3} borderRadius="full">
+                    <AlertTriangle size={24} color="white" />
+                  </Box>
+                  <VStack spacing={1} align="start" flex="1">
+                    <Text fontSize="lg" fontWeight="bold" color="orange.800">
+                      Adeudo Pendiente
+                    </Text>
+                    <Text fontSize="sm" color="orange.700">
+                      Este paciente tiene un saldo pendiente de pago
+                    </Text>
+                  </VStack>
+                  <VStack spacing={0} align="end">
+                    <Text fontSize="xs" color="orange.700">
+                      Total adeudo:
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="orange.800">
+                      ${patient.totalDebt.toLocaleString()} MXN
+                    </Text>
+                  </VStack>
+                  <Button
+                    leftIcon={<DollarSign size={16} />}
+                    colorScheme="orange"
+                    size="md"
+                  >
+                    Registrar Pago
+                  </Button>
+                </HStack>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Patient Header Card */}
           <Card bg={bg} shadow="md">
