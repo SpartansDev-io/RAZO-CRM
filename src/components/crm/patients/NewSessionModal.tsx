@@ -32,6 +32,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface SessionFormData {
+  patientId?: string;
   sessionDate: string;
   sessionTime: string;
   sessionType: string;
@@ -45,13 +46,18 @@ interface SessionFormData {
   progress: string;
 }
 
+interface Patient {
+  id: string;
+  name: string;
+  company?: string;
+  lastSession?: Date | null;
+}
+
 interface NewSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  patient: {
-    id: string;
-    name: string;
-  };
+  patient?: Patient | null;
+  showPatientSelector?: boolean;
 }
 
 // Session types
@@ -92,12 +98,22 @@ const progressOptions = [
   { value: 'regression', label: 'Retroceso', color: 'red' },
 ];
 
+const mockPatients: Patient[] = [
+  { id: '1', name: 'María González', company: 'Tech Solutions SA', lastSession: new Date('2024-01-15') },
+  { id: '2', name: 'Carlos Rodríguez', company: 'Innovate Industries', lastSession: new Date('2024-01-14') },
+  { id: '3', name: 'Ana López', company: 'Tech Solutions SA', lastSession: new Date('2024-01-16') },
+  { id: '4', name: 'Pedro Martínez', company: 'Tech Solutions SA', lastSession: new Date('2024-01-10') },
+  { id: '5', name: 'Laura Sánchez', company: 'Innovate Industries' },
+];
+
 export default function NewSessionModal({
   isOpen,
   onClose,
   patient,
+  showPatientSelector = false,
 }: NewSessionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patient || null);
   const toast = useToast();
 
   const {
@@ -105,9 +121,11 @@ export default function NewSessionModal({
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, isValid },
   } = useForm<SessionFormData>({
     defaultValues: {
+      patientId: patient?.id,
       sessionDate: format(new Date(), 'yyyy-MM-dd'),
       sessionTime: format(new Date(), 'HH:mm'),
       sessionType: 'individual',
@@ -116,6 +134,13 @@ export default function NewSessionModal({
       progress: 'moderate',
     },
   });
+
+  const handlePatientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const patientId = e.target.value;
+    const foundPatient = mockPatients.find(p => p.id === patientId);
+    setSelectedPatient(foundPatient || null);
+    setValue('patientId', patientId);
+  };
 
   const watchedMood = watch('patientMood');
   const watchedProgress = watch('progress');
@@ -152,6 +177,7 @@ export default function NewSessionModal({
 
   const handleClose = () => {
     reset();
+    setSelectedPatient(patient || null);
     onClose();
   };
 
@@ -174,9 +200,11 @@ export default function NewSessionModal({
             <FileText size={24} color="#3182CE" />
             <Box>
               <Text>Nuevo Registro de Sesión</Text>
-              <Text fontSize="sm" color="gray.600" fontWeight="normal">
-                Paciente: {patient.name}
-              </Text>
+              {!showPatientSelector && selectedPatient && (
+                <Text fontSize="sm" color="gray.600" fontWeight="normal">
+                  Paciente: {selectedPatient.name}
+                </Text>
+              )}
             </Box>
           </HStack>
         </ModalHeader>
@@ -185,6 +213,62 @@ export default function NewSessionModal({
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalBody>
             <VStack spacing={6} align="stretch">
+              {/* Patient Selector (if enabled) */}
+              {showPatientSelector && (
+                <Box>
+                  <FormControl isRequired>
+                    <FormLabel>
+                      <HStack spacing={2}>
+                        <User size={16} />
+                        <Text>Paciente</Text>
+                      </HStack>
+                    </FormLabel>
+                    <Select
+                      placeholder="Selecciona un paciente"
+                      {...register('patientId', { required: showPatientSelector ? 'Seleccione un paciente' : false })}
+                      onChange={handlePatientChange}
+                      defaultValue={patient?.id}
+                    >
+                      {mockPatients.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} {p.company && `- ${p.company}`}
+                        </option>
+                      ))}
+                    </Select>
+                    {errors.patientId && (
+                      <Text fontSize="sm" color="red.500" mt={1}>
+                        {errors.patientId.message}
+                      </Text>
+                    )}
+                  </FormControl>
+
+                  {selectedPatient && (
+                    <Box mt={3} p={3} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+                      <Grid templateColumns="repeat(2, 1fr)" gap={2}>
+                        {selectedPatient.company && (
+                          <Box>
+                            <Text fontSize="xs" color="gray.600">Empresa</Text>
+                            <Text fontSize="sm" fontWeight="medium" color="blue.700">
+                              {selectedPatient.company}
+                            </Text>
+                          </Box>
+                        )}
+                        {selectedPatient.lastSession && (
+                          <Box>
+                            <Text fontSize="xs" color="gray.600">Última Sesión</Text>
+                            <Text fontSize="sm" fontWeight="medium" color="blue.700">
+                              {format(selectedPatient.lastSession, "dd 'de' MMMM, yyyy", { locale: es })}
+                            </Text>
+                          </Box>
+                        )}
+                      </Grid>
+                    </Box>
+                  )}
+
+                  <Divider mt={4} />
+                </Box>
+              )}
+
               {/* Session Basic Info */}
               <Box>
                 <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
@@ -394,6 +478,14 @@ export default function NewSessionModal({
                     </HStack>
                   </FormControl>
                 </VStack>
+              </Box>
+
+              {/* Confidentiality Note */}
+              <Box bg="blue.50" p={4} borderRadius="md" borderWidth="1px" borderColor="blue.200">
+                <Text fontSize="xs" color="blue.700" lineHeight="1.6">
+                  <strong>Nota de Confidencialidad:</strong> Esta información es confidencial y forma parte del expediente clínico del paciente.
+                  Asegúrate de que todos los datos sean precisos y completos. El acceso a esta información está protegido por las leyes de privacidad médica.
+                </Text>
               </Box>
             </VStack>
           </ModalBody>

@@ -34,7 +34,7 @@ import DashboardLayout from '@/components/crm/layout/DashboardLayout';
 import StatisticsCard from '@/components/crm/dashboard/StatisticsCard';
 import RecentAppointments from '@/components/crm/dashboard/RecentAppointments';
 import RecentPatients from '@/components/crm/dashboard/RecentPatients';
-import NewSessionModal from '@/components/crm/dashboard/NewSessionModal';
+import NewSessionModal from '@/components/crm/patients/NewSessionModal';
 
 export default function DashboardPage() {
   const { isOpen: isSessionModalOpen, onOpen: onSessionModalOpen, onClose: onSessionModalClose } = useDisclosure();
@@ -163,6 +163,7 @@ export default function DashboardPage() {
         <NewSessionModal
           isOpen={isSessionModalOpen}
           onClose={onSessionModalClose}
+          showPatientSelector={true}
         />
       </DashboardLayout>
     </AuthLayout>
