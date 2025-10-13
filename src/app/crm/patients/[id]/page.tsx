@@ -56,6 +56,7 @@ import AppointmentModal from '@/components/crm/calendar/AppointmentModal';
 import NewSessionModal from '@/components/crm/patients/NewSessionModal';
 import PatientAppointments from '@/components/crm/patients/PatientAppointments';
 import PatientMedicalHistory from '@/components/crm/patients/PatientMedicalHistory';
+import PaymentModal from '@/components/crm/patients/PaymentModal';
 
 interface Patient {
   id: string;
@@ -143,10 +144,16 @@ export default function PatientProfilePage() {
     onClose: onAppointmentClose 
   } = useDisclosure();
   
-  const { 
-    isOpen: isSessionOpen, 
-    onOpen: onSessionOpen, 
-    onClose: onSessionClose 
+  const {
+    isOpen: isSessionOpen,
+    onOpen: onSessionOpen,
+    onClose: onSessionClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isPaymentOpen,
+    onOpen: onPaymentOpen,
+    onClose: onPaymentClose
   } = useDisclosure();
 
   const bg = useColorModeValue('white', 'gray.800');
@@ -197,6 +204,23 @@ export default function PatientProfilePage() {
       default: return 'No especificado';
     }
   };
+
+  const pendingSessions = [
+    {
+      id: '1',
+      sessionDate: new Date('2024-01-15T11:00:00'),
+      amount: 1500,
+      contractName: 'Contrato Premium - TechCorp',
+      sessionType: 'Terapia Individual',
+    },
+    {
+      id: '2',
+      sessionDate: new Date('2024-01-08T10:30:00'),
+      amount: 1500,
+      contractName: 'Contrato Premium - TechCorp',
+      sessionType: 'Evaluación de Seguimiento',
+    },
+  ];
 
   return (
     <AuthLayout>
@@ -398,7 +422,7 @@ export default function PatientProfilePage() {
                           </Badge>
                         </HStack>
                       </VStack>
-                      <Button size="sm" colorScheme="orange" leftIcon={<DollarSign size={14} />}>
+                      <Button size="sm" colorScheme="orange" leftIcon={<DollarSign size={14} />} onClick={onPaymentOpen}>
                         Registrar Pago
                       </Button>
                     </HStack>
@@ -592,6 +616,13 @@ export default function PatientProfilePage() {
           isOpen={isSessionOpen}
           onClose={onSessionClose}
           patient={patient}
+        />
+
+        <PaymentModal
+          isOpen={isPaymentOpen}
+          onClose={onPaymentClose}
+          pendingSessions={pendingSessions}
+          patientName={patient.name}
         />
       </DashboardLayout>
     </AuthLayout>
