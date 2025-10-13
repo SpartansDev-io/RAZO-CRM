@@ -827,6 +827,8 @@ export default function CompanyProfilePage() {
           isOpen={isViewModalOpen}
           onClose={() => setIsViewModalOpen(false)}
           contract={viewingContract}
+          companyId={company.id}
+          companyName={company.name}
         />
 
         <AlertDialog
