@@ -2,6 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import ContractsList from '@/components/crm/companies/ContractsList';
+import ContractModal from '@/components/crm/companies/ContractModal';
 import {
   Box,
   VStack,
@@ -182,6 +184,26 @@ export default function CompanyProfilePage() {
   const employees = getMockEmployees(companyId);
 
   const [activeTab, setActiveTab] = useState(0);
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<any>(null);
+
+  const handleNewContract = () => {
+    setSelectedContract(null);
+    setIsContractModalOpen(true);
+  };
+
+  const handleEditContract = (contract: any) => {
+    setSelectedContract(contract);
+    setIsContractModalOpen(true);
+  };
+
+  const handleDeleteContract = (contractId: string) => {
+    console.log('Delete contract:', contractId);
+  };
+
+  const handleViewContract = (contract: any) => {
+    console.log('View contract:', contract);
+  };
 
   const bg = useColorModeValue('white', 'gray.800');
   const cardBg = useColorModeValue('gray.50', 'gray.700');
@@ -440,6 +462,12 @@ export default function CompanyProfilePage() {
                   </Tab>
                   <Tab>
                     <HStack spacing={2}>
+                      <FileText size={16} />
+                      <Text>Contratos</Text>
+                    </HStack>
+                  </Tab>
+                  <Tab>
+                    <HStack spacing={2}>
                       <Users size={16} />
                       <Text>Empleados ({employees.length})</Text>
                     </HStack>
@@ -595,6 +623,16 @@ export default function CompanyProfilePage() {
                   </TabPanel>
 
                   <TabPanel p={6}>
+                    <ContractsList
+                      companyId={company.id}
+                      onNewContract={handleNewContract}
+                      onEditContract={handleEditContract}
+                      onDeleteContract={handleDeleteContract}
+                      onViewContract={handleViewContract}
+                    />
+                  </TabPanel>
+
+                  <TabPanel p={6}>
                     <VStack spacing={4} align="stretch">
                       <HStack justify="space-between">
                         <Text fontSize="lg" fontWeight="semibold" color="gray.800">
@@ -736,6 +774,13 @@ export default function CompanyProfilePage() {
             </CardBody>
           </Card>
         </VStack>
+
+        <ContractModal
+          isOpen={isContractModalOpen}
+          onClose={() => setIsContractModalOpen(false)}
+          contract={selectedContract}
+          companyId={company.id}
+        />
       </DashboardLayout>
     </AuthLayout>
   );
