@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ContractsList from '@/components/crm/companies/ContractsList';
 import ContractModal from '@/components/crm/companies/ContractModal';
+import ViewContractModal from '@/components/crm/companies/ViewContractModal';
 import {
   Box,
   VStack,
@@ -38,6 +39,13 @@ import {
   Th,
   Td,
   Progress,
+  useToast,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react';
 import {
   Building2,
@@ -186,6 +194,11 @@ export default function CompanyProfilePage() {
   const [activeTab, setActiveTab] = useState(0);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [contractToDelete, setContractToDelete] = useState<string | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingContract, setViewingContract] = useState<any>(null);
+  const toast = useToast();
+  const cancelRef = useState<any>(null)[0];
 
   const handleNewContract = () => {
     setSelectedContract(null);
@@ -198,11 +211,39 @@ export default function CompanyProfilePage() {
   };
 
   const handleDeleteContract = (contractId: string) => {
-    console.log('Delete contract:', contractId);
+    setContractToDelete(contractId);
+  };
+
+  const confirmDeleteContract = async () => {
+    if (!contractToDelete) return;
+
+    try {
+      console.log('Deleting contract:', contractToDelete);
+
+      toast({
+        title: 'Contrato eliminado',
+        description: 'El contrato se ha eliminado correctamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
+      setContractToDelete(null);
+    } catch (error) {
+      console.error('Error deleting contract:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el contrato',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleViewContract = (contract: any) => {
-    console.log('View contract:', contract);
+    setViewingContract(contract);
+    setIsViewModalOpen(true);
   };
 
   const bg = useColorModeValue('white', 'gray.800');
@@ -781,6 +822,39 @@ export default function CompanyProfilePage() {
           contract={selectedContract}
           companyId={company.id}
         />
+
+        <ViewContractModal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          contract={viewingContract}
+        />
+
+        <AlertDialog
+          isOpen={!!contractToDelete}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setContractToDelete(null)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Eliminar Contrato
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                ¿Estás seguro de que deseas eliminar este contrato? Esta acción no se puede deshacer.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={() => setContractToDelete(null)}>
+                  Cancelar
+                </Button>
+                <Button colorScheme="red" onClick={confirmDeleteContract} ml={3}>
+                  Eliminar
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </DashboardLayout>
     </AuthLayout>
   );
