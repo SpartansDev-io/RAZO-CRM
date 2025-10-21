@@ -1,6 +1,3 @@
-// Prisma Schema - Sistema CRM Completo
-// Compatible con Supabase PostgreSQL
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,90 +7,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// 1. USER PROFILES (Perfiles de Usuario)
-// ============================================
-
 model UserProfile {
-  id                   String    @id @db.Uuid
-  fullName             String    @map("full_name")
-  email                String    @unique
-  phone                String?
-  role                 String    @default("therapist") // admin, therapist, assistant
-  specialty            String?
-  licenseNumber        String?   @map("license_number")
-  bio                  String?
-  avatarUrl            String?   @map("avatar_url")
-  notificationsEnabled Boolean   @default(true) @map("notifications_enabled")
-  isActive             Boolean   @default(true) @map("is_active")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  companiesCreated             Company[]                    @relation("CompanyCreatedBy")
-  companiesUpdated             Company[]                    @relation("CompanyUpdatedBy")
-  contractsCreated             Contract[]                   @relation("ContractCreatedBy")
-  contractsUpdated             Contract[]                   @relation("ContractUpdatedBy")
-  patientsCreated              Patient[]                    @relation("PatientCreatedBy")
-  patientsUpdated              Patient[]                    @relation("PatientUpdatedBy")
-  patientsPrimary              Patient[]                    @relation("PatientPrimaryTherapist")
-  sessionsAsTherapist          Session[]                    @relation("SessionTherapist")
-  sessionsCreated              Session[]                    @relation("SessionCreatedBy")
-  sessionsUpdated              Session[]                    @relation("SessionUpdatedBy")
-  sessionsCancelled            Session[]                    @relation("SessionCancelledBy")
-  notifications                Notification[]
-  tasksAssigned                Task[]                       @relation("TaskAssignedTo")
-  tasksCreated                 Task[]                       @relation("TaskCreatedBy")
-  clinicalNotes                ClinicalNote[]
-  therapeuticGoals             TherapeuticGoal[]
-  therapistAvailability        TherapistAvailability[]
-  attachmentsUploaded          PatientAttachment[]
-  paymentTransactionsProcessed PaymentTransaction[]
-  diagnoses                    Diagnosis[]
-  documentTemplatesCreated     DocumentTemplate[]
-  systemSettingsUpdated        SystemSetting[]
-  auditLogs                    AuditLog[]
-  reportsPaid                  MonthlyContractReport[]      @relation("ReportPaidBy")
-  reportsGenerated             MonthlyContractReport[]      @relation("ReportGeneratedBy")
-  reportsSent                  MonthlyContractReport[]      @relation("ReportSentBy")
+  id                               String                  @id @db.Uuid
+  fullName                         String                  @map("full_name")
+  email                            String                  @unique
+  phone                            String?
+  role                             String                  @default("therapist")
+  specialty                        String?
+  licenseNumber                    String?                 @map("license_number")
+  bio                              String?
+  avatarUrl                        String?                 @map("avatar_url")
+  notificationsEnabled             Boolean                 @default(true) @map("notifications_enabled")
+  isActive                         Boolean                 @default(true) @map("is_active")
+  createdAt                        DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                        DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  auditLogs                        AuditLog[]
+  clinicalNotes                    ClinicalNote[]
+  companiesCreated                 Company[]               @relation("CompanyCreatedBy")
+  companiesUpdated                 Company[]               @relation("CompanyUpdatedBy")
+  contractsCreated                 Contract[]              @relation("ContractCreatedBy")
+  contractsUpdated                 Contract[]              @relation("ContractUpdatedBy")
+  diagnoses                        Diagnosis[]
+  documentTemplatesCreated         DocumentTemplate[]
+  reportsGenerated                 MonthlyContractReport[] @relation("ReportGeneratedBy")
+  reportsPaid                      MonthlyContractReport[] @relation("ReportPaidBy")
+  reportsSent                      MonthlyContractReport[] @relation("ReportSentBy")
   monthlyReportSessionsAsTherapist MonthlyReportSession[]
+  notifications                    Notification[]
+  attachmentsUploaded              PatientAttachment[]
+  patientsCreated                  Patient[]               @relation("PatientCreatedBy")
+  patientsPrimary                  Patient[]               @relation("PatientPrimaryTherapist")
+  patientsUpdated                  Patient[]               @relation("PatientUpdatedBy")
+  paymentTransactionsProcessed     PaymentTransaction[]
+  sessionsCancelled                Session[]               @relation("SessionCancelledBy")
+  sessionsCreated                  Session[]               @relation("SessionCreatedBy")
+  sessionsAsTherapist              Session[]               @relation("SessionTherapist")
+  sessionsUpdated                  Session[]               @relation("SessionUpdatedBy")
+  systemSettingsUpdated            SystemSetting[]
+  tasksAssigned                    Task[]                  @relation("TaskAssignedTo")
+  tasksCreated                     Task[]                  @relation("TaskCreatedBy")
+  therapeuticGoals                 TherapeuticGoal[]
+  therapistAvailability            TherapistAvailability[]
 
   @@map("user_profiles")
 }
 
-// ============================================
-// 2. COMPANIES (Empresas Cliente)
-// ============================================
-
 model Company {
-  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                   String
-  email                  String    @unique
-  phone                  String?
-  address                String?
-  website                String?
-  industry               String?
-  taxId                  String?   @map("tax_id")
-  billingContactName     String?   @map("billing_contact_name")
-  billingContactEmail    String?   @map("billing_contact_email")
-  billingContactPhone    String?   @map("billing_contact_phone")
-  employeeCount          Int       @default(0) @map("employee_count")
-  activeContractsCount   Int       @default(0) @map("active_contracts_count")
-  isActive               Boolean   @default(true) @map("is_active")
-  notes                  String?
-  createdBy              String?   @map("created_by") @db.Uuid
-  updatedBy              String?   @map("updated_by") @db.Uuid
-  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt              DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  // Relations
-  createdByUser      UserProfile?            @relation("CompanyCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByUser      UserProfile?            @relation("CompanyUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
-  contracts          Contract[]
-  patients           Patient[]
-  monthlyReports     MonthlyContractReport[]
-  companyEmployees   CompanyEmployee[]
+  id                   String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  email                String                  @unique
+  phone                String?
+  address              String?
+  website              String?
+  industry             String?
+  taxId                String?                 @map("tax_id")
+  billingContactName   String?                 @map("billing_contact_name")
+  billingContactEmail  String?                 @map("billing_contact_email")
+  billingContactPhone  String?                 @map("billing_contact_phone")
+  employeeCount        Int                     @default(0) @map("employee_count")
+  activeContractsCount Int                     @default(0) @map("active_contracts_count")
+  isActive             Boolean                 @default(true) @map("is_active")
+  notes                String?
+  createdBy            String?                 @map("created_by") @db.Uuid
+  updatedBy            String?                 @map("updated_by") @db.Uuid
+  createdAt            DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt            DateTime?               @map("deleted_at") @db.Timestamptz(6)
+  createdByUser        UserProfile?            @relation("CompanyCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser        UserProfile?            @relation("CompanyUpdatedBy", fields: [updatedBy], references: [id])
+  companyEmployees     CompanyEmployee[]
+  contracts            Contract[]
+  monthlyReports       MonthlyContractReport[]
+  patients             Patient[]
 
   @@index([name])
   @@index([email])
@@ -102,43 +87,37 @@ model Company {
   @@map("companies")
 }
 
-// ============================================
-// 3. CONTRACTS (Contratos de Servicio)
-// ============================================
-
 model Contract {
-  id                            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  companyId                     String    @map("company_id") @db.Uuid
-  contractName                  String    @map("contract_name")
-  contractNumber                String?   @unique @map("contract_number")
-  startDate                     DateTime  @map("start_date") @db.Date
-  endDate                       DateTime  @map("end_date") @db.Date
-  costPerSession                Decimal   @map("cost_per_session") @db.Decimal(10, 2)
-  monthlyLimit                  Decimal?  @map("monthly_limit") @db.Decimal(10, 2)
-  paymentFrequency              String    @default("monthly") @map("payment_frequency") // monthly, quarterly, annual
-  status                        String    @default("active") // draft, active, expired, cancelled, suspended
-  autoRenew                     Boolean   @default(false) @map("auto_renew")
-  renewalNoticeDays             Int       @default(30) @map("renewal_notice_days")
-  notes                         String?
-  attachmentUrl                 String?   @map("attachment_url")
-  sendRenewalNotification       Boolean   @default(true) @map("send_renewal_notification")
-  lastRenewalNotificationSent   DateTime? @map("last_renewal_notification_sent") @db.Timestamptz(6)
-  billingEmail                  String?   @map("billing_email")
-  termsAcceptedAt               DateTime? @map("terms_accepted_at") @db.Timestamptz(6)
-  termsAcceptedBy               String?   @map("terms_accepted_by")
-  createdBy                     String?   @map("created_by") @db.Uuid
-  updatedBy                     String?   @map("updated_by") @db.Uuid
-  createdAt                     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt                     DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  // Relations
-  company            Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdByUser      UserProfile?              @relation("ContractCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByUser      UserProfile?              @relation("ContractUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
-  sessions           Session[]
-  monthlyReports     MonthlyContractReport[]
-  paymentTransactions PaymentTransaction[]
+  id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId                   String                  @map("company_id") @db.Uuid
+  contractName                String                  @map("contract_name")
+  contractNumber              String?                 @unique @map("contract_number")
+  startDate                   DateTime                @map("start_date") @db.Date
+  endDate                     DateTime                @map("end_date") @db.Date
+  costPerSession              Decimal                 @map("cost_per_session") @db.Decimal(10, 2)
+  monthlyLimit                Decimal?                @map("monthly_limit") @db.Decimal(10, 2)
+  paymentFrequency            String                  @default("monthly") @map("payment_frequency")
+  status                      String                  @default("active")
+  autoRenew                   Boolean                 @default(false) @map("auto_renew")
+  renewalNoticeDays           Int                     @default(30) @map("renewal_notice_days")
+  notes                       String?
+  attachmentUrl               String?                 @map("attachment_url")
+  sendRenewalNotification     Boolean                 @default(true) @map("send_renewal_notification")
+  lastRenewalNotificationSent DateTime?               @map("last_renewal_notification_sent") @db.Timestamptz(6)
+  billingEmail                String?                 @map("billing_email")
+  termsAcceptedAt             DateTime?               @map("terms_accepted_at") @db.Timestamptz(6)
+  termsAcceptedBy             String?                 @map("terms_accepted_by")
+  createdBy                   String?                 @map("created_by") @db.Uuid
+  updatedBy                   String?                 @map("updated_by") @db.Uuid
+  createdAt                   DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                   DateTime?               @map("deleted_at") @db.Timestamptz(6)
+  company                     Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdByUser               UserProfile?            @relation("ContractCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser               UserProfile?            @relation("ContractUpdatedBy", fields: [updatedBy], references: [id])
+  monthlyReports              MonthlyContractReport[]
+  paymentTransactions         PaymentTransaction[]
+  sessions                    Session[]
 
   @@index([companyId])
   @@index([status])
@@ -147,84 +126,78 @@ model Contract {
   @@map("contracts")
 }
 
-// ============================================
-// 4. PATIENTS (Pacientes)
-// ============================================
-
 model Patient {
-  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                        String
-  email                       String    @unique
-  phone                       String
-  birthDate                   DateTime  @map("birth_date") @db.Date
-  gender                      String    // M, F, Other, Prefer not to say
-  companyId                   String?   @map("company_id") @db.Uuid
-  companyName                 String?   @map("company_name")
-  occupation                  String?
-  address                     String?
-  city                        String?
-  state                       String?
-  zipCode                     String?   @map("zip_code")
-  emergencyContactName        String    @map("emergency_contact_name")
-  emergencyContactRelationship String?  @map("emergency_contact_relationship")
-  emergencyContactPhone       String    @map("emergency_contact_phone")
-  maritalStatus               String?   @map("marital_status") // single, married, divorced, widowed, separated, other
-  educationLevel              String?   @map("education_level")
-  nationality                 String?
-  religion                    String?
-  livingSituation             String?   @map("living_situation")
-  hasChildren                 Boolean   @default(false) @map("has_children")
-  childrenCount               Int       @default(0) @map("children_count")
-  primaryTherapistId          String?   @map("primary_therapist_id") @db.Uuid
-  therapyType                 String    @map("therapy_type")
-  referredBy                  String?   @map("referred_by")
-  referralSource              String?   @map("referral_source")
-  reasonForTherapy            String    @map("reason_for_therapy")
-  therapeuticGoalsText        String?   @map("therapeutic_goals")
-  expectations                String?
-  previousTherapy             Boolean   @default(false) @map("previous_therapy")
-  previousTherapyDetails      String?   @map("previous_therapy_details")
-  currentMedications          String?   @map("current_medications")
-  allergies                   String?
-  medicalConditions           String?   @map("medical_conditions")
-  psychiatricDiagnoses        String?   @map("psychiatric_diagnoses")
-  familyPsychiatricHistory    String?   @map("family_psychiatric_history")
-  substanceUse                String?   @map("substance_use")
-  riskAssessment              String?   @map("risk_assessment")
-  status                      String    @default("active") // active, inactive, discharged, pending, on_hold
-  dischargeDate               DateTime? @map("discharge_date") @db.Date
-  dischargeReason             String?   @map("discharge_reason")
-  consentSigned               Boolean   @default(false) @map("consent_signed")
-  consentDate                 DateTime? @map("consent_date") @db.Date
-  privacyNoticeAccepted       Boolean   @default(false) @map("privacy_notice_accepted")
-  photoUrl                    String?   @map("photo_url")
-  preferredContactMethod      String?   @map("preferred_contact_method") // email, phone, sms, whatsapp
-  preferredLanguage           String    @default("es") @map("preferred_language")
-  insuranceProvider           String?   @map("insurance_provider")
-  insurancePolicyNumber       String?   @map("insurance_policy_number")
-  insuranceValidUntil         DateTime? @map("insurance_valid_until") @db.Date
-  notes                       String?
-  createdBy                   String?   @map("created_by") @db.Uuid
-  updatedBy                   String?   @map("updated_by") @db.Uuid
-  createdAt                   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt                   DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  // Relations
-  company                Company?                 @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  primaryTherapist       UserProfile?             @relation("PatientPrimaryTherapist", fields: [primaryTherapistId], references: [id], onDelete: SetNull)
-  createdByUser          UserProfile?             @relation("PatientCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByUser          UserProfile?             @relation("PatientUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
-  sessions               Session[]
-  attachments            PatientAttachment[]
-  clinicalNotes          ClinicalNote[]
-  therapeuticGoals       TherapeuticGoal[]
-  appointmentReminders   AppointmentReminder[]
-  paymentTransactions    PaymentTransaction[]
-  diagnoses              Diagnosis[]
-  monthlyReportSessions  MonthlyReportSession[]
-  emergencyContacts      PatientEmergencyContact[]
-  companyEmployee        CompanyEmployee[]
+  id                           String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                         String
+  email                        String                    @unique
+  phone                        String
+  birthDate                    DateTime                  @map("birth_date") @db.Date
+  gender                       String
+  companyId                    String?                   @map("company_id") @db.Uuid
+  companyName                  String?                   @map("company_name")
+  occupation                   String?
+  address                      String?
+  city                         String?
+  state                        String?
+  zipCode                      String?                   @map("zip_code")
+  emergencyContactName         String                    @map("emergency_contact_name")
+  emergencyContactRelationship String?                   @map("emergency_contact_relationship")
+  emergencyContactPhone        String                    @map("emergency_contact_phone")
+  maritalStatus                String?                   @map("marital_status")
+  educationLevel               String?                   @map("education_level")
+  nationality                  String?
+  religion                     String?
+  livingSituation              String?                   @map("living_situation")
+  hasChildren                  Boolean                   @default(false) @map("has_children")
+  childrenCount                Int                       @default(0) @map("children_count")
+  primaryTherapistId           String?                   @map("primary_therapist_id") @db.Uuid
+  therapyType                  String                    @map("therapy_type")
+  referredBy                   String?                   @map("referred_by")
+  referralSource               String?                   @map("referral_source")
+  reasonForTherapy             String                    @map("reason_for_therapy")
+  therapeuticGoalsText         String?                   @map("therapeutic_goals")
+  expectations                 String?
+  previousTherapy              Boolean                   @default(false) @map("previous_therapy")
+  previousTherapyDetails       String?                   @map("previous_therapy_details")
+  currentMedications           String?                   @map("current_medications")
+  allergies                    String?
+  medicalConditions            String?                   @map("medical_conditions")
+  psychiatricDiagnoses         String?                   @map("psychiatric_diagnoses")
+  familyPsychiatricHistory     String?                   @map("family_psychiatric_history")
+  substanceUse                 String?                   @map("substance_use")
+  riskAssessment               String?                   @map("risk_assessment")
+  status                       String                    @default("active")
+  dischargeDate                DateTime?                 @map("discharge_date") @db.Date
+  dischargeReason              String?                   @map("discharge_reason")
+  consentSigned                Boolean                   @default(false) @map("consent_signed")
+  consentDate                  DateTime?                 @map("consent_date") @db.Date
+  privacyNoticeAccepted        Boolean                   @default(false) @map("privacy_notice_accepted")
+  photoUrl                     String?                   @map("photo_url")
+  preferredContactMethod       String?                   @map("preferred_contact_method")
+  preferredLanguage            String                    @default("es") @map("preferred_language")
+  insuranceProvider            String?                   @map("insurance_provider")
+  insurancePolicyNumber        String?                   @map("insurance_policy_number")
+  insuranceValidUntil          DateTime?                 @map("insurance_valid_until") @db.Date
+  notes                        String?
+  createdBy                    String?                   @map("created_by") @db.Uuid
+  updatedBy                    String?                   @map("updated_by") @db.Uuid
+  createdAt                    DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                    DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                    DateTime?                 @map("deleted_at") @db.Timestamptz(6)
+  appointmentReminders         AppointmentReminder[]
+  clinicalNotes                ClinicalNote[]
+  companyEmployee              CompanyEmployee[]
+  diagnoses                    Diagnosis[]
+  monthlyReportSessions        MonthlyReportSession[]
+  attachments                  PatientAttachment[]
+  emergencyContacts            PatientEmergencyContact[]
+  company                      Company?                  @relation(fields: [companyId], references: [id])
+  createdByUser                UserProfile?              @relation("PatientCreatedBy", fields: [createdBy], references: [id])
+  primaryTherapist             UserProfile?              @relation("PatientPrimaryTherapist", fields: [primaryTherapistId], references: [id])
+  updatedByUser                UserProfile?              @relation("PatientUpdatedBy", fields: [updatedBy], references: [id])
+  paymentTransactions          PaymentTransaction[]
+  sessions                     Session[]
+  therapeuticGoals             TherapeuticGoal[]
 
   @@index([name])
   @@index([email])
@@ -235,26 +208,20 @@ model Patient {
   @@map("patients")
 }
 
-// ============================================
-// 5. PATIENT ATTACHMENTS (Archivos)
-// ============================================
-
 model PatientAttachment {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId      String   @map("patient_id") @db.Uuid
-  fileName       String   @map("file_name")
-  fileUrl        String   @map("file_url")
-  fileType       String   @map("file_type") // document, image, consent, medical_record, other
-  fileSizeKb     Int?     @map("file_size_kb")
-  mimeType       String?  @map("mime_type")
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId      String       @map("patient_id") @db.Uuid
+  fileName       String       @map("file_name")
+  fileUrl        String       @map("file_url")
+  fileType       String       @map("file_type")
+  fileSizeKb     Int?         @map("file_size_kb")
+  mimeType       String?      @map("mime_type")
   description    String?
-  isConfidential Boolean  @default(true) @map("is_confidential")
-  uploadedBy     String?  @map("uploaded_by") @db.Uuid
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  uploadedByUser UserProfile? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+  isConfidential Boolean      @default(true) @map("is_confidential")
+  uploadedBy     String?      @map("uploaded_by") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  patient        Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  uploadedByUser UserProfile? @relation(fields: [uploadedBy], references: [id])
 
   @@index([patientId])
   @@index([fileType])
@@ -262,63 +229,57 @@ model PatientAttachment {
   @@map("patient_attachments")
 }
 
-// ============================================
-// 6. SESSIONS (Sesiones Terapéuticas)
-// ============================================
-
 model Session {
-  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId               String    @map("patient_id") @db.Uuid
-  therapistId             String?   @map("therapist_id") @db.Uuid
-  sessionNumber           Int?      @map("session_number")
-  sessionDate             DateTime  @map("session_date") @db.Timestamptz(6)
-  sessionDurationMinutes  Int       @default(60) @map("session_duration_minutes")
-  sessionType             String    @map("session_type")
-  sessionModality         String    @default("in_person") @map("session_modality") // in_person, online, phone, home_visit
-  appointmentType         String?   @map("appointment_type") // presencial, videollamada, visita
-  meetLink                String?   @map("meet_link")
-  locationAddress         String?   @map("location_address")
-  sessionCost             Decimal   @map("session_cost") @db.Decimal(10, 2)
-  billingType             String    @default("direct") @map("billing_type") // contract, direct, insurance, pro_bono
-  contractId              String?   @map("contract_id") @db.Uuid
-  paymentStatus           String    @default("pending") @map("payment_status") // pending, partial, paid, written_off
-  paidAmount              Decimal   @default(0) @map("paid_amount") @db.Decimal(10, 2)
-  paymentDate             DateTime? @map("payment_date") @db.Date
-  paymentMethod           String?   @map("payment_method") // cash, card, transfer, check, other
-  paymentReference        String?   @map("payment_reference")
-  sessionNotes            String?   @map("session_notes")
-  progressNotes           String?   @map("progress_notes")
-  interventions           String?
-  homeworkAssigned        String?   @map("homework_assigned")
-  nextSessionPlan         String?   @map("next_session_plan")
-  riskLevel               String?   @map("risk_level") // low, medium, high, crisis
-  status                  String    @default("scheduled") // scheduled, confirmed, in_progress, completed, cancelled, no_show, rescheduled
-  confirmedAt             DateTime? @map("confirmed_at") @db.Timestamptz(6)
-  confirmedBy             String?   @map("confirmed_by")
-  remindersSent           Int       @default(0) @map("reminders_sent")
-  lastReminderSentAt      DateTime? @map("last_reminder_sent_at") @db.Timestamptz(6)
-  cancelledReason         String?   @map("cancelled_reason")
-  cancelledBy             String?   @map("cancelled_by") @db.Uuid
-  cancelledAt             DateTime? @map("cancelled_at") @db.Timestamptz(6)
-  createdBy               String?   @map("created_by") @db.Uuid
-  updatedBy               String?   @map("updated_by") @db.Uuid
-  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt               DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  // Relations
-  patient               Patient                  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  therapist             UserProfile?             @relation("SessionTherapist", fields: [therapistId], references: [id], onDelete: SetNull)
-  contract              Contract?                @relation(fields: [contractId], references: [id], onDelete: SetNull)
-  cancelledByUser       UserProfile?             @relation("SessionCancelledBy", fields: [cancelledBy], references: [id], onDelete: SetNull)
-  createdByUser         UserProfile?             @relation("SessionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByUser         UserProfile?             @relation("SessionUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
-  clinicalNotes         ClinicalNote[]
-  appointmentReminders  AppointmentReminder[]
-  paymentTransactions   PaymentTransaction[]
-  diagnoses             Diagnosis[]
-  monthlyReportSessions MonthlyReportSession[]
-  sessionTechniques     SessionTechnique[]
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId              String                 @map("patient_id") @db.Uuid
+  therapistId            String?                @map("therapist_id") @db.Uuid
+  sessionNumber          Int?                   @map("session_number")
+  sessionDate            DateTime               @map("session_date") @db.Timestamptz(6)
+  sessionDurationMinutes Int                    @default(60) @map("session_duration_minutes")
+  sessionType            String                 @map("session_type")
+  sessionModality        String                 @default("in_person") @map("session_modality")
+  appointmentType        String?                @map("appointment_type")
+  meetLink               String?                @map("meet_link")
+  locationAddress        String?                @map("location_address")
+  sessionCost            Decimal                @map("session_cost") @db.Decimal(10, 2)
+  billingType            String                 @default("direct") @map("billing_type")
+  contractId             String?                @map("contract_id") @db.Uuid
+  paymentStatus          String                 @default("pending") @map("payment_status")
+  paidAmount             Decimal                @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  paymentDate            DateTime?              @map("payment_date") @db.Date
+  paymentMethod          String?                @map("payment_method")
+  paymentReference       String?                @map("payment_reference")
+  sessionNotes           String?                @map("session_notes")
+  progressNotes          String?                @map("progress_notes")
+  interventions          String?
+  homeworkAssigned       String?                @map("homework_assigned")
+  nextSessionPlan        String?                @map("next_session_plan")
+  riskLevel              String?                @map("risk_level")
+  status                 String                 @default("scheduled")
+  confirmedAt            DateTime?              @map("confirmed_at") @db.Timestamptz(6)
+  confirmedBy            String?                @map("confirmed_by")
+  remindersSent          Int                    @default(0) @map("reminders_sent")
+  lastReminderSentAt     DateTime?              @map("last_reminder_sent_at") @db.Timestamptz(6)
+  cancelledReason        String?                @map("cancelled_reason")
+  cancelledBy            String?                @map("cancelled_by") @db.Uuid
+  cancelledAt            DateTime?              @map("cancelled_at") @db.Timestamptz(6)
+  createdBy              String?                @map("created_by") @db.Uuid
+  updatedBy              String?                @map("updated_by") @db.Uuid
+  createdAt              DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime?              @map("deleted_at") @db.Timestamptz(6)
+  appointmentReminders   AppointmentReminder[]
+  clinicalNotes          ClinicalNote[]
+  diagnoses              Diagnosis[]
+  monthlyReportSessions  MonthlyReportSession[]
+  paymentTransactions    PaymentTransaction[]
+  sessionTechniques      SessionTechnique[]
+  cancelledByUser        UserProfile?           @relation("SessionCancelledBy", fields: [cancelledBy], references: [id])
+  contract               Contract?              @relation(fields: [contractId], references: [id])
+  createdByUser          UserProfile?           @relation("SessionCreatedBy", fields: [createdBy], references: [id])
+  patient                Patient                @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  therapist              UserProfile?           @relation("SessionTherapist", fields: [therapistId], references: [id])
+  updatedByUser          UserProfile?           @relation("SessionUpdatedBy", fields: [updatedBy], references: [id])
 
   @@index([patientId])
   @@index([therapistId])
@@ -331,46 +292,40 @@ model Session {
   @@map("sessions")
 }
 
-// ============================================
-// 7. MONTHLY CONTRACT REPORTS
-// ============================================
-
 model MonthlyContractReport {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  contractId       String    @map("contract_id") @db.Uuid
-  companyId        String    @map("company_id") @db.Uuid
-  reportMonth      Int       @map("report_month")
-  reportYear       Int       @map("report_year")
-  periodStartDate  DateTime  @map("period_start_date") @db.Date
-  periodEndDate    DateTime  @map("period_end_date") @db.Date
-  totalSessions    Int       @default(0) @map("total_sessions")
-  totalPatients    Int       @default(0) @map("total_patients")
-  totalAmount      Decimal   @default(0) @map("total_amount") @db.Decimal(10, 2)
-  paymentStatus    String    @default("pending") @map("payment_status") // pending, paid, overdue
-  invoiceNumber    String?   @map("invoice_number")
-  invoiceDate      DateTime? @map("invoice_date") @db.Date
-  dueDate          DateTime? @map("due_date") @db.Date
-  paidAmount       Decimal   @default(0) @map("paid_amount") @db.Decimal(10, 2)
-  paidAt           DateTime? @map("paid_at") @db.Timestamptz(6)
-  paidBy           String?   @map("paid_by") @db.Uuid
-  paymentReference String?   @map("payment_reference")
-  paymentMethod    String?   @map("payment_method") // transfer, cash, check, card
-  sentToCompanyAt  DateTime? @map("sent_to_company_at") @db.Timestamptz(6)
-  sentBy           String?   @map("sent_by") @db.Uuid
-  pdfUrl           String?   @map("pdf_url")
-  notes            String?
-  generatedBy      String?   @map("generated_by") @db.Uuid
-  generatedAt      DateTime  @default(now()) @map("generated_at") @db.Timestamptz(6)
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  contract          Contract               @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  company           Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  paidByUser        UserProfile?           @relation("ReportPaidBy", fields: [paidBy], references: [id], onDelete: SetNull)
-  generatedByUser   UserProfile?           @relation("ReportGeneratedBy", fields: [generatedBy], references: [id], onDelete: SetNull)
-  sentByUser        UserProfile?           @relation("ReportSentBy", fields: [sentBy], references: [id], onDelete: SetNull)
-  reportSessions    MonthlyReportSession[]
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contractId          String                 @map("contract_id") @db.Uuid
+  companyId           String                 @map("company_id") @db.Uuid
+  reportMonth         Int                    @map("report_month")
+  reportYear          Int                    @map("report_year")
+  periodStartDate     DateTime               @map("period_start_date") @db.Date
+  periodEndDate       DateTime               @map("period_end_date") @db.Date
+  totalSessions       Int                    @default(0) @map("total_sessions")
+  totalPatients       Int                    @default(0) @map("total_patients")
+  totalAmount         Decimal                @default(0) @map("total_amount") @db.Decimal(10, 2)
+  paymentStatus       String                 @default("pending") @map("payment_status")
+  invoiceNumber       String?                @map("invoice_number")
+  invoiceDate         DateTime?              @map("invoice_date") @db.Date
+  dueDate             DateTime?              @map("due_date") @db.Date
+  paidAmount          Decimal                @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  paidAt              DateTime?              @map("paid_at") @db.Timestamptz(6)
+  paidBy              String?                @map("paid_by") @db.Uuid
+  paymentReference    String?                @map("payment_reference")
+  paymentMethod       String?                @map("payment_method")
+  sentToCompanyAt     DateTime?              @map("sent_to_company_at") @db.Timestamptz(6)
+  sentBy              String?                @map("sent_by") @db.Uuid
+  pdfUrl              String?                @map("pdf_url")
+  notes               String?
+  generatedBy         String?                @map("generated_by") @db.Uuid
+  generatedAt         DateTime               @default(now()) @map("generated_at") @db.Timestamptz(6)
+  createdAt           DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company             Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contract            Contract               @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  generatedByUser     UserProfile?           @relation("ReportGeneratedBy", fields: [generatedBy], references: [id])
+  paidByUser          UserProfile?           @relation("ReportPaidBy", fields: [paidBy], references: [id])
+  sentByUser          UserProfile?           @relation("ReportSentBy", fields: [sentBy], references: [id])
+  reportSessions      MonthlyReportSession[]
   paymentTransactions PaymentTransaction[]
 
   @@unique([contractId, reportMonth, reportYear])
@@ -382,28 +337,22 @@ model MonthlyContractReport {
   @@map("monthly_contract_reports")
 }
 
-// ============================================
-// 8. MONTHLY REPORT SESSIONS
-// ============================================
-
 model MonthlyReportSession {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  reportId      String   @map("report_id") @db.Uuid
-  sessionId     String   @map("session_id") @db.Uuid
-  patientId     String   @map("patient_id") @db.Uuid
-  patientName   String   @map("patient_name")
-  therapistId   String?  @map("therapist_id") @db.Uuid
-  therapistName String?  @map("therapist_name")
-  sessionDate   DateTime @map("session_date") @db.Timestamptz(6)
-  sessionType   String   @map("session_type")
-  sessionCost   Decimal  @map("session_cost") @db.Decimal(10, 2)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  report    MonthlyContractReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  session   Session               @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  patient   Patient               @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  therapist UserProfile?          @relation(fields: [therapistId], references: [id], onDelete: SetNull)
+  id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reportId      String                @map("report_id") @db.Uuid
+  sessionId     String                @map("session_id") @db.Uuid
+  patientId     String                @map("patient_id") @db.Uuid
+  patientName   String                @map("patient_name")
+  therapistId   String?               @map("therapist_id") @db.Uuid
+  therapistName String?               @map("therapist_name")
+  sessionDate   DateTime              @map("session_date") @db.Timestamptz(6)
+  sessionType   String                @map("session_type")
+  sessionCost   Decimal               @map("session_cost") @db.Decimal(10, 2)
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  patient       Patient               @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  report        MonthlyContractReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  session       Session               @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  therapist     UserProfile?          @relation(fields: [therapistId], references: [id])
 
   @@unique([reportId, sessionId])
   @@index([reportId])
@@ -413,30 +362,24 @@ model MonthlyReportSession {
   @@map("monthly_report_sessions")
 }
 
-// ============================================
-// 9. NOTIFICATIONS (Notificaciones)
-// ============================================
-
 model Notification {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId             String    @map("user_id") @db.Uuid
-  title              String
-  message            String
-  type               String    // info, warning, error, success, reminder, task, payment, appointment
-  priority           String    @default("normal") // low, normal, high, urgent
-  relatedEntityType  String?   @map("related_entity_type") // patient, session, contract, company, task, payment
-  relatedEntityId    String?   @map("related_entity_id") @db.Uuid
-  isRead             Boolean   @default(false) @map("is_read")
-  isArchived         Boolean   @default(false) @map("is_archived")
-  readAt             DateTime? @map("read_at") @db.Timestamptz(6)
-  actionUrl          String?   @map("action_url")
-  actionLabel        String?   @map("action_label")
-  metadata           Json?
-  expiresAt          DateTime? @map("expires_at") @db.Timestamptz(6)
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String      @map("user_id") @db.Uuid
+  title             String
+  message           String
+  type              String
+  priority          String      @default("normal")
+  relatedEntityType String?     @map("related_entity_type")
+  relatedEntityId   String?     @map("related_entity_id") @db.Uuid
+  isRead            Boolean     @default(false) @map("is_read")
+  isArchived        Boolean     @default(false) @map("is_archived")
+  readAt            DateTime?   @map("read_at") @db.Timestamptz(6)
+  actionUrl         String?     @map("action_url")
+  actionLabel       String?     @map("action_label")
+  metadata          Json?
+  expiresAt         DateTime?   @map("expires_at") @db.Timestamptz(6)
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  user              UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, isRead])
@@ -446,29 +389,23 @@ model Notification {
   @@map("notifications")
 }
 
-// ============================================
-// 10. TASKS (Tareas)
-// ============================================
-
 model Task {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  assignedTo         String    @map("assigned_to") @db.Uuid
-  createdBy          String    @map("created_by") @db.Uuid
-  title              String
-  description        String?
-  priority           String    @default("medium") // low, medium, high, urgent
-  status             String    @default("pending") // pending, in_progress, completed, cancelled
-  relatedEntityType  String?   @map("related_entity_type") // patient, session, contract, company
-  relatedEntityId    String?   @map("related_entity_id") @db.Uuid
-  dueDate            DateTime? @map("due_date") @db.Timestamptz(6)
-  completedAt        DateTime? @map("completed_at") @db.Timestamptz(6)
-  tags               String[]
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  assignedToUser UserProfile @relation("TaskAssignedTo", fields: [assignedTo], references: [id], onDelete: Cascade)
-  createdByUser  UserProfile @relation("TaskCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assignedTo        String      @map("assigned_to") @db.Uuid
+  createdBy         String      @map("created_by") @db.Uuid
+  title             String
+  description       String?
+  priority          String      @default("medium")
+  status            String      @default("pending")
+  relatedEntityType String?     @map("related_entity_type")
+  relatedEntityId   String?     @map("related_entity_id") @db.Uuid
+  dueDate           DateTime?   @map("due_date") @db.Timestamptz(6)
+  completedAt       DateTime?   @map("completed_at") @db.Timestamptz(6)
+  tags              String[]
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  assignedToUser    UserProfile @relation("TaskAssignedTo", fields: [assignedTo], references: [id], onDelete: Cascade)
+  createdByUser     UserProfile @relation("TaskCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@index([assignedTo])
   @@index([status])
@@ -478,40 +415,34 @@ model Task {
   @@map("tasks")
 }
 
-// ============================================
-// 11. CLINICAL NOTES (Notas Clínicas)
-// ============================================
-
 model ClinicalNote {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId            String    @map("session_id") @db.Uuid
-  patientId            String    @map("patient_id") @db.Uuid
-  therapistId          String    @map("therapist_id") @db.Uuid
-  subjectiveNote       String?   @map("subjective_note")
-  objectiveNote        String?   @map("objective_note")
-  assessment           String?
-  plan                 String?
-  moodAssessment       String?   @map("mood_assessment") // excellent, good, neutral, poor, critical
-  anxietyLevel         Int?      @map("anxiety_level")
-  depressionLevel      Int?      @map("depression_level")
-  riskLevel            String?   @map("risk_level") // none, low, medium, high, imminent
-  riskNotes            String?   @map("risk_notes")
-  progressRating       Int?      @map("progress_rating")
-  treatmentAdherence   String?   @map("treatment_adherence") // excellent, good, fair, poor, none
-  interventionsUsed    String[]  @map("interventions_used")
-  homeworkAssigned     String?   @map("homework_assigned")
-  homeworkCompletion   String?   @map("homework_completion") // completed, partial, not_done, not_applicable
-  isConfidential       Boolean   @default(true) @map("is_confidential")
-  isTemplate           Boolean   @default(false) @map("is_template")
-  templateName         String?   @map("template_name")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  session          Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  patient          Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  therapist        UserProfile        @relation(fields: [therapistId], references: [id], onDelete: SetNull)
-  sessionTechniques SessionTechnique[]
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId          String             @map("session_id") @db.Uuid
+  patientId          String             @map("patient_id") @db.Uuid
+  therapistId        String             @map("therapist_id") @db.Uuid
+  subjectiveNote     String?            @map("subjective_note")
+  objectiveNote      String?            @map("objective_note")
+  assessment         String?
+  plan               String?
+  moodAssessment     String?            @map("mood_assessment")
+  anxietyLevel       Int?               @map("anxiety_level")
+  depressionLevel    Int?               @map("depression_level")
+  riskLevel          String?            @map("risk_level")
+  riskNotes          String?            @map("risk_notes")
+  progressRating     Int?               @map("progress_rating")
+  treatmentAdherence String?            @map("treatment_adherence")
+  interventionsUsed  String[]           @map("interventions_used")
+  homeworkAssigned   String?            @map("homework_assigned")
+  homeworkCompletion String?            @map("homework_completion")
+  isConfidential     Boolean            @default(true) @map("is_confidential")
+  isTemplate         Boolean            @default(false) @map("is_template")
+  templateName       String?            @map("template_name")
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient            Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  session            Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  therapist          UserProfile        @relation(fields: [therapistId], references: [id], onDelete: SetNull)
+  sessionTechniques  SessionTechnique[]
 
   @@index([sessionId])
   @@index([patientId])
@@ -520,35 +451,29 @@ model ClinicalNote {
   @@map("clinical_notes")
 }
 
-// ============================================
-// 12. THERAPEUTIC GOALS
-// ============================================
-
 model TherapeuticGoal {
-  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId           String    @map("patient_id") @db.Uuid
-  therapistId         String?   @map("therapist_id") @db.Uuid
-  goalTitle           String    @map("goal_title")
-  goalDescription     String?   @map("goal_description")
-  goalCategory        String?   @map("goal_category") // emotional, behavioral, cognitive, social, personal, professional, other
-  targetDate          DateTime? @map("target_date") @db.Date
-  status              String    @default("active") // active, in_progress, achieved, modified, abandoned
-  progressPercentage  Int       @default(0) @map("progress_percentage")
-  specificCriteria    String?   @map("specific_criteria")
-  measurableCriteria  String?   @map("measurable_criteria")
-  achievableNotes     String?   @map("achievable_notes")
-  relevantNotes       String?   @map("relevant_notes")
-  timeBoundDate       DateTime? @map("time_bound_date") @db.Date
-  lastReviewedAt      DateTime? @map("last_reviewed_at") @db.Timestamptz(6)
-  achievedAt          DateTime? @map("achieved_at") @db.Timestamptz(6)
-  abandonedReason     String?   @map("abandoned_reason")
-  notes               String?
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  patient   Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  therapist UserProfile? @relation(fields: [therapistId], references: [id], onDelete: SetNull)
+  id                 String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId          String       @map("patient_id") @db.Uuid
+  therapistId        String?      @map("therapist_id") @db.Uuid
+  goalTitle          String       @map("goal_title")
+  goalDescription    String?      @map("goal_description")
+  goalCategory       String?      @map("goal_category")
+  targetDate         DateTime?    @map("target_date") @db.Date
+  status             String       @default("active")
+  progressPercentage Int          @default(0) @map("progress_percentage")
+  specificCriteria   String?      @map("specific_criteria")
+  measurableCriteria String?      @map("measurable_criteria")
+  achievableNotes    String?      @map("achievable_notes")
+  relevantNotes      String?      @map("relevant_notes")
+  timeBoundDate      DateTime?    @map("time_bound_date") @db.Date
+  lastReviewedAt     DateTime?    @map("last_reviewed_at") @db.Timestamptz(6)
+  achievedAt         DateTime?    @map("achieved_at") @db.Timestamptz(6)
+  abandonedReason    String?      @map("abandoned_reason")
+  notes              String?
+  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient            Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  therapist          UserProfile? @relation(fields: [therapistId], references: [id])
 
   @@index([patientId])
   @@index([status])
@@ -556,26 +481,20 @@ model TherapeuticGoal {
   @@map("therapeutic_goals")
 }
 
-// ============================================
-// 13. THERAPIST AVAILABILITY
-// ============================================
-
 model TherapistAvailability {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  therapistId    String    @map("therapist_id") @db.Uuid
-  dayOfWeek      Int       @map("day_of_week") // 0-6
-  startTime      DateTime  @map("start_time") @db.Time(6)
-  endTime        DateTime  @map("end_time") @db.Time(6)
-  isAvailable    Boolean   @default(true) @map("is_available")
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  therapistId    String      @map("therapist_id") @db.Uuid
+  dayOfWeek      Int         @map("day_of_week")
+  startTime      DateTime    @map("start_time") @db.Time(6)
+  endTime        DateTime    @map("end_time") @db.Time(6)
+  isAvailable    Boolean     @default(true) @map("is_available")
   location       String?
-  effectiveFrom  DateTime  @map("effective_from") @db.Date
-  effectiveUntil DateTime? @map("effective_until") @db.Date
+  effectiveFrom  DateTime    @map("effective_from") @db.Date
+  effectiveUntil DateTime?   @map("effective_until") @db.Date
   notes          String?
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  therapist UserProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  therapist      UserProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId])
   @@index([dayOfWeek])
@@ -583,27 +502,21 @@ model TherapistAvailability {
   @@map("therapist_availability")
 }
 
-// ============================================
-// 14. APPOINTMENT REMINDERS
-// ============================================
-
 model AppointmentReminder {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sessionId       String    @map("session_id") @db.Uuid
   patientId       String    @map("patient_id") @db.Uuid
-  reminderType    String    @map("reminder_type") // email, sms, whatsapp, push
+  reminderType    String    @map("reminder_type")
   scheduledFor    DateTime  @map("scheduled_for") @db.Timestamptz(6)
-  status          String    @default("pending") // pending, sent, failed, cancelled
+  status          String    @default("pending")
   sentAt          DateTime? @map("sent_at") @db.Timestamptz(6)
   messageTemplate String?   @map("message_template")
   messageSent     String?   @map("message_sent")
   errorMessage    String?   @map("error_message")
   retryCount      Int       @default(0) @map("retry_count")
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patient         Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  session         Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([patientId])
@@ -612,37 +525,31 @@ model AppointmentReminder {
   @@map("appointment_reminders")
 }
 
-// ============================================
-// 15. PAYMENT TRANSACTIONS
-// ============================================
-
 model PaymentTransaction {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId         String?   @map("session_id") @db.Uuid
-  patientId         String?   @map("patient_id") @db.Uuid
-  contractId        String?   @map("contract_id") @db.Uuid
-  reportId          String?   @map("report_id") @db.Uuid
-  transactionType   String    @map("transaction_type") // payment, refund, adjustment, discount
-  amount            Decimal   @db.Decimal(10, 2)
-  paymentMethod     String?   @map("payment_method") // cash, card, transfer, check, online, other
-  paymentReference  String?   @map("payment_reference")
-  currency          String    @default("MXN")
-  exchangeRate      Decimal   @default(1.0) @map("exchange_rate") @db.Decimal(10, 4)
-  status            String    @default("completed") // pending, processing, completed, failed, cancelled
-  bankName          String?   @map("bank_name")
-  accountLastFour   String?   @map("account_last_four")
-  authorizationCode String?   @map("authorization_code")
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId         String?                @map("session_id") @db.Uuid
+  patientId         String?                @map("patient_id") @db.Uuid
+  contractId        String?                @map("contract_id") @db.Uuid
+  reportId          String?                @map("report_id") @db.Uuid
+  transactionType   String                 @map("transaction_type")
+  amount            Decimal                @db.Decimal(10, 2)
+  paymentMethod     String?                @map("payment_method")
+  paymentReference  String?                @map("payment_reference")
+  currency          String                 @default("MXN")
+  exchangeRate      Decimal                @default(1.0) @map("exchange_rate") @db.Decimal(10, 4)
+  status            String                 @default("completed")
+  bankName          String?                @map("bank_name")
+  accountLastFour   String?                @map("account_last_four")
+  authorizationCode String?                @map("authorization_code")
   notes             String?
-  processedBy       String?   @map("processed_by") @db.Uuid
-  transactionDate   DateTime  @default(now()) @map("transaction_date") @db.Timestamptz(6)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  session       Session?               @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-  patient       Patient?               @relation(fields: [patientId], references: [id], onDelete: SetNull)
-  contract      Contract?              @relation(fields: [contractId], references: [id], onDelete: SetNull)
-  report        MonthlyContractReport? @relation(fields: [reportId], references: [id], onDelete: SetNull)
-  processedByUser UserProfile?        @relation(fields: [processedBy], references: [id], onDelete: SetNull)
+  processedBy       String?                @map("processed_by") @db.Uuid
+  transactionDate   DateTime               @default(now()) @map("transaction_date") @db.Timestamptz(6)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  contract          Contract?              @relation(fields: [contractId], references: [id])
+  patient           Patient?               @relation(fields: [patientId], references: [id])
+  processedByUser   UserProfile?           @relation(fields: [processedBy], references: [id])
+  report            MonthlyContractReport? @relation(fields: [reportId], references: [id])
+  session           Session?               @relation(fields: [sessionId], references: [id])
 
   @@index([sessionId])
   @@index([patientId])
@@ -652,32 +559,26 @@ model PaymentTransaction {
   @@map("payment_transactions")
 }
 
-// ============================================
-// 16. DIAGNOSES (Diagnósticos)
-// ============================================
-
 model Diagnosis {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId         String    @map("patient_id") @db.Uuid
-  therapistId       String?   @map("therapist_id") @db.Uuid
-  sessionId         String?   @map("session_id") @db.Uuid
-  diagnosisCode     String?   @map("diagnosis_code")
-  diagnosisName     String    @map("diagnosis_name")
-  diagnosisCategory String?   @map("diagnosis_category")
-  diagnosisType     String?   @map("diagnosis_type") // primary, secondary, provisional, ruled_out
-  severity          String?   // mild, moderate, severe, in_remission
-  diagnosedAt       DateTime  @map("diagnosed_at") @db.Date
-  resolvedAt        DateTime? @map("resolved_at") @db.Date
-  clinicalNotes     String?   @map("clinical_notes")
-  treatmentPlan     String?   @map("treatment_plan")
-  isActive          Boolean   @default(true) @map("is_active")
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  patient   Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  therapist UserProfile? @relation(fields: [therapistId], references: [id], onDelete: SetNull)
-  session   Session?     @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId         String       @map("patient_id") @db.Uuid
+  therapistId       String?      @map("therapist_id") @db.Uuid
+  sessionId         String?      @map("session_id") @db.Uuid
+  diagnosisCode     String?      @map("diagnosis_code")
+  diagnosisName     String       @map("diagnosis_name")
+  diagnosisCategory String?      @map("diagnosis_category")
+  diagnosisType     String?      @map("diagnosis_type")
+  severity          String?
+  diagnosedAt       DateTime     @map("diagnosed_at") @db.Date
+  resolvedAt        DateTime?    @map("resolved_at") @db.Date
+  clinicalNotes     String?      @map("clinical_notes")
+  treatmentPlan     String?      @map("treatment_plan")
+  isActive          Boolean      @default(true) @map("is_active")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient           Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  session           Session?     @relation(fields: [sessionId], references: [id])
+  therapist         UserProfile? @relation(fields: [therapistId], references: [id])
 
   @@index([patientId])
   @@index([therapistId])
@@ -686,25 +587,19 @@ model Diagnosis {
   @@map("diagnoses")
 }
 
-// ============================================
-// 17. DOCUMENT TEMPLATES
-// ============================================
-
 model DocumentTemplate {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdBy    String?  @map("created_by") @db.Uuid
-  templateName String   @map("template_name")
-  templateType String   @map("template_type") // clinical_note, consent_form, report, letter, invoice, other
-  content      String
-  variables    Json?
-  isActive     Boolean  @default(true) @map("is_active")
-  isPublic     Boolean  @default(false) @map("is_public")
-  usageCount   Int      @default(0) @map("usage_count")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  createdByUser UserProfile? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdBy     String?      @map("created_by") @db.Uuid
+  templateName  String       @map("template_name")
+  templateType  String       @map("template_type")
+  content       String
+  variables     Json?
+  isActive      Boolean      @default(true) @map("is_active")
+  isPublic      Boolean      @default(false) @map("is_public")
+  usageCount    Int          @default(0) @map("usage_count")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdByUser UserProfile? @relation(fields: [createdBy], references: [id])
 
   @@index([templateType])
   @@index([isPublic])
@@ -712,48 +607,36 @@ model DocumentTemplate {
   @@map("document_templates")
 }
 
-// ============================================
-// 18. SYSTEM SETTINGS
-// ============================================
-
 model SystemSetting {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  settingKey   String   @unique @map("setting_key")
-  settingValue Json     @map("setting_value")
-  settingType  String   @map("setting_type") // string, number, boolean, json, array
-  description  String?
-  category     String?
-  isPublic     Boolean  @default(false) @map("is_public")
-  updatedBy    String?  @map("updated_by") @db.Uuid
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  updatedByUser UserProfile? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  settingKey    String       @unique @map("setting_key")
+  settingValue  Json         @map("setting_value")
+  settingType   String       @map("setting_type")
+  description   String?
+  category      String?
+  isPublic      Boolean      @default(false) @map("is_public")
+  updatedBy     String?      @map("updated_by") @db.Uuid
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedByUser UserProfile? @relation(fields: [updatedBy], references: [id])
 
   @@index([settingKey])
   @@index([category])
   @@map("system_settings")
 }
 
-// ============================================
-// 19. AUDIT LOG
-// ============================================
-
 model AuditLog {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String?  @map("user_id") @db.Uuid
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String?      @map("user_id") @db.Uuid
   action     String
-  entityType String   @map("entity_type")
-  entityId   String?  @map("entity_id") @db.Uuid
+  entityType String       @map("entity_type")
+  entityId   String?      @map("entity_id") @db.Uuid
   changes    Json?
-  ipAddress  String?  @map("ip_address")
-  userAgent  String?  @map("user_agent")
-  severity   String   @default("info") // info, warning, error, critical
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  user UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress  String?      @map("ip_address")
+  userAgent  String?      @map("user_agent")
+  severity   String       @default("info")
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       UserProfile? @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([entityType, entityId])
@@ -762,34 +645,24 @@ model AuditLog {
   @@map("audit_log")
 }
 
-// ============================================
-// 20. SESSION TECHNIQUES
-// ============================================
-
 model SessionTechnique {
-  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId            String        @map("session_id") @db.Uuid
-  clinicalNoteId       String?       @map("clinical_note_id") @db.Uuid
-  techniqueName        String        @map("technique_name")
-  techniqueCategory    String?       @map("technique_category") // cognitive, behavioral, psychodynamic, humanistic, systemic, mindfulness, other
-  effectivenessRating  Int?          @map("effectiveness_rating")
-  patientResponse      String?       @map("patient_response")
-  notes                String?
-  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  // Relations
-  session      Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  clinicalNote ClinicalNote? @relation(fields: [clinicalNoteId], references: [id], onDelete: Cascade)
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId           String        @map("session_id") @db.Uuid
+  clinicalNoteId      String?       @map("clinical_note_id") @db.Uuid
+  techniqueName       String        @map("technique_name")
+  techniqueCategory   String?       @map("technique_category")
+  effectivenessRating Int?          @map("effectiveness_rating")
+  patientResponse     String?       @map("patient_response")
+  notes               String?
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  clinicalNote        ClinicalNote? @relation(fields: [clinicalNoteId], references: [id], onDelete: Cascade)
+  session             Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([techniqueCategory])
   @@index([techniqueName])
   @@map("session_techniques")
 }
-
-// ============================================
-// 21. PATIENT EMERGENCY CONTACTS
-// ============================================
 
 model PatientEmergencyContact {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -804,38 +677,30 @@ model PatientEmergencyContact {
   notes          String?
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
   @@index([patientId, isPrimary])
   @@map("patient_emergency_contacts")
 }
 
-// ============================================
-// 22. COMPANY EMPLOYEES
-// ============================================
-
 model CompanyEmployee {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  companyId          String    @map("company_id") @db.Uuid
-  patientId          String?   @map("patient_id") @db.Uuid
-  employeeName       String    @map("employee_name")
-  employeeEmail      String?   @map("employee_email")
-  employeeIdNumber   String?   @map("employee_id_number")
-  department         String?
-  position           String?
-  isActive           Boolean   @default(true) @map("is_active")
-  startDate          DateTime? @map("start_date") @db.Date
-  endDate            DateTime? @map("end_date") @db.Date
-  notes              String?
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId        String    @map("company_id") @db.Uuid
+  patientId        String?   @map("patient_id") @db.Uuid
+  employeeName     String    @map("employee_name")
+  employeeEmail    String?   @map("employee_email")
+  employeeIdNumber String?   @map("employee_id_number")
+  department       String?
+  position         String?
+  isActive         Boolean   @default(true) @map("is_active")
+  startDate        DateTime? @map("start_date") @db.Date
+  endDate          DateTime? @map("end_date") @db.Date
+  notes            String?
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  patient          Patient?  @relation(fields: [patientId], references: [id])
 
   @@index([companyId])
   @@index([patientId])

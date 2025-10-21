@@ -271,7 +271,8 @@ console.log(dashboardData.data.overview);
 
 ## 🗄️ Base de Datos
 
-Todos los endpoints consultan directamente a **Supabase PostgreSQL** utilizando el cliente de Supabase (`@supabase/supabase-js`).
+Todos los endpoints consultan directamente a **Supabase PostgreSQL** utilizando el cliente de import { prisma } from '@/lib/prisma'; // Asegúrate de tener exportado tu cliente Prisma
+
 
 ### Tablas consultadas:
 - `patients` - Pacientes

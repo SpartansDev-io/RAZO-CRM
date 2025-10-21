@@ -1,147 +1,119 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+import { prisma } from '@/modules/shared/infrastructure/database/prisma';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
-    const sortBy = searchParams.get('sortBy') || 'created_at'; // created_at, updated_at, last_session
+    const sortBy = searchParams.get('sortBy') || 'createdAt'; // createdAt, updatedAt, last_session
     const order = searchParams.get('order') || 'desc';
 
-    let query = supabase
-      .from('patients')
-      .select(`
-        id,
-        name,
-        email,
-        phone,
-        photo_url,
-        status,
-        created_at,
-        updated_at,
-        company:companies (
-          id,
-          name
-        ),
-        primary_therapist:user_profiles!primary_therapist_id (
-          id,
-          full_name
-        )
-      `)
-      .eq('status', 'active')
-      .is('deleted_at', null);
+    // 1️⃣ Obtener pacientes activos con sus relaciones
+    const patients = await prisma.patient.findMany({
+      where: {
+        status: 'active',
+        deletedAt: null
+      },
+      include: {
+        company: true,
+        primaryTherapist: true
+      },
+      take: limit,
+      orderBy: sortBy === 'last_session' ? undefined : { [sortBy]: order }
+    });
 
-    // Ordenamiento
-    if (sortBy === 'created_at' || sortBy === 'updated_at') {
-      query = query.order(sortBy, { ascending: order === 'asc' });
-    }
-
-    query = query.limit(limit);
-
-    const { data: patients, error } = await query;
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
-
-    // Para cada paciente, obtener la última sesión
+    // 2️⃣ Mapear pacientes para obtener última sesión y conteos
     const patientsWithSessions = await Promise.all(
-      (patients || []).map(async (patient: any) => {
-        const company = Array.isArray(patient.company) ? patient.company[0] : patient.company;
-        const therapist = Array.isArray(patient.primary_therapist) ? patient.primary_therapist[0] : patient.primary_therapist;
-        const { data: lastSession } = await supabase
-          .from('sessions')
-          .select('session_date, status')
-          .eq('patient_id', patient.id)
-          .is('deleted_at', null)
-          .order('session_date', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      patients.map(async (patient: typeof patients[number]) => {
+        // Última sesión
+        const last_session = await prisma.session.findFirst({
+          where: {
+            patientId: patient.id,
+            deletedAt: null
+          },
+          orderBy: { sessionDate: 'desc' }
+        });
 
-        // Contar total de sesiones
-        const { count: totalSessions } = await supabase
-          .from('sessions')
-          .select('*', { count: 'exact', head: true })
-          .eq('patient_id', patient.id)
-          .is('deleted_at', null);
+        // Conteo total de sesiones
+        const totalSessions = await prisma.session.count({
+          where: {
+            patientId: patient.id,
+            deletedAt: null
+          }
+        });
 
-        // Contar sesiones completadas
-        const { count: completedSessions } = await supabase
-          .from('sessions')
-          .select('*', { count: 'exact', head: true })
-          .eq('patient_id', patient.id)
-          .eq('status', 'completed')
-          .is('deleted_at', null);
+        // Conteo de sesiones completadas
+        const completedSessions = await prisma.session.count({
+          where: {
+            patientId: patient.id,
+            status: 'completed',
+            deletedAt: null
+          }
+        });
 
         return {
           id: patient.id,
           name: patient.name,
           email: patient.email,
           phone: patient.phone,
-          photoUrl: patient.photo_url,
+          photoUrl: patient.photoUrl,
           status: patient.status,
-          company: company ? {
-            id: company.id,
-            name: company.name
+          company: patient.company ? {
+            id: patient.company.id,
+            name: patient.company.name
           } : null,
-          primaryTherapist: therapist ? {
-            id: therapist.id,
-            name: therapist.full_name
+          primaryTherapist: patient.primaryTherapist ? {
+            id: patient.primaryTherapist.id,
+            name: patient.primaryTherapist.fullName
           } : null,
-          lastSession: lastSession ? {
-            date: lastSession.session_date,
-            status: lastSession.status,
-            formatted: new Date(lastSession.session_date).toLocaleDateString('es-MX', {
+          last_session: last_session ? {
+            date: last_session.sessionDate,
+            status: last_session.status,
+            formatted: last_session.sessionDate.toLocaleDateString('es-MX', {
               year: 'numeric',
               month: 'short',
               day: 'numeric'
             })
           } : null,
           sessionCount: {
-            total: totalSessions || 0,
-            completed: completedSessions || 0
+            total: totalSessions,
+            completed: completedSessions
           },
-          createdAt: patient.created_at,
-          updatedAt: patient.updated_at
+          createdAt: patient.createdAt,
+          updatedAt: patient.updatedAt
         };
       })
     );
 
-    // Si se solicitó ordenar por última sesión, hacerlo aquí
+    // 3️⃣ Ordenar por última sesión si se solicitó
     if (sortBy === 'last_session') {
       patientsWithSessions.sort((a, b) => {
-        const dateA = a.lastSession?.date ? new Date(a.lastSession.date).getTime() : 0;
-        const dateB = b.lastSession?.date ? new Date(b.lastSession.date).getTime() : 0;
+        const dateA = a.last_session?.date ? new Date(a.last_session.date).getTime() : 0;
+        const dateB = b.last_session?.date ? new Date(b.last_session.date).getTime() : 0;
         return order === 'asc' ? dateA - dateB : dateB - dateA;
       });
     }
 
-    // Estadísticas adicionales
-    const { count: totalActivePatients } = await supabase
-      .from('patients')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-      .is('deleted_at', null);
+    // 4️⃣ Estadísticas adicionales
+    const totalActivePatients = await prisma.patient.count({
+      where: { status: 'active', deletedAt: null }
+    });
 
-    const { count: newPatientsThisMonth } = await supabase
-      .from('patients')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-      .is('deleted_at', null)
-      .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+    const newPatientsThisMonth = await prisma.patient.count({
+      where: {
+        status: 'active',
+        deletedAt: null,
+        createdAt: {
+          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        }
+      }
+    });
 
     return NextResponse.json({
       success: true,
       data: {
         patients: patientsWithSessions,
-        total: totalActivePatients || 0,
-        newThisMonth: newPatientsThisMonth || 0,
+        total: totalActivePatients,
+        newThisMonth: newPatientsThisMonth,
         returned: patientsWithSessions.length
       }
     });
