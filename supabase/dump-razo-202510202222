@@ -1,0 +1,2865 @@
+--
+-- PostgreSQL database cluster dump
+--
+
+-- Started on 2025-10-20 22:22:01 CST
+
+SET default_transaction_read_only = off;
+
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+
+--
+-- Roles
+--
+
+CREATE ROLE alejandrogarcia;
+ALTER ROLE alejandrogarcia WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
+CREATE ROLE postgres;
+ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
+
+
+
+
+
+
+--
+-- Databases
+--
+
+--
+-- Database "template1" dump
+--
+
+\connect template1
+
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.17 (Homebrew)
+-- Dumped by pg_dump version 14.4
+
+-- Started on 2025-10-20 22:22:01 CST
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+-- Completed on 2025-10-20 22:22:01 CST
+
+--
+-- PostgreSQL database dump complete
+--
+
+--
+-- Database "razo" dump
+--
+
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.17 (Homebrew)
+-- Dumped by pg_dump version 14.4
+
+-- Started on 2025-10-20 22:22:01 CST
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 4114 (class 1262 OID 63012)
+-- Name: razo; Type: DATABASE; Schema: -; Owner: alejandrogarcia
+--
+
+CREATE DATABASE razo WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'C';
+
+
+ALTER DATABASE razo OWNER TO alejandrogarcia;
+
+\connect razo
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 241 (class 1255 OID 64923)
+-- Name: calculate_therapist_revenue(uuid, date, date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.calculate_therapist_revenue(p_therapist_id uuid, p_start_date date, p_end_date date) RETURNS TABLE(total_sessions bigint, completed_sessions bigint, total_revenue numeric, paid_revenue numeric, pending_revenue numeric, average_session_cost numeric)
+    LANGUAGE plpgsql STABLE
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(*)::bigint as total_sessions,
+    COUNT(*) FILTER (WHERE status = 'completed')::bigint as completed_sessions,
+    COALESCE(SUM(session_cost), 0) as total_revenue,
+    COALESCE(SUM(paid_amount), 0) as paid_revenue,
+    COALESCE(SUM(session_cost - paid_amount), 0) as pending_revenue,
+    COALESCE(AVG(session_cost), 0) as average_session_cost
+  FROM sessions
+  WHERE therapist_id = p_therapist_id
+    AND session_date >= p_start_date
+    AND session_date <= p_end_date
+    AND deleted_at IS NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.calculate_therapist_revenue(p_therapist_id uuid, p_start_date date, p_end_date date) OWNER TO postgres;
+
+--
+-- TOC entry 250 (class 1255 OID 64924)
+-- Name: get_company_statistics(uuid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_company_statistics(p_company_id uuid) RETURNS TABLE(total_contracts bigint, active_contracts bigint, total_patients bigint, active_patients bigint, total_sessions bigint, completed_sessions bigint, total_billed numeric, total_paid numeric, pending_amount numeric)
+    LANGUAGE plpgsql STABLE
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(DISTINCT ct.id)::bigint as total_contracts,
+    COUNT(DISTINCT ct.id) FILTER (WHERE ct.status = 'active')::bigint as active_contracts,
+    COUNT(DISTINCT p.id)::bigint as total_patients,
+    COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'active')::bigint as active_patients,
+    COUNT(DISTINCT s.id)::bigint as total_sessions,
+    COUNT(DISTINCT s.id) FILTER (WHERE s.status = 'completed')::bigint as completed_sessions,
+    COALESCE(SUM(s.session_cost), 0) as total_billed,
+    COALESCE(SUM(s.paid_amount), 0) as total_paid,
+    COALESCE(SUM(s.session_cost - s.paid_amount), 0) as pending_amount
+  FROM companies c
+  LEFT JOIN contracts ct ON c.id = ct.company_id AND ct.deleted_at IS NULL
+  LEFT JOIN patients p ON c.id = p.company_id AND p.deleted_at IS NULL
+  LEFT JOIN sessions s ON p.id = s.patient_id AND s.deleted_at IS NULL
+  WHERE c.id = p_company_id AND c.deleted_at IS NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.get_company_statistics(p_company_id uuid) OWNER TO postgres;
+
+--
+-- TOC entry 237 (class 1255 OID 64902)
+-- Name: get_contract_status(text, date, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_contract_status(p_status text, p_end_date date, p_deleted_at timestamp with time zone) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+BEGIN
+  IF p_deleted_at IS NOT NULL THEN
+    RETURN 'deleted';
+  END IF;
+  
+  IF p_status = 'cancelled' THEN
+    RETURN 'cancelled';
+  END IF;
+  
+  IF p_end_date < CURRENT_DATE THEN
+    RETURN 'expired';
+  END IF;
+  
+  IF p_status = 'active' AND p_end_date >= CURRENT_DATE THEN
+    IF p_end_date <= CURRENT_DATE + INTERVAL '30 days' THEN
+      RETURN 'expiring_soon';
+    END IF;
+    RETURN 'active';
+  END IF;
+  
+  RETURN p_status;
+END;
+$$;
+
+
+ALTER FUNCTION public.get_contract_status(p_status text, p_end_date date, p_deleted_at timestamp with time zone) OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1255 OID 64901)
+-- Name: get_patient_age(date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_patient_age(birth_date date) RETURNS integer
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+BEGIN
+  RETURN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birth_date))::integer;
+END;
+$$;
+
+
+ALTER FUNCTION public.get_patient_age(birth_date date) OWNER TO postgres;
+
+--
+-- TOC entry 251 (class 1255 OID 64925)
+-- Name: get_upcoming_sessions(integer, uuid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_upcoming_sessions(p_days_ahead integer DEFAULT 7, p_therapist_id uuid DEFAULT NULL::uuid) RETURNS TABLE(session_id uuid, session_date timestamp with time zone, session_type text, patient_id uuid, patient_name text, therapist_id uuid, therapist_name text, status text, session_duration_minutes integer)
+    LANGUAGE plpgsql STABLE
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.id as session_id,
+    s.session_date,
+    s.session_type,
+    p.id as patient_id,
+    p.name as patient_name,
+    s.therapist_id,
+    up.full_name as therapist_name,
+    s.status,
+    s.session_duration_minutes
+  FROM sessions s
+  JOIN patients p ON s.patient_id = p.id
+  LEFT JOIN user_profiles up ON s.therapist_id = up.id
+  WHERE s.session_date >= CURRENT_TIMESTAMP
+    AND s.session_date <= CURRENT_TIMESTAMP + (p_days_ahead || ' days')::interval
+    AND s.status IN ('scheduled', 'confirmed')
+    AND s.deleted_at IS NULL
+    AND (p_therapist_id IS NULL OR s.therapist_id = p_therapist_id)
+  ORDER BY s.session_date ASC;
+END;
+$$;
+
+
+ALTER FUNCTION public.get_upcoming_sessions(p_days_ahead integer, p_therapist_id uuid) OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 209 (class 1259 OID 63640)
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public._prisma_migrations (
+    id character varying(36) NOT NULL,
+    checksum character varying(64) NOT NULL,
+    finished_at timestamp with time zone,
+    migration_name character varying(255) NOT NULL,
+    logs text,
+    rolled_back_at timestamp with time zone,
+    started_at timestamp with time zone DEFAULT now() NOT NULL,
+    applied_steps_count integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public._prisma_migrations OWNER TO postgres;
+
+--
+-- TOC entry 232 (class 1259 OID 64903)
+-- Name: active_patients_summary; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.active_patients_summary AS
+SELECT
+    NULL::uuid AS id,
+    NULL::text AS name,
+    NULL::text AS email,
+    NULL::text AS phone,
+    NULL::date AS birth_date,
+    NULL::integer AS age,
+    NULL::text AS gender,
+    NULL::uuid AS company_id,
+    NULL::text AS company_name,
+    NULL::text AS therapy_type,
+    NULL::text AS status,
+    NULL::uuid AS primary_therapist_id,
+    NULL::text AS therapist_name,
+    NULL::bigint AS total_sessions,
+    NULL::bigint AS completed_sessions,
+    NULL::bigint AS scheduled_sessions,
+    NULL::timestamp with time zone AS last_session_date,
+    NULL::numeric AS total_billed,
+    NULL::numeric AS total_paid,
+    NULL::timestamp(6) with time zone AS created_at,
+    NULL::timestamp(6) with time zone AS updated_at;
+
+
+ALTER TABLE public.active_patients_summary OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 63817)
+-- Name: appointment_reminders; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.appointment_reminders (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    session_id uuid NOT NULL,
+    patient_id uuid NOT NULL,
+    reminder_type text NOT NULL,
+    scheduled_for timestamp(6) with time zone NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    sent_at timestamp(6) with time zone,
+    message_template text,
+    message_sent text,
+    error_message text,
+    retry_count integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.appointment_reminders OWNER TO postgres;
+
+--
+-- TOC entry 228 (class 1259 OID 63876)
+-- Name: audit_log; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.audit_log (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    action text NOT NULL,
+    entity_type text NOT NULL,
+    entity_id uuid,
+    changes jsonb,
+    ip_address text,
+    user_agent text,
+    severity text DEFAULT 'info'::text NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.audit_log OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 63782)
+-- Name: clinical_notes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.clinical_notes (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    session_id uuid NOT NULL,
+    patient_id uuid NOT NULL,
+    therapist_id uuid NOT NULL,
+    subjective_note text,
+    objective_note text,
+    assessment text,
+    plan text,
+    mood_assessment text,
+    anxiety_level integer,
+    depression_level integer,
+    risk_level text,
+    risk_notes text,
+    progress_rating integer,
+    treatment_adherence text,
+    interventions_used text[],
+    homework_assigned text,
+    homework_completion text,
+    is_confidential boolean DEFAULT true NOT NULL,
+    is_template boolean DEFAULT false NOT NULL,
+    template_name text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.clinical_notes OWNER TO postgres;
+
+--
+-- TOC entry 211 (class 1259 OID 63661)
+-- Name: companies; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.companies (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    email text NOT NULL,
+    phone text,
+    address text,
+    website text,
+    industry text,
+    tax_id text,
+    billing_contact_name text,
+    billing_contact_email text,
+    billing_contact_phone text,
+    employee_count integer DEFAULT 0 NOT NULL,
+    active_contracts_count integer DEFAULT 0 NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    notes text,
+    created_by uuid,
+    updated_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted_at timestamp(6) with time zone
+);
+
+
+ALTER TABLE public.companies OWNER TO postgres;
+
+--
+-- TOC entry 234 (class 1259 OID 64913)
+-- Name: company_contracts_overview; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.company_contracts_overview AS
+SELECT
+    NULL::uuid AS company_id,
+    NULL::text AS company_name,
+    NULL::text AS company_email,
+    NULL::boolean AS company_active,
+    NULL::bigint AS total_contracts,
+    NULL::bigint AS active_contracts,
+    NULL::bigint AS expired_contracts,
+    NULL::bigint AS total_patients,
+    NULL::bigint AS active_patients,
+    NULL::bigint AS total_sessions,
+    NULL::bigint AS pending_payment_sessions,
+    NULL::numeric AS total_contract_billing,
+    NULL::numeric AS total_contract_paid,
+    NULL::timestamp with time zone AS last_session_date,
+    NULL::timestamp(6) with time zone AS created_at,
+    NULL::timestamp(6) with time zone AS updated_at;
+
+
+ALTER TABLE public.company_contracts_overview OWNER TO postgres;
+
+--
+-- TOC entry 231 (class 1259 OID 63907)
+-- Name: company_employees; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.company_employees (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    company_id uuid NOT NULL,
+    patient_id uuid,
+    employee_name text NOT NULL,
+    employee_email text,
+    employee_id_number text,
+    department text,
+    "position" text,
+    is_active boolean DEFAULT true NOT NULL,
+    start_date date,
+    end_date date,
+    notes text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.company_employees OWNER TO postgres;
+
+--
+-- TOC entry 212 (class 1259 OID 63674)
+-- Name: contracts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.contracts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    company_id uuid NOT NULL,
+    contract_name text NOT NULL,
+    contract_number text,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    cost_per_session numeric(10,2) NOT NULL,
+    monthly_limit numeric(10,2),
+    payment_frequency text DEFAULT 'monthly'::text NOT NULL,
+    status text DEFAULT 'active'::text NOT NULL,
+    auto_renew boolean DEFAULT false NOT NULL,
+    renewal_notice_days integer DEFAULT 30 NOT NULL,
+    notes text,
+    attachment_url text,
+    send_renewal_notification boolean DEFAULT true NOT NULL,
+    last_renewal_notification_sent timestamp(6) with time zone,
+    billing_email text,
+    terms_accepted_at timestamp(6) with time zone,
+    terms_accepted_by text,
+    created_by uuid,
+    updated_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted_at timestamp(6) with time zone
+);
+
+
+ALTER TABLE public.contracts OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 63841)
+-- Name: diagnoses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.diagnoses (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    therapist_id uuid,
+    session_id uuid,
+    diagnosis_code text,
+    diagnosis_name text NOT NULL,
+    diagnosis_category text,
+    diagnosis_type text,
+    severity text,
+    diagnosed_at date NOT NULL,
+    resolved_at date,
+    clinical_notes text,
+    treatment_plan text,
+    is_active boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.diagnoses OWNER TO postgres;
+
+--
+-- TOC entry 226 (class 1259 OID 63852)
+-- Name: document_templates; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.document_templates (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_by uuid,
+    template_name text NOT NULL,
+    template_type text NOT NULL,
+    content text NOT NULL,
+    variables jsonb,
+    is_active boolean DEFAULT true NOT NULL,
+    is_public boolean DEFAULT false NOT NULL,
+    usage_count integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.document_templates OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 63733)
+-- Name: monthly_contract_reports; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.monthly_contract_reports (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    contract_id uuid NOT NULL,
+    company_id uuid NOT NULL,
+    report_month integer NOT NULL,
+    report_year integer NOT NULL,
+    period_start_date date NOT NULL,
+    period_end_date date NOT NULL,
+    total_sessions integer DEFAULT 0 NOT NULL,
+    total_patients integer DEFAULT 0 NOT NULL,
+    total_amount numeric(10,2) DEFAULT 0 NOT NULL,
+    payment_status text DEFAULT 'pending'::text NOT NULL,
+    invoice_number text,
+    invoice_date date,
+    due_date date,
+    paid_amount numeric(10,2) DEFAULT 0 NOT NULL,
+    paid_at timestamp(6) with time zone,
+    paid_by uuid,
+    payment_reference text,
+    payment_method text,
+    sent_to_company_at timestamp(6) with time zone,
+    sent_by uuid,
+    pdf_url text,
+    notes text,
+    generated_by uuid,
+    generated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.monthly_contract_reports OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 63749)
+-- Name: monthly_report_sessions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.monthly_report_sessions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    report_id uuid NOT NULL,
+    session_id uuid NOT NULL,
+    patient_id uuid NOT NULL,
+    patient_name text NOT NULL,
+    therapist_id uuid,
+    therapist_name text,
+    session_date timestamp(6) with time zone NOT NULL,
+    session_type text NOT NULL,
+    session_cost numeric(10,2) NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.monthly_report_sessions OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 63758)
+-- Name: notifications; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.notifications (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    title text NOT NULL,
+    message text NOT NULL,
+    type text NOT NULL,
+    priority text DEFAULT 'normal'::text NOT NULL,
+    related_entity_type text,
+    related_entity_id uuid,
+    is_read boolean DEFAULT false NOT NULL,
+    is_archived boolean DEFAULT false NOT NULL,
+    read_at timestamp(6) with time zone,
+    action_url text,
+    action_label text,
+    metadata jsonb,
+    expires_at timestamp(6) with time zone,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.notifications OWNER TO postgres;
+
+--
+-- TOC entry 214 (class 1259 OID 63706)
+-- Name: patient_attachments; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.patient_attachments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    file_name text NOT NULL,
+    file_url text NOT NULL,
+    file_type text NOT NULL,
+    file_size_kb integer,
+    mime_type text,
+    description text,
+    is_confidential boolean DEFAULT true NOT NULL,
+    uploaded_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.patient_attachments OWNER TO postgres;
+
+--
+-- TOC entry 230 (class 1259 OID 63895)
+-- Name: patient_emergency_contacts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.patient_emergency_contacts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    contact_name text NOT NULL,
+    relationship text NOT NULL,
+    phone text NOT NULL,
+    alternate_phone text,
+    email text,
+    is_primary boolean DEFAULT false NOT NULL,
+    priority integer DEFAULT 1 NOT NULL,
+    notes text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.patient_emergency_contacts OWNER TO postgres;
+
+--
+-- TOC entry 213 (class 1259 OID 63689)
+-- Name: patients; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.patients (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    email text NOT NULL,
+    phone text NOT NULL,
+    birth_date date NOT NULL,
+    gender text NOT NULL,
+    company_id uuid,
+    company_name text,
+    occupation text,
+    address text,
+    city text,
+    state text,
+    zip_code text,
+    emergency_contact_name text NOT NULL,
+    emergency_contact_relationship text,
+    emergency_contact_phone text NOT NULL,
+    marital_status text,
+    education_level text,
+    nationality text,
+    religion text,
+    living_situation text,
+    has_children boolean DEFAULT false NOT NULL,
+    children_count integer DEFAULT 0 NOT NULL,
+    primary_therapist_id uuid,
+    therapy_type text NOT NULL,
+    referred_by text,
+    referral_source text,
+    reason_for_therapy text NOT NULL,
+    therapeutic_goals text,
+    expectations text,
+    previous_therapy boolean DEFAULT false NOT NULL,
+    previous_therapy_details text,
+    current_medications text,
+    allergies text,
+    medical_conditions text,
+    psychiatric_diagnoses text,
+    family_psychiatric_history text,
+    substance_use text,
+    risk_assessment text,
+    status text DEFAULT 'active'::text NOT NULL,
+    discharge_date date,
+    discharge_reason text,
+    consent_signed boolean DEFAULT false NOT NULL,
+    consent_date date,
+    privacy_notice_accepted boolean DEFAULT false NOT NULL,
+    photo_url text,
+    preferred_contact_method text,
+    preferred_language text DEFAULT 'es'::text NOT NULL,
+    insurance_provider text,
+    insurance_policy_number text,
+    insurance_valid_until date,
+    notes text,
+    created_by uuid,
+    updated_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted_at timestamp(6) with time zone
+);
+
+
+ALTER TABLE public.patients OWNER TO postgres;
+
+--
+-- TOC entry 224 (class 1259 OID 63828)
+-- Name: payment_transactions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.payment_transactions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    session_id uuid,
+    patient_id uuid,
+    contract_id uuid,
+    report_id uuid,
+    transaction_type text NOT NULL,
+    amount numeric(10,2) NOT NULL,
+    payment_method text,
+    payment_reference text,
+    currency text DEFAULT 'MXN'::text NOT NULL,
+    exchange_rate numeric(10,4) DEFAULT 1.0 NOT NULL,
+    status text DEFAULT 'completed'::text NOT NULL,
+    bank_name text,
+    account_last_four text,
+    authorization_code text,
+    notes text,
+    processed_by uuid,
+    transaction_date timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.payment_transactions OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 63716)
+-- Name: sessions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sessions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    therapist_id uuid,
+    session_number integer,
+    session_date timestamp(6) with time zone NOT NULL,
+    session_duration_minutes integer DEFAULT 60 NOT NULL,
+    session_type text NOT NULL,
+    session_modality text DEFAULT 'in_person'::text NOT NULL,
+    appointment_type text,
+    meet_link text,
+    location_address text,
+    session_cost numeric(10,2) NOT NULL,
+    billing_type text DEFAULT 'direct'::text NOT NULL,
+    contract_id uuid,
+    payment_status text DEFAULT 'pending'::text NOT NULL,
+    paid_amount numeric(10,2) DEFAULT 0 NOT NULL,
+    payment_date date,
+    payment_method text,
+    payment_reference text,
+    session_notes text,
+    progress_notes text,
+    interventions text,
+    homework_assigned text,
+    next_session_plan text,
+    risk_level text,
+    status text DEFAULT 'scheduled'::text NOT NULL,
+    confirmed_at timestamp(6) with time zone,
+    confirmed_by text,
+    reminders_sent integer DEFAULT 0 NOT NULL,
+    last_reminder_sent_at timestamp(6) with time zone,
+    cancelled_reason text,
+    cancelled_by uuid,
+    cancelled_at timestamp(6) with time zone,
+    created_by uuid,
+    updated_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted_at timestamp(6) with time zone
+);
+
+
+ALTER TABLE public.sessions OWNER TO postgres;
+
+--
+-- TOC entry 210 (class 1259 OID 63649)
+-- Name: user_profiles; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_profiles (
+    id uuid NOT NULL,
+    full_name text NOT NULL,
+    email text NOT NULL,
+    phone text,
+    role text DEFAULT 'therapist'::text NOT NULL,
+    specialty text,
+    license_number text,
+    bio text,
+    avatar_url text,
+    notifications_enabled boolean DEFAULT true NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.user_profiles OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1259 OID 64918)
+-- Name: pending_payments_summary; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.pending_payments_summary AS
+ SELECT s.id AS session_id,
+    s.session_date,
+    s.session_type,
+    s.session_cost,
+    s.paid_amount,
+    (s.session_cost - s.paid_amount) AS balance_due,
+    s.payment_status,
+    s.billing_type,
+    s.status AS session_status,
+    p.id AS patient_id,
+    p.name AS patient_name,
+    p.email AS patient_email,
+    p.company_id,
+    COALESCE(co.name, p.company_name) AS company_name,
+    ct.id AS contract_id,
+    ct.contract_name,
+    up.id AS therapist_id,
+    up.full_name AS therapist_name,
+        CASE
+            WHEN (s.session_date < (CURRENT_DATE - '90 days'::interval)) THEN 'overdue_90+'::text
+            WHEN (s.session_date < (CURRENT_DATE - '60 days'::interval)) THEN 'overdue_60+'::text
+            WHEN (s.session_date < (CURRENT_DATE - '30 days'::interval)) THEN 'overdue_30+'::text
+            ELSE 'current'::text
+        END AS aging_category,
+    s.created_at,
+    s.updated_at
+   FROM ((((public.sessions s
+     JOIN public.patients p ON ((s.patient_id = p.id)))
+     LEFT JOIN public.companies co ON ((p.company_id = co.id)))
+     LEFT JOIN public.contracts ct ON ((s.contract_id = ct.id)))
+     LEFT JOIN public.user_profiles up ON ((s.therapist_id = up.id)))
+  WHERE ((s.payment_status = ANY (ARRAY['pending'::text, 'partial'::text])) AND (s.status = 'completed'::text) AND (s.deleted_at IS NULL))
+  ORDER BY s.session_date DESC;
+
+
+ALTER TABLE public.pending_payments_summary OWNER TO postgres;
+
+--
+-- TOC entry 229 (class 1259 OID 63886)
+-- Name: session_techniques; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.session_techniques (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    session_id uuid NOT NULL,
+    clinical_note_id uuid,
+    technique_name text NOT NULL,
+    technique_category text,
+    effectiveness_rating integer,
+    patient_response text,
+    notes text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.session_techniques OWNER TO postgres;
+
+--
+-- TOC entry 227 (class 1259 OID 63865)
+-- Name: system_settings; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.system_settings (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    setting_key text NOT NULL,
+    setting_value jsonb NOT NULL,
+    setting_type text NOT NULL,
+    description text,
+    category text,
+    is_public boolean DEFAULT false NOT NULL,
+    updated_by uuid,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.system_settings OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 63770)
+-- Name: tasks; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tasks (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    assigned_to uuid NOT NULL,
+    created_by uuid NOT NULL,
+    title text NOT NULL,
+    description text,
+    priority text DEFAULT 'medium'::text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    related_entity_type text,
+    related_entity_id uuid,
+    due_date timestamp(6) with time zone,
+    completed_at timestamp(6) with time zone,
+    tags text[],
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.tasks OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 63794)
+-- Name: therapeutic_goals; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.therapeutic_goals (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    therapist_id uuid,
+    goal_title text NOT NULL,
+    goal_description text,
+    goal_category text,
+    target_date date,
+    status text DEFAULT 'active'::text NOT NULL,
+    progress_percentage integer DEFAULT 0 NOT NULL,
+    specific_criteria text,
+    measurable_criteria text,
+    achievable_notes text,
+    relevant_notes text,
+    time_bound_date date,
+    last_reviewed_at timestamp(6) with time zone,
+    achieved_at timestamp(6) with time zone,
+    abandoned_reason text,
+    notes text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.therapeutic_goals OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1259 OID 63806)
+-- Name: therapist_availability; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.therapist_availability (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    therapist_id uuid NOT NULL,
+    day_of_week integer NOT NULL,
+    start_time time(6) without time zone NOT NULL,
+    end_time time(6) without time zone NOT NULL,
+    is_available boolean DEFAULT true NOT NULL,
+    location text,
+    effective_from date NOT NULL,
+    effective_until date,
+    notes text,
+    created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.therapist_availability OWNER TO postgres;
+
+--
+-- TOC entry 233 (class 1259 OID 64908)
+-- Name: therapist_workload; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.therapist_workload AS
+SELECT
+    NULL::uuid AS therapist_id,
+    NULL::text AS therapist_name,
+    NULL::text AS specialty,
+    NULL::boolean AS is_active,
+    NULL::bigint AS active_patients,
+    NULL::bigint AS upcoming_sessions,
+    NULL::bigint AS sessions_last_30_days,
+    NULL::numeric AS revenue_last_30_days,
+    NULL::numeric AS avg_session_duration,
+    NULL::timestamp with time zone AS next_session_date;
+
+
+ALTER TABLE public.therapist_workload OWNER TO postgres;
+
+--
+-- TOC entry 4086 (class 0 OID 63640)
+-- Dependencies: 209
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
+dd8d5839-5a0d-4542-a711-d5cdff88d8f2	437e574e45e00813d528b90ff50f0cc52edbb5f308002197229ef7d78497e897	2025-10-13 15:57:39.79581-06	20251013202725_init	\N	\N	2025-10-13 15:57:39.710228-06	1
+\.
+
+
+--
+-- TOC entry 4100 (class 0 OID 63817)
+-- Dependencies: 223
+-- Data for Name: appointment_reminders; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.appointment_reminders (id, session_id, patient_id, reminder_type, scheduled_for, status, sent_at, message_template, message_sent, error_message, retry_count, created_at) FROM stdin;
+00000000-0000-0000-0000-000000000039	10000000-0000-0000-0000-000000000019	10000000-0000-0000-0000-000000000001	email	2025-08-18 17:46:47.54004-06	sent	2025-08-18 17:46:47.54004-06	Recordatorio de cita terapéutica	Hola Alejandro, te recordamos tu cita el día ...	\N	0	2025-08-17 17:46:47.54004-06
+00000000-0000-0000-0000-000000000040	50000000-0000-0000-0000-000000000023	20000000-0000-0000-0000-000000000002	sms	2025-08-23 17:46:47.54004-06	sent	2025-08-23 17:46:47.54004-06	Recordatorio de cita	Hola Sofía, tu cita es hoy a las ...	\N	0	2025-08-22 17:46:47.54004-06
+00000000-0000-0000-0000-000000000041	70000000-0000-0000-0000-000000000025	a0000000-0000-0000-0000-00000000000a	whatsapp	2025-08-26 17:46:47.54004-06	sent	2025-08-26 17:46:47.54004-06	Recordatorio importante	Hola Guadalupe, recuerda tu cita de hoy...	\N	0	2025-08-25 17:46:47.54004-06
+\.
+
+
+--
+-- TOC entry 4105 (class 0 OID 63876)
+-- Dependencies: 228
+-- Data for Name: audit_log; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.audit_log (id, user_id, action, entity_type, entity_id, changes, ip_address, user_agent, severity, created_at) FROM stdin;
+00000000-0000-0000-0000-000000000065	22222222-2222-2222-2222-222222222222	CREATE	patient	10000000-0000-0000-0000-000000000001	{"name": "Ing. Alejandro Torres Méndez", "status": "active"}	192.168.1.100	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36	info	2025-08-19 17:47:18.059848-06
+00000000-0000-0000-0000-000000000066	33333333-3333-3333-3333-333333333333	UPDATE	session	50000000-0000-0000-0000-000000000023	{"status": "completed", "progress_notes": "Actualizadas notas de progreso"}	192.168.1.101	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36	info	2025-08-24 17:47:18.059848-06
+00000000-0000-0000-0000-000000000067	11111111-1111-1111-1111-111111111111	DELETE	patient_attachment	d0000000-0000-0000-0000-00000000000d	{"file_name": "documento_eliminado.pdf"}	192.168.1.102	Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36	warning	2025-09-18 17:47:18.059848-06
+\.
+
+
+--
+-- TOC entry 4097 (class 0 OID 63782)
+-- Dependencies: 220
+-- Data for Name: clinical_notes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.clinical_notes (id, session_id, patient_id, therapist_id, subjective_note, objective_note, assessment, plan, mood_assessment, anxiety_level, depression_level, risk_level, risk_notes, progress_rating, treatment_adherence, interventions_used, homework_assigned, homework_completion, is_confidential, is_template, template_name, created_at, updated_at) FROM stdin;
+b0000000-0000-0000-0000-000000000029	10000000-0000-0000-0000-000000000019	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	Paciente reporta "sentirse abrumado por la carga laboral", dificultades para dormir, irritabilidad con equipo de trabajo. Menciona que "nunca hay tiempo suficiente".	Paciente se presenta puntual, vestimenta formal. Habla rápido, movimientos inquietos. Contacto visual intermitente. Afecto ansioso.	Trastorno de adaptación con ansiedad. Patrones perfectionistas contribuyen al estrés. Buen insight sobre su situación.	Terapia cognitivo-conductual focalizada en manejo de estrés y establecimiento de límites. Psicoeducación sobre ansiedad.	poor	8	5	medium	Paciente con alto nivel de estrés que afecta funcionamiento laboral y familiar.	3	good	{evaluación,psicoeducación}	Registro de situaciones estresantes	not_done	t	f	\N	2025-08-19 17:46:47.516245-06	2025-10-13 17:46:47.516245-06
+c0000000-0000-0000-0000-000000000030	70000000-0000-0000-0000-000000000025	a0000000-0000-0000-0000-00000000000a	33333333-3333-3333-3333-333333333333	"Siento que me voy a morir cuando empieza el ataque", reporta palpitaciones, dificultad para respirar, miedo intenso. Evita salir sola.	Paciente llegó acompañada. Temblor en manos visible. Voz temblorosa. Respiración superficial durante la sesión.	Trastorno de pánico con agorafobia leve. Alta ansiedad anticipatoria. Apoyo familiar adecuado.	Terapia focalizada en manejo de pánico. Técnicas de grounding y exposición gradual.	critical	9	6	high	Riesgo de crisis de pánico en situaciones públicas. Necesita acompañamiento.	4	excellent	{evaluación,grounding,respiración}	Practicar técnica 5-4-3-2-1	completed	t	f	\N	2025-08-27 17:46:47.516245-06	2025-10-13 17:46:47.516245-06
+\.
+
+
+--
+-- TOC entry 4088 (class 0 OID 63661)
+-- Dependencies: 211
+-- Data for Name: companies; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.companies (id, name, email, phone, address, website, industry, tax_id, billing_contact_name, billing_contact_email, billing_contact_phone, employee_count, active_contracts_count, is_active, notes, created_by, updated_by, created_at, updated_at, deleted_at) FROM stdin;
+66666666-6666-6666-6666-666666666666	TechSolutions México	contabilidad@techsolutions.mx	+525555123456	Av. Reforma 123, CDMX	https://techsolutions.mx	Tecnología	TSM850101ABC	Lic. Fernando Morales	fernando.morales@techsolutions.mx	+525555123457	250	2	t	Empresa de tecnología con enfoque en bienestar emocional	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-14 17:46:47.344629-06	2025-10-13 17:46:47.344629-06	\N
+77777777-7777-7777-7777-777777777777	Consultoría Estratégica Global	rrhh@ceg.mx	+525555123458	Bosques de las Lomas 456, CDMX	https://ceg.mx	Consultoría	CEG900505DEF	C.P. Adriana Ríos	adriana.rios@ceg.mx	+525555123459	120	1	t	Consultoría con programas de salud mental	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-19 17:46:47.344629-06	2025-10-13 17:46:47.344629-06	\N
+88888888-8888-8888-8888-888888888888	Industrias Creativas SA	administracion@industriascreativas.com	+525555123460	Santa Fe 789, CDMX	https://industriascreativas.com	Creatividad	ICS750202GHI	Ing. Jorge Silva	jorge.silva@industriascreativas.com	+525555123461	80	1	t	Agencia creativa con enfoque en balance vida-trabajo	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-24 17:46:47.344629-06	2025-10-13 17:46:47.344629-06	\N
+\.
+
+
+--
+-- TOC entry 4108 (class 0 OID 63907)
+-- Dependencies: 231
+-- Data for Name: company_employees; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.company_employees (id, company_id, patient_id, employee_name, employee_email, employee_id_number, department, "position", is_active, start_date, end_date, notes, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000015	66666666-6666-6666-6666-666666666666	10000000-0000-0000-0000-000000000001	Ing. Alejandro Torres Méndez	alejandro.torres@techsolutions.mx	TS-001	Tecnología	Director de Tecnología	t	2020-03-15	\N	Empleado de alto rendimiento	2025-08-19 17:46:47.492578-06	2025-10-13 17:46:47.492578-06
+00000000-0000-0000-0000-000000000016	66666666-6666-6666-6666-666666666666	20000000-0000-0000-0000-000000000002	Lic. Sofía Ramírez López	sofia.ramirez@techsolutions.mx	TS-045	Proyectos	Gerente de Proyectos	t	2019-07-01	\N	Empleada con potencial de liderazgo	2025-08-24 17:46:47.492578-06	2025-10-13 17:46:47.492578-06
+00000000-0000-0000-0000-000000000017	77777777-7777-7777-7777-777777777777	50000000-0000-0000-0000-000000000005	Mtro. Javier Ortega Santos	javier.ortega@ceg.mx	CEG-012	Consultoría	Consultor Senior	t	2018-11-20	\N	Empleado con amplia experiencia	2025-08-26 17:46:47.492578-06	2025-10-13 17:46:47.492578-06
+00000000-0000-0000-0000-000000000018	88888888-8888-8888-8888-888888888888	70000000-0000-0000-0000-000000000007	Diseñador Omar Flores García	omar.flores@industriascreativas.com	ICS-023	Creatividad	Director Creativo	t	2021-02-15	\N	Talento creativo destacado	2025-09-05 17:46:47.492578-06	2025-10-13 17:46:47.492578-06
+\.
+
+
+--
+-- TOC entry 4089 (class 0 OID 63674)
+-- Dependencies: 212
+-- Data for Name: contracts; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.contracts (id, company_id, contract_name, contract_number, start_date, end_date, cost_per_session, monthly_limit, payment_frequency, status, auto_renew, renewal_notice_days, notes, attachment_url, send_renewal_notification, last_renewal_notification_sent, billing_email, terms_accepted_at, terms_accepted_by, created_by, updated_by, created_at, updated_at, deleted_at) FROM stdin;
+99999999-9999-9999-9999-999999999999	66666666-6666-6666-6666-666666666666	Contrato Bienestar Emocional 2024	TS-2024-001	2024-01-01	2024-12-31	800.00	50000.00	monthly	active	t	30	Sesiones ilimitadas hasta alcanzar límite mensual	\N	t	\N	contabilidad@techsolutions.mx	2024-01-01 00:00:00-06	Fernando Morales	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-14 17:46:47.36442-06	2025-10-13 17:46:47.36442-06	\N
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa	66666666-6666-6666-6666-666666666666	Contrato Programa Directivos	TS-2024-002	2024-02-01	2024-12-31	1200.00	30000.00	monthly	active	t	30	Solo para nivel directivo	\N	t	\N	directivos@techsolutions.mx	2024-02-01 00:00:00-06	Fernando Morales	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-29 17:46:47.36442-06	2025-10-13 17:46:47.36442-06	\N
+bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb	77777777-7777-7777-7777-777777777777	Programa Salud Mental Corporativa	CEG-2024-001	2024-01-15	2024-12-15	750.00	30000.00	monthly	active	t	30	Incluye 2 talleres mensuales	\N	t	\N	rrhh@ceg.mx	2024-01-15 00:00:00-06	Adriana Ríos	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-19 17:46:47.36442-06	2025-10-13 17:46:47.36442-06	\N
+cccccccc-cccc-cccc-cccc-cccccccccccc	88888888-8888-8888-8888-888888888888	Plan Bienestar Integral	ICS-2024-001	2024-01-20	2024-12-20	850.00	20000.00	monthly	active	t	30	Focus en manejo de estrés creativo	\N	t	\N	administracion@industriascreativas.com	2024-01-20 00:00:00-06	Jorge Silva	11111111-1111-1111-1111-111111111111	11111111-1111-1111-1111-111111111111	2025-08-24 17:46:47.36442-06	2025-10-13 17:46:47.36442-06	\N
+\.
+
+
+--
+-- TOC entry 4102 (class 0 OID 63841)
+-- Dependencies: 225
+-- Data for Name: diagnoses; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.diagnoses (id, patient_id, therapist_id, session_id, diagnosis_code, diagnosis_name, diagnosis_category, diagnosis_type, severity, diagnosed_at, resolved_at, clinical_notes, treatment_plan, is_active, created_at, updated_at) FROM stdin;
+f0000000-0000-0000-0000-000000000033	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	10000000-0000-0000-0000-000000000019	F43.23	Trastorno de adaptación con ansiedad	Trauma y trastornos relacionados con estresores	primary	moderate	2025-08-20	\N	Relacionado con alta demanda laboral	Terapia cognitivo-conductual focalizada en manejo de estrés y habilidades de afrontamiento	t	2025-08-20 17:46:47.529895-06	2025-10-13 17:46:47.529895-06
+00000000-0000-0000-0000-000000000034	a0000000-0000-0000-0000-00000000000a	33333333-3333-3333-3333-333333333333	70000000-0000-0000-0000-000000000025	F41.0	Trastorno de pánico	Trastornos de ansiedad	primary	severe	2025-08-28	\N	Con agorafobia leve	Terapia cognitivo-conductual con exposición gradual y técnicas de manejo de pánico	t	2025-08-28 17:46:47.529895-06	2025-10-13 17:46:47.529895-06
+00000000-0000-0000-0000-000000000035	50000000-0000-0000-0000-000000000005	33333333-3333-3333-3333-333333333333	\N	F32.1	Episodio depresivo mayor moderado	Trastornos depresivos	primary	moderate	2025-08-27	\N	En el contexto de crisis existencial	Psicoterapia psicodinámica focalizada en duelo y reevaluación vital	t	2025-08-27 17:46:47.529895-06	2025-10-13 17:46:47.529895-06
+\.
+
+
+--
+-- TOC entry 4103 (class 0 OID 63852)
+-- Dependencies: 226
+-- Data for Name: document_templates; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.document_templates (id, created_by, template_name, template_type, content, variables, is_active, is_public, usage_count, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000060	11111111-1111-1111-1111-111111111111	Nota Clínica SOAP	clinical_note	## Nota Clínica SOAP\\n\\n### Subjetivo\\n{{subjective}}\\n\\n### Objetivo\\n{{objective}}\\n\\n### Assessment\\n{{assessment}}\\n\\n### Plan\\n{{plan}}	["subjective", "objective", "assessment", "plan"]	t	t	45	2025-08-14 17:46:47.576235-06	2025-10-13 17:46:47.576235-06
+00000000-0000-0000-0000-000000000061	11111111-1111-1111-1111-111111111111	Consentimiento Informado	consent_form	# CONSENTIMIENTO INFORMADO\\n\\nYo, {{patient_name}}, acepto participar en el proceso terapéutico...	["patient_name", "therapist_name", "date"]	t	t	32	2025-08-14 17:46:47.576235-06	2025-10-13 17:46:47.576235-06
+\.
+
+
+--
+-- TOC entry 4093 (class 0 OID 63733)
+-- Dependencies: 216
+-- Data for Name: monthly_contract_reports; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.monthly_contract_reports (id, contract_id, company_id, report_month, report_year, period_start_date, period_end_date, total_sessions, total_patients, total_amount, payment_status, invoice_number, invoice_date, due_date, paid_amount, paid_at, paid_by, payment_reference, payment_method, sent_to_company_at, sent_by, pdf_url, notes, generated_by, generated_at, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000045	99999999-9999-9999-9999-999999999999	66666666-6666-6666-6666-666666666666	11	2024	2024-11-01	2024-11-30	15	4	12000.00	paid	FAC-2024-001	2024-12-05	2024-12-20	12000.00	2024-12-15 00:00:00-06	55555555-5555-5555-5555-555555555555	BAN-001	transfer	2024-12-05 00:00:00-06	55555555-5555-5555-5555-555555555555	https://storage.terapia.com/invoices/FAC-2024-001.pdf	Reporte mensual de noviembre	11111111-1111-1111-1111-111111111111	2024-12-04 00:00:00-06	2025-09-17 17:46:47.551681-06	2025-10-13 17:46:47.551681-06
+00000000-0000-0000-0000-000000000046	99999999-9999-9999-9999-999999999999	66666666-6666-6666-6666-666666666666	12	2024	2024-12-01	2024-12-31	18	4	14400.00	pending	FAC-2024-002	2024-12-25	2025-01-20	0.00	\N	\N	\N	\N	2024-12-25 00:00:00-06	55555555-5555-5555-5555-555555555555	https://storage.terapia.com/invoices/FAC-2024-002.pdf	Reporte mensual de diciembre	11111111-1111-1111-1111-111111111111	2024-12-24 00:00:00-06	2025-10-07 17:46:47.551681-06	2025-10-13 17:46:47.551681-06
+\.
+
+
+--
+-- TOC entry 4094 (class 0 OID 63749)
+-- Dependencies: 217
+-- Data for Name: monthly_report_sessions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.monthly_report_sessions (id, report_id, session_id, patient_id, patient_name, therapist_id, therapist_name, session_date, session_type, session_cost, created_at) FROM stdin;
+00000000-0000-0000-0000-000000000047	00000000-0000-0000-0000-000000000045	10000000-0000-0000-0000-000000000019	10000000-0000-0000-0000-000000000001	Ing. Alejandro Torres Méndez	22222222-2222-2222-2222-222222222222	Lic. Carlos Sánchez López	2025-08-19 17:46:47.558-06	individual	800.00	2025-09-18 17:46:47.558-06
+00000000-0000-0000-0000-000000000048	00000000-0000-0000-0000-000000000045	20000000-0000-0000-0000-000000000020	10000000-0000-0000-0000-000000000001	Ing. Alejandro Torres Méndez	22222222-2222-2222-2222-222222222222	Lic. Carlos Sánchez López	2025-08-26 17:46:47.558-06	individual	800.00	2025-09-18 17:46:47.558-06
+00000000-0000-0000-0000-000000000049	00000000-0000-0000-0000-000000000045	50000000-0000-0000-0000-000000000023	20000000-0000-0000-0000-000000000002	Lic. Sofía Ramírez López	33333333-3333-3333-3333-333333333333	Mtro. Roberto Jiménez García	2025-08-24 17:46:47.558-06	individual	800.00	2025-09-18 17:46:47.558-06
+\.
+
+
+--
+-- TOC entry 4095 (class 0 OID 63758)
+-- Dependencies: 218
+-- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.notifications (id, user_id, title, message, type, priority, related_entity_type, related_entity_id, is_read, is_archived, read_at, action_url, action_label, metadata, expires_at, created_at) FROM stdin;
+00000000-0000-0000-0000-000000000055	22222222-2222-2222-2222-222222222222	Nuevo paciente asignado	Se te ha asignado el paciente Ing. Alejandro Torres Méndez	task	normal	patient	10000000-0000-0000-0000-000000000001	t	f	2025-08-19 17:46:47.567553-06	/patients/10000000-0000-0000-0000-000000000001	Ver paciente	{"patient_name": "Ing. Alejandro Torres Méndez"}	\N	2025-08-19 17:46:47.567553-06
+00000000-0000-0000-0000-000000000056	33333333-3333-3333-3333-333333333333	Recordatorio de sesión	Tienes una sesión con Lic. Sofía Ramírez López en 30 minutos	reminder	normal	session	50000000-0000-0000-0000-000000000023	t	f	2025-08-24 17:46:47.567553-06	/sessions/50000000-0000-0000-0000-000000000023	Unirse a sesión	{"session_time": "10:00 AM"}	\N	2025-08-24 17:46:47.567553-06
+00000000-0000-0000-0000-000000000057	11111111-1111-1111-1111-111111111111	Reporte mensual pendiente	El reporte mensual de TechSolutions está pendiente de envío	warning	high	monthly_report	00000000-0000-0000-0000-000000000045	t	f	2025-09-16 17:46:47.567553-06	/reports/00000000-0000-0000-0000-000000000045	Revisar reporte	{"company_name": "TechSolutions México"}	\N	2025-09-15 17:46:47.567553-06
+\.
+
+
+--
+-- TOC entry 4091 (class 0 OID 63706)
+-- Dependencies: 214
+-- Data for Name: patient_attachments; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.patient_attachments (id, patient_id, file_name, file_url, file_type, file_size_kb, mime_type, description, is_confidential, uploaded_by, created_at) FROM stdin;
+d0000000-0000-0000-0000-00000000000d	10000000-0000-0000-0000-000000000001	consentimiento_informado.pdf	https://storage.terapia.com/consentimientos/alejandro_torres.pdf	consent	250	application/pdf	Consentimiento informado firmado	t	22222222-2222-2222-2222-222222222222	2025-08-19 17:46:47.473349-06
+e0000000-0000-0000-0000-00000000000e	20000000-0000-0000-0000-000000000002	consentimiento_sofia.pdf	https://storage.terapia.com/consentimientos/sofia_ramirez.pdf	consent	245	application/pdf	Consentimiento informado firmado	t	33333333-3333-3333-3333-333333333333	2025-08-24 17:46:47.473349-06
+f0000000-0000-0000-0000-00000000000f	a0000000-0000-0000-0000-00000000000a	estudios_medicos.pdf	https://storage.terapia.com/medicos/guadalupe_morales.pdf	medical_record	1800	application/pdf	Estudios médicos previos	t	33333333-3333-3333-3333-333333333333	2025-08-28 17:46:47.473349-06
+00000000-0000-0000-0000-000000000010	90000000-0000-0000-0000-000000000009	identificacion.pdf	https://storage.terapia.com/identificaciones/eduardo_navarro.pdf	document	1500	application/pdf	INE vigente	f	22222222-2222-2222-2222-222222222222	2025-08-23 17:46:47.473349-06
+\.
+
+
+--
+-- TOC entry 4107 (class 0 OID 63895)
+-- Dependencies: 230
+-- Data for Name: patient_emergency_contacts; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.patient_emergency_contacts (id, patient_id, contact_name, relationship, phone, alternate_phone, email, is_primary, priority, notes, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000011	10000000-0000-0000-0000-000000000001	María Torres	Esposa	+525566778800	+525577889900	maria.torres@email.com	t	1	Disponible todo el día	2025-08-19 17:46:47.48369-06	2025-10-13 17:46:47.48369-06
+00000000-0000-0000-0000-000000000012	10000000-0000-0000-0000-000000000001	Carlos Torres	Hermano	+525577889911	\N	carlos.t@email.com	f	2	Contactar si no contesta esposa	2025-08-19 17:46:47.48369-06	2025-10-13 17:46:47.48369-06
+00000000-0000-0000-0000-000000000013	a0000000-0000-0000-0000-00000000000a	Juan Morales	Esposo	+525566778888	+525577889933	juan.morales@email.com	t	1	Disponible después de 6pm	2025-08-27 17:46:47.48369-06	2025-10-13 17:46:47.48369-06
+00000000-0000-0000-0000-000000000014	90000000-0000-0000-0000-000000000009	Susana Navarro	Hija	+525566778866	\N	susana.navarro@email.com	t	1	Vive con el paciente	2025-08-22 17:46:47.48369-06	2025-10-13 17:46:47.48369-06
+\.
+
+
+--
+-- TOC entry 4090 (class 0 OID 63689)
+-- Dependencies: 213
+-- Data for Name: patients; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.patients (id, name, email, phone, birth_date, gender, company_id, company_name, occupation, address, city, state, zip_code, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone, marital_status, education_level, nationality, religion, living_situation, has_children, children_count, primary_therapist_id, therapy_type, referred_by, referral_source, reason_for_therapy, therapeutic_goals, expectations, previous_therapy, previous_therapy_details, current_medications, allergies, medical_conditions, psychiatric_diagnoses, family_psychiatric_history, substance_use, risk_assessment, status, discharge_date, discharge_reason, consent_signed, consent_date, privacy_notice_accepted, photo_url, preferred_contact_method, preferred_language, insurance_provider, insurance_policy_number, insurance_valid_until, notes, created_by, updated_by, created_at, updated_at, deleted_at) FROM stdin;
+10000000-0000-0000-0000-000000000001	Ing. Alejandro Torres Méndez	alejandro.torres@techsolutions.mx	+525566778899	1985-03-15	M	66666666-6666-6666-6666-666666666666	TechSolutions México	Director de Tecnología	Av. Insurgentes 123, CDMX	Ciudad de México	CDMX	06100	María Torres	Esposa	+525566778800	married	maestria	Mexicana	Católica	with_family	t	2	22222222-2222-2222-2222-222222222222	individual	\N	empresa	Estrés laboral y ansiedad por alto rendimiento	Manejo de estrés, equilibrio vida-trabajo, mejorar relaciones interpersonales	Mejorar calidad de vida y desempeño laboral	t	Terapia breve hace 2 años	Ninguno	Ninguna	Hipertensión controlada	Trastorno de ansiedad generalizada	Madre con depresión	Alcohol social (2-3 copas fines de semana)	medium	active	\N	\N	t	2025-08-19	t	\N	email	es	\N	\N	\N	Paciente comprometido con alto potencial de mejora	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-08-19 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+20000000-0000-0000-0000-000000000002	Lic. Sofía Ramírez López	sofia.ramirez@techsolutions.mx	+525566778811	1990-07-22	F	66666666-6666-6666-6666-666666666666	TechSolutions México	Gerente de Proyectos	Calle Tlalpan 456, CDMX	Ciudad de México	CDMX	04100	Carlos Ramírez	Hermano	+525566778822	single	licenciatura	Mexicana	Agnóstica	alone	f	0	33333333-3333-3333-3333-333333333333	individual	\N	empresa	Burnout y dificultades de liderazgo	Desarrollar habilidades de liderazgo, manejo de equipos, prevención de burnout	Mejorar habilidades directivas	f	\N	Ninguno	Penicilina	Ninguna	Síndrome de burnout	Hermano con TDAH	No consume	low	active	\N	\N	t	2025-08-24	t	\N	email	es	\N	\N	\N	Paciente con alto potencial de crecimiento	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-24 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+30000000-0000-0000-0000-000000000003	C. Miguel Ángel Cruz	miguel.cruz@techsolutions.mx	+525566778833	1988-11-30	M	66666666-6666-6666-6666-666666666666	TechSolutions México	Líder Técnico	Av. Universidad 789, CDMX	Ciudad de México	CDMX	04500	Laura Cruz	Madre	+525566778844	divorced	licenciatura	Mexicana	Cristiano	with_roommates	t	1	22222222-2222-2222-2222-222222222222	individual	\N	empresa	Problemas de adaptación post-pandemia	Adaptación a trabajo híbrido, habilidades sociales, manejo de ansiedad social	Reintegrarse socialmente	t	Terapia grupal por 6 meses	Sertralina 50mg	Ninguna	Ninguna	Trastorno de adaptación	Sin antecedentes conocidos	No consume	low	active	\N	\N	t	2025-08-29	t	\N	whatsapp	es	\N	\N	\N	Paciente en proceso de adaptación	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-08-29 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+40000000-0000-0000-0000-000000000004	Arq. Daniela Vargas Ruiz	daniela.vargas@techsolutions.mx	+525566778855	1992-04-18	F	66666666-6666-6666-6666-666666666666	TechSolutions México	Diseñadora UX Senior	Calle Durango 321, CDMX	Ciudad de México	CDMX	06700	Roberto Vargas	Padre	+525566778866	single	licenciatura	Mexicana	Budista	with_partner	f	0	44444444-4444-4444-4444-444444444444	individual	\N	empresa	Problemas de autoestima y perfeccionismo	Mejorar autoestima, manejar perfeccionismo, desarrollar asertividad	Aumentar confianza personal	f	\N	Ninguno	Mariscos	Migraña	Ninguno formal	Padre con trastorno obsesivo-compulsivo	No consume	low	active	\N	\N	t	2025-09-03	t	\N	sms	es	\N	\N	\N	Paciente con buen insight	44444444-4444-4444-4444-444444444444	44444444-4444-4444-4444-444444444444	2025-09-03 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+50000000-0000-0000-0000-000000000005	Mtro. Javier Ortega Santos	javier.ortega@ceg.mx	+525566778877	1983-12-10	M	77777777-7777-7777-7777-777777777777	Consultoría Estratégica Global	Consultor Senior	Bosques de las Lomas 456, CDMX	Ciudad de México	CDMX	05100	Carmen Ortega	Esposa	+525566778888	married	maestria	Mexicana	Católico	with_family	t	3	33333333-3333-3333-3333-333333333333	individual	\N	empresa	Crisis de mediana edad y reevaluación profesional	Encontrar propósito, manejo de transición profesional, mejorar relaciones familiares	Redefinir proyecto de vida	t	Psicoanálisis por 2 años	Ninguno	Ninguna	Diabetes tipo 2	Trastorno depresivo moderado	Sin antecedentes	Alcohol ocasional	medium	active	\N	\N	t	2025-08-26	t	\N	email	es	\N	\N	\N	Paciente en proceso de introspección	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-26 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+60000000-0000-0000-0000-000000000006	Lic. Andrea Mendoza Castro	andrea.mendoza@ceg.mx	+525566778899	1991-06-25	F	77777777-7777-7777-7777-777777777777	Consultoría Estratégica Global	Analista Estratégica	Av. Patriotismo 789, CDMX	Ciudad de México	CDMX	03800	Ricardo Mendoza	Hermano	+525566778800	single	licenciatura	Mexicana	Atea	alone	f	0	44444444-4444-4444-4444-444444444444	individual	\N	empresa	Dificultades en relaciones interpersonales laborales	Desarrollo de inteligencia emocional, comunicación asertiva, manejo de conflictos	Mejorar clima laboral	f	\N	Ninguno	Ninguna	Ninguna	Ninguno	Madre con ansiedad	No consume	low	active	\N	\N	t	2025-09-01	t	\N	phone	es	\N	\N	\N	Paciente con dificultades de comunicación	44444444-4444-4444-4444-444444444444	44444444-4444-4444-4444-444444444444	2025-09-01 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+70000000-0000-0000-0000-000000000007	Diseñador Omar Flores García	omar.flores@industriascreativas.com	+525566778811	1987-09-14	M	88888888-8888-8888-8888-888888888888	Industrias Creativas SA	Director Creativo	Santa Fe 789, CDMX	Ciudad de México	CDMX	01210	Patricia Flores	Hermana	+525566778822	single	licenciatura	Mexicana	Espiritual	with_roommates	f	0	22222222-2222-2222-2222-222222222222	individual	\N	empresa	Bloqueo creativo y ansiedad por deadlines	Superar bloqueo creativo, manejar presión por fechas límite, mejorar productividad	Recuperar creatividad	t	Terapia breve por bloqueo creativo	Ninguno	Polvo	Rinitis alérgica	Trastorno de ansiedad	Sin antecedentes	No consume	medium	active	\N	\N	t	2025-09-05	t	\N	whatsapp	es	\N	\N	\N	Paciente creativo en crisis	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-05 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+80000000-0000-0000-0000-000000000008	C. Valeria Ríos Martínez	valeria.rios@industriascreativas.com	+525566778833	1993-02-28	F	88888888-8888-8888-8888-888888888888	Industrias Creativas SA	Coordinadora de Producción	Calle Oaxaca 123, CDMX	Ciudad de México	CDMX	06700	Fernando Ríos	Padre	+525566778844	single	licenciatura	Mexicana	Católica	with_partner	f	0	44444444-4444-4444-4444-444444444444	individual	\N	empresa	Problemas de límites y manejo del tiempo	Establecer límites saludables, organización del tiempo, manejo del estrés	Mejorar organización personal	f	\N	Ninguno	Ninguna	Ninguna	Ninguno	Sin antecedentes	No consume	low	active	\N	\N	t	2025-09-08	t	\N	email	es	\N	\N	\N	Paciente con dificultades de organización	44444444-4444-4444-4444-444444444444	44444444-4444-4444-4444-444444444444	2025-09-08 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+90000000-0000-0000-0000-000000000009	C. Eduardo Navarro Pérez	eduardo.navarro@gmail.com	+525566778855	1978-05-20	M	\N	\N	Contador	Av. Chapultepec 456, CDMX	Ciudad de México	CDMX	06500	Susana Navarro	Hija	+525566778866	widowed	licenciatura	Mexicana	Católico	with_children	t	2	22222222-2222-2222-2222-222222222222	individual	Recomendación de amigo	referencia_paciente	Duelo por pérdida de familiar	Procesar duelo, manejar tristeza, reconstruir proyecto de vida	Superar el duelo	t	Terapia de duelo por 3 meses	Escitalopram 10mg	Ninguna	Hipertensión	Trastorno depresivo mayor	Sin antecedentes	Alcohol ocasional	medium	active	\N	\N	t	2025-08-22	t	\N	phone	es	GNP	GNP123456	2024-12-31	Paciente en proceso de duelo	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-08-22 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+a0000000-0000-0000-0000-00000000000a	Sra. Guadalupe Morales Herrera	lupita.morales@hotmail.com	+525566778877	1965-08-12	F	\N	\N	Ama de casa	Calle Michoacán 321, CDMX	Ciudad de México	CDMX	11800	Juan Morales	Esposo	+525566778888	married	secundaria	Mexicana	Católica	with_family	t	4	33333333-3333-3333-3333-333333333333	individual	Búsqueda en internet	internet	Ansiedad y ataques de pánico	Reducir frecuencia e intensidad de ataques, desarrollar herramientas de manejo	Controlar los ataques de pánico	f	\N	Alprazolam 0.25mg PRN	Ninguna	Artritis	Trastorno de pánico	Hija con trastorno alimenticio	No consume	high	active	\N	\N	t	2025-08-27	t	\N	phone	es	\N	\N	\N	Paciente con alto nivel de ansiedad	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-27 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+b0000000-0000-0000-0000-00000000000b	Est. Alejandro Rojas Díaz	alejandro.rojas@unam.mx	+525566778899	2000-11-03	M	\N	\N	Estudiante universitario	Calle Universidad 789, CDMX	Ciudad de México	CDMX	04500	Silvia Rojas	Madre	+525566778800	single	universidad	Mexicana	Agnóstico	with_family	f	0	44444444-4444-4444-4444-444444444444	individual	Servicio universitario	universidad	Ansiedad académica y presión por desempeño	Manejar ansiedad ante exámenes, mejorar hábitos de estudio, equilibrio vida-estudio	Mejorar rendimiento académico	t	Orientación vocacional	Ninguno	Ninguna	Ninguna	Trastorno de ansiedad social	Padre con depresión	No consume	low	active	\N	\N	t	2025-09-02	t	\N	whatsapp	es	\N	\N	\N	Paciente joven con ansiedad académica	44444444-4444-4444-4444-444444444444	44444444-4444-4444-4444-444444444444	2025-09-02 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+c0000000-0000-0000-0000-00000000000c	Lic. Carmen Silva López	carmen.silva@outlook.com	+525566778811	1982-03-08	F	\N	\N	Arquitecta	Av. Revolución 123, CDMX	Ciudad de México	CDMX	03900	Roberto Silva	Esposo	+525566778822	married	maestria	Mexicana	Católica	with_partner	t	1	22222222-2222-2222-2222-222222222222	couple	Recomendación de amiga	amigo	Problemas de comunicación en pareja	Mejorar comunicación, resolver conflictos, fortalecer vínculo	Mejorar relación de pareja	f	\N	Ninguno	Ninguna	Ninguna	Ninguno	Sin antecedentes	No consume	low	active	\N	\N	t	2025-09-07	t	\N	email	es	\N	\N	\N	Pareja en terapia conjunta	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-07 17:46:47.458946-06	2025-10-13 17:46:47.458946-06	\N
+\.
+
+
+--
+-- TOC entry 4101 (class 0 OID 63828)
+-- Dependencies: 224
+-- Data for Name: payment_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.payment_transactions (id, session_id, patient_id, contract_id, report_id, transaction_type, amount, payment_method, payment_reference, currency, exchange_rate, status, bank_name, account_last_four, authorization_code, notes, processed_by, transaction_date, created_at) FROM stdin;
+00000000-0000-0000-0000-000000000042	10000000-0000-0000-0000-000000000019	10000000-0000-0000-0000-000000000001	99999999-9999-9999-9999-999999999999	\N	payment	800.00	transfer	TS-001-001	MXN	1.0000	completed	BBVA	1234	AUTH123	Pago incluido en factura mensual	55555555-5555-5555-5555-555555555555	2025-08-20 17:46:47.545755-06	2025-08-20 17:46:47.545755-06
+00000000-0000-0000-0000-000000000043	50000000-0000-0000-0000-000000000023	20000000-0000-0000-0000-000000000002	99999999-9999-9999-9999-999999999999	\N	payment	800.00	transfer	TS-001-002	MXN	1.0000	completed	BBVA	5678	AUTH124	Pago incluido en factura mensual	55555555-5555-5555-5555-555555555555	2025-08-25 17:46:47.545755-06	2025-08-25 17:46:47.545755-06
+00000000-0000-0000-0000-000000000044	70000000-0000-0000-0000-000000000025	a0000000-0000-0000-0000-00000000000a	\N	\N	payment	1000.00	cash	EF-001	MXN	1.0000	completed	\N	\N	\N	Pago en efectivo	55555555-5555-5555-5555-555555555555	2025-08-28 17:46:47.545755-06	2025-08-28 17:46:47.545755-06
+\.
+
+
+--
+-- TOC entry 4106 (class 0 OID 63886)
+-- Dependencies: 229
+-- Data for Name: session_techniques; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.session_techniques (id, session_id, clinical_note_id, technique_name, technique_category, effectiveness_rating, patient_response, notes, created_at) FROM stdin;
+d0000000-0000-0000-0000-000000000031	20000000-0000-0000-0000-000000000020	b0000000-0000-0000-0000-000000000029	Mindfulness Breathing	mindfulness	8	Paciente reporta "mayor calma inmediata"	Necesita práctica consistente para automatizar	2025-08-26 17:46:47.522151-06
+e0000000-0000-0000-0000-000000000032	70000000-0000-0000-0000-000000000025	c0000000-0000-0000-0000-000000000030	Grounding 5-4-3-2-1	mindfulness	9	Paciente reporta "reducción inmediata de síntomas"	Muy efectiva en etapas iniciales de pánico	2025-08-27 17:46:47.522151-06
+\.
+
+
+--
+-- TOC entry 4092 (class 0 OID 63716)
+-- Dependencies: 215
+-- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.sessions (id, patient_id, therapist_id, session_number, session_date, session_duration_minutes, session_type, session_modality, appointment_type, meet_link, location_address, session_cost, billing_type, contract_id, payment_status, paid_amount, payment_date, payment_method, payment_reference, session_notes, progress_notes, interventions, homework_assigned, next_session_plan, risk_level, status, confirmed_at, confirmed_by, reminders_sent, last_reminder_sent_at, cancelled_reason, cancelled_by, cancelled_at, created_by, updated_by, created_at, updated_at, deleted_at) FROM stdin;
+10000000-0000-0000-0000-000000000019	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	1	2025-08-19 17:46:47.505771-06	60	individual	in_person	presencial	\N	Consultorio Central	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-08-20	transfer	TS-001-001	Primera sesión de evaluación. Paciente presenta alta carga laboral y síntomas de ansiedad.	Establecido rapport terapéutico. Identificados principales estresores laborales.	Evaluación inicial, psicoeducación sobre ansiedad	Llevar registro de situaciones estresantes durante la semana	Profundizar en historia laboral y personal	medium	completed	2025-08-19 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	2	2025-08-18 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-08-19 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+20000000-0000-0000-0000-000000000020	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	2	2025-08-26 17:46:47.505771-06	60	individual	online	videollamada	https://meet.terapia.com/session-alejandro-2	Online	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-08-27	transfer	TS-001-002	Sesión focalizada en identificación de triggers de estrés.	Progreso en identificación temprana de síntomas de estrés	Técnicas de mindfulness, reestructuración cognitiva	Practicar técnica de respiración 5-5-5 diariamente	Trabajar en comunicación asertiva	medium	completed	2025-08-26 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-08-25 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-08-26 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+30000000-0000-0000-0000-000000000021	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	3	2025-09-02 17:46:47.505771-06	60	individual	in_person	presencial	\N	Consultorio Central	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-09-03	transfer	TS-001-003	Trabajo en comunicación asertiva. Paciente practicó situaciones difíciles.	Mejora notable en expresión de necesidades	Role-playing, entrenamiento asertivo	Implementar comunicación asertiva en al menos 2 situaciones laborales	Manejo de conflictos específicos	low	completed	2025-09-02 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-09-01 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-02 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+40000000-0000-0000-0000-000000000022	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	4	2025-09-09 17:46:47.505771-06	60	individual	online	videollamada	https://meet.terapia.com/session-alejandro-4	Online	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-09-10	transfer	TS-001-004	Revisión de progreso. Paciente reporta reducción del 30% en percepción de estrés.	Significativa reducción en escalas de estrés autoevaluadas	Revisión de progreso, ajuste de técnicas	Mantener práctica diaria de mindfulness	Enfoque en balance vida-trabajo	low	completed	2025-09-09 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-09-08 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-09 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+50000000-0000-0000-0000-000000000023	20000000-0000-0000-0000-000000000002	33333333-3333-3333-3333-333333333333	1	2025-08-24 17:46:47.505771-06	60	individual	in_person	presencial	\N	Consultorio Central	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-08-25	transfer	TS-001-005	Evaluación inicial. Paciente con síntomas de burnout, dificultades para establecer límites.	Establecida buena alianza terapéutica	Evaluación, psicoeducación sobre burnout	Registro de horas trabajadas y actividades de autocuidado	Análisis de patrones laborales	low	completed	2025-08-24 17:46:47.505771-06	33333333-3333-3333-3333-333333333333	2	2025-08-23 17:46:47.505771-06	\N	\N	\N	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-24 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+60000000-0000-0000-0000-000000000024	20000000-0000-0000-0000-000000000002	33333333-3333-3333-3333-333333333333	2	2025-08-31 17:46:47.505771-06	60	individual	online	videollamada	https://meet.terapia.com/session-sofia-2	Online	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-09-01	transfer	TS-001-006	Trabajo en establecimiento de límites. Paciente implementó horario de desconexión con éxito moderado.	Progreso inicial en establecimiento de límites	Entrenamiento en asertividad, planificación de límites	Mantener horario estricto de salida	Manejo de expectativas con superiores	low	completed	2025-08-31 17:46:47.505771-06	33333333-3333-3333-3333-333333333333	1	2025-08-30 17:46:47.505771-06	\N	\N	\N	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-31 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+70000000-0000-0000-0000-000000000025	a0000000-0000-0000-0000-00000000000a	33333333-3333-3333-3333-333333333333	1	2025-08-27 17:46:47.505771-06	60	individual	in_person	presencial	\N	Consultorio Central	1000.00	direct	\N	paid	1000.00	2025-08-28	cash	EF-001	Primera sesión. Paciente con historia de ataques de pánico. Alto nivel de ansiedad anticipatoria.	Establecido rapport, paciente colaboradora	Evaluación, técnicas de grounding iniciales	Practicar técnica 5-4-3-2-1 diariamente	Psicoeducación sobre ansiedad y pánico	high	completed	2025-08-27 17:46:47.505771-06	33333333-3333-3333-3333-333333333333	2	2025-08-26 17:46:47.505771-06	\N	\N	\N	33333333-3333-3333-3333-333333333333	33333333-3333-3333-3333-333333333333	2025-08-27 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+a0000000-0000-0000-0000-000000000028	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	7	2025-09-30 17:46:47.505771-06	60	individual	online	videollamada	https://meet.terapia.com/session-alejandro-7	Online	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-10-01	transfer	TS-001-009	Avance significativo. Paciente implementa técnicas consistentemente. Reducción del 60% en estrés percibido.	Progreso notable en todas las áreas trabajadas	Refuerzo de técnicas, establecimiento de mantenimiento	Continuar con prácticas establecidas	Prevención de recaídas	low	completed	2025-09-30 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-09-29 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-30 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+90000000-0000-0000-0000-000000000027	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	6	2025-10-20 07:46:47.505-06	60	individual	in_person	presencial	\N	Consultorio Central	800.00	contract	99999999-9999-9999-9999-999999999999	scheduled	800.00	2025-09-24	transfer	TS-001-008	Trabajo en relaciones familiares. Paciente reconoce necesidad de mayor presencia en casa.	Insight sobre impacto del trabajo en familia	Análisis de dinámicas familiares, role-playing	Dedicar tiempo de calidad con hijos diariamente	Comunicación asertiva en familia	low	in_progress	2025-09-23 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-09-22 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-23 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+80000000-0000-0000-0000-000000000026	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	5	2025-10-20 17:46:47.505-06	60	individual	online	videollamada	https://meet.terapia.com/session-alejandro-5	Online	800.00	contract	99999999-9999-9999-9999-999999999999	paid	800.00	2025-09-17	transfer	TS-001-007	Enfoque en balance vida-trabajo. Paciente reporta mejor distribución de tiempo.	Mejora consistente en manejo de tiempo	Planificación semanal, establecimiento de prioridades	Implementar una actividad recreativa semanal	Trabajo en relaciones familiares	low	in_progress	2025-09-16 17:46:47.505771-06	22222222-2222-2222-2222-222222222222	1	2025-09-15 17:46:47.505771-06	\N	\N	\N	22222222-2222-2222-2222-222222222222	22222222-2222-2222-2222-222222222222	2025-09-16 17:46:47.505771-06	2025-10-13 17:46:47.505771-06	\N
+\.
+
+
+--
+-- TOC entry 4104 (class 0 OID 63865)
+-- Dependencies: 227
+-- Data for Name: system_settings; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.system_settings (id, setting_key, setting_value, setting_type, description, category, is_public, updated_by, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- TOC entry 4096 (class 0 OID 63770)
+-- Dependencies: 219
+-- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tasks (id, assigned_to, created_by, title, description, priority, status, related_entity_type, related_entity_id, due_date, completed_at, tags, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000058	55555555-5555-5555-5555-555555555555	11111111-1111-1111-1111-111111111111	Enviar factura a TechSolutions	Factura FAC-2024-002 pendiente de envío	high	pending	monthly_report	00000000-0000-0000-0000-000000000046	2025-10-15 17:46:47.572532-06	\N	{facturación,urgente}	2025-10-08 17:46:47.572532-06	2025-10-13 17:46:47.572532-06
+00000000-0000-0000-0000-000000000059	22222222-2222-2222-2222-222222222222	11111111-1111-1111-1111-111111111111	Revisión de caso alto riesgo	Revisar evolución de Guadalupe Morales - riesgo alto	urgent	completed	patient	a0000000-0000-0000-0000-00000000000a	2025-10-12 17:46:47.572532-06	2025-10-12 17:46:47.572532-06	{clínico,riesgo}	2025-10-10 17:46:47.572532-06	2025-10-13 17:46:47.572532-06
+\.
+
+
+--
+-- TOC entry 4098 (class 0 OID 63794)
+-- Dependencies: 221
+-- Data for Name: therapeutic_goals; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.therapeutic_goals (id, patient_id, therapist_id, goal_title, goal_description, goal_category, target_date, status, progress_percentage, specific_criteria, measurable_criteria, achievable_notes, relevant_notes, time_bound_date, last_reviewed_at, achieved_at, abandoned_reason, notes, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000036	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	Reducir niveles de estrés laboral	Implementar técnicas de manejo de estrés en entorno laboral	emotional	2026-01-11	in_progress	40	Identificar triggers de estrés y aplicar técnicas de respiración	Reducir escala de estrés percibido de 8/10 a 4/10	Ya cuenta con técnicas básicas, necesita practica consistente	Fundamental para su desempeño y salud	2026-01-11	2025-10-03 17:46:47.535811-06	\N	\N	Objetivo en progreso constante	2025-08-20 17:46:47.535811-06	2025-10-13 17:46:47.535811-06
+00000000-0000-0000-0000-000000000037	10000000-0000-0000-0000-000000000001	22222222-2222-2222-2222-222222222222	Mejorar comunicación asertiva	Desarrollar habilidades para expresar necesidades en el trabajo	social	2026-02-10	active	25	Practicar comunicación asertiva en 3 situaciones semanales	Reportar 80% de satisfacción en interacciones difíciles	Tiene buena base, necesita desarrollar confianza	Clave para crecimiento profesional	2026-02-10	2025-10-03 17:46:47.535811-06	\N	\N	Objetivo a largo plazo	2025-08-20 17:46:47.535811-06	2025-10-13 17:46:47.535811-06
+00000000-0000-0000-0000-000000000038	a0000000-0000-0000-0000-00000000000a	33333333-3333-3333-3333-333333333333	Manejo de ataques de pánico	Reducir frecuencia e intensidad de ataques de pánico	emotional	2026-04-11	active	30	Aplicar técnicas de grounding durante episodios iniciales	Reducir ataques de 3 semanales a 1 mensual	Ha mostrado progreso en identificación temprana	Mejora significativa calidad de vida	2026-04-11	2025-10-06 17:46:47.535811-06	\N	\N	Objetivo crítico para funcionalidad	2025-08-28 17:46:47.535811-06	2025-10-13 17:46:47.535811-06
+\.
+
+
+--
+-- TOC entry 4099 (class 0 OID 63806)
+-- Dependencies: 222
+-- Data for Name: therapist_availability; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.therapist_availability (id, therapist_id, day_of_week, start_time, end_time, is_available, location, effective_from, effective_until, notes, created_at, updated_at) FROM stdin;
+00000000-0000-0000-0000-000000000050	22222222-2222-2222-2222-222222222222	1	09:00:00	17:00:00	t	consultorio	2024-01-01	\N	Disponibilidad regular	2025-08-14 17:46:47.563247-06	2025-10-13 17:46:47.563247-06
+00000000-0000-0000-0000-000000000051	22222222-2222-2222-2222-222222222222	2	09:00:00	17:00:00	t	consultorio	2024-01-01	\N	Disponibilidad regular	2025-08-14 17:46:47.563247-06	2025-10-13 17:46:47.563247-06
+00000000-0000-0000-0000-000000000052	22222222-2222-2222-2222-222222222222	3	09:00:00	17:00:00	t	online	2024-01-01	\N	Sesiones en línea	2025-08-14 17:46:47.563247-06	2025-10-13 17:46:47.563247-06
+00000000-0000-0000-0000-000000000053	33333333-3333-3333-3333-333333333333	1	10:00:00	18:00:00	t	consultorio	2024-01-01	\N	Disponibilidad regular	2025-08-14 17:46:47.563247-06	2025-10-13 17:46:47.563247-06
+00000000-0000-0000-0000-000000000054	33333333-3333-3333-3333-333333333333	3	10:00:00	18:00:00	t	consultorio	2024-01-01	\N	Disponibilidad regular	2025-08-14 17:46:47.563247-06	2025-10-13 17:46:47.563247-06
+\.
+
+
+--
+-- TOC entry 4087 (class 0 OID 63649)
+-- Dependencies: 210
+-- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_profiles (id, full_name, email, phone, role, specialty, license_number, bio, avatar_url, notifications_enabled, is_active, created_at, updated_at) FROM stdin;
+11111111-1111-1111-1111-111111111111	Dra. Ana Martínez Rodríguez	ana.martinez@terapia.com	+525512345678	admin	Psicología Clínica	PSI123456	Directora clínica con 15 años de experiencia en terapia cognitivo-conductual	\N	t	t	2025-08-14 17:46:47.311814-06	2025-10-13 17:46:47.311814-06
+22222222-2222-2222-2222-222222222222	Lic. Carlos Sánchez López	carlos.sanchez@terapia.com	+525512345679	therapist	Terapia Cognitivo-Conductual	PSI234567	Especialista en estrés laboral y manejo de ansiedad	\N	t	t	2025-08-14 17:46:47.311814-06	2025-10-13 17:46:47.311814-06
+33333333-3333-3333-3333-333333333333	Mtro. Roberto Jiménez García	roberto.jimenez@terapia.com	+525512345680	therapist	Psicoanálisis	PSI345678	Psicoanalista con enfoque en terapia a largo plazo	\N	t	t	2025-08-14 17:46:47.311814-06	2025-10-13 17:46:47.311814-06
+44444444-4444-4444-4444-444444444444	Lic. Laura Hernández Pérez	laura.hernandez@terapia.com	+525512345681	therapist	Terapia Familiar	PSI456789	Especialista en terapia familiar y de pareja	\N	t	t	2025-08-14 17:46:47.311814-06	2025-10-13 17:46:47.311814-06
+55555555-5555-5555-5555-555555555555	Sra. María González Díaz	maria.gonzalez@terapia.com	+525512345682	assistant	Administración	\N	Asistente administrativa con 5 años de experiencia	\N	t	t	2025-08-14 17:46:47.311814-06	2025-10-13 17:46:47.311814-06
+\.
+
+
+--
+-- TOC entry 3754 (class 2606 OID 63648)
+-- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public._prisma_migrations
+    ADD CONSTRAINT _prisma_migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3843 (class 2606 OID 63827)
+-- Name: appointment_reminders appointment_reminders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.appointment_reminders
+    ADD CONSTRAINT appointment_reminders_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3874 (class 2606 OID 63885)
+-- Name: audit_log audit_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.audit_log
+    ADD CONSTRAINT audit_log_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3827 (class 2606 OID 63793)
+-- Name: clinical_notes clinical_notes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.clinical_notes
+    ADD CONSTRAINT clinical_notes_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3764 (class 2606 OID 63673)
+-- Name: companies companies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.companies
+    ADD CONSTRAINT companies_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3889 (class 2606 OID 63917)
+-- Name: company_employees company_employees_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.company_employees
+    ADD CONSTRAINT company_employees_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3770 (class 2606 OID 63688)
+-- Name: contracts contracts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contracts
+    ADD CONSTRAINT contracts_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3858 (class 2606 OID 63851)
+-- Name: diagnoses diagnoses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagnoses
+    ADD CONSTRAINT diagnoses_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3863 (class 2606 OID 63864)
+-- Name: document_templates document_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.document_templates
+    ADD CONSTRAINT document_templates_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3802 (class 2606 OID 63748)
+-- Name: monthly_contract_reports monthly_contract_reports_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3806 (class 2606 OID 63757)
+-- Name: monthly_report_sessions monthly_report_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_report_sessions
+    ADD CONSTRAINT monthly_report_sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3813 (class 2606 OID 63769)
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3784 (class 2606 OID 63715)
+-- Name: patient_attachments patient_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patient_attachments
+    ADD CONSTRAINT patient_attachments_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3884 (class 2606 OID 63906)
+-- Name: patient_emergency_contacts patient_emergency_contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patient_emergency_contacts
+    ADD CONSTRAINT patient_emergency_contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3778 (class 2606 OID 63705)
+-- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3850 (class 2606 OID 63840)
+-- Name: payment_transactions payment_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3877 (class 2606 OID 63894)
+-- Name: session_techniques session_techniques_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.session_techniques
+    ADD CONSTRAINT session_techniques_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3792 (class 2606 OID 63732)
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3867 (class 2606 OID 63875)
+-- Name: system_settings system_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.system_settings
+    ADD CONSTRAINT system_settings_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3821 (class 2606 OID 63781)
+-- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3833 (class 2606 OID 63805)
+-- Name: therapeutic_goals therapeutic_goals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.therapeutic_goals
+    ADD CONSTRAINT therapeutic_goals_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3839 (class 2606 OID 63816)
+-- Name: therapist_availability therapist_availability_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.therapist_availability
+    ADD CONSTRAINT therapist_availability_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3757 (class 2606 OID 63660)
+-- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_profiles
+    ADD CONSTRAINT user_profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3841 (class 1259 OID 63979)
+-- Name: appointment_reminders_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX appointment_reminders_patient_id_idx ON public.appointment_reminders USING btree (patient_id);
+
+
+--
+-- TOC entry 3844 (class 1259 OID 63980)
+-- Name: appointment_reminders_scheduled_for_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX appointment_reminders_scheduled_for_idx ON public.appointment_reminders USING btree (scheduled_for);
+
+
+--
+-- TOC entry 3845 (class 1259 OID 63978)
+-- Name: appointment_reminders_session_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX appointment_reminders_session_id_idx ON public.appointment_reminders USING btree (session_id);
+
+
+--
+-- TOC entry 3846 (class 1259 OID 63981)
+-- Name: appointment_reminders_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX appointment_reminders_status_idx ON public.appointment_reminders USING btree (status);
+
+
+--
+-- TOC entry 3870 (class 1259 OID 64000)
+-- Name: audit_log_action_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX audit_log_action_idx ON public.audit_log USING btree (action);
+
+
+--
+-- TOC entry 3871 (class 1259 OID 63999)
+-- Name: audit_log_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX audit_log_created_at_idx ON public.audit_log USING btree (created_at);
+
+
+--
+-- TOC entry 3872 (class 1259 OID 63998)
+-- Name: audit_log_entity_type_entity_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX audit_log_entity_type_entity_id_idx ON public.audit_log USING btree (entity_type, entity_id);
+
+
+--
+-- TOC entry 3875 (class 1259 OID 63997)
+-- Name: audit_log_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX audit_log_user_id_idx ON public.audit_log USING btree (user_id);
+
+
+--
+-- TOC entry 3825 (class 1259 OID 63969)
+-- Name: clinical_notes_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX clinical_notes_patient_id_idx ON public.clinical_notes USING btree (patient_id);
+
+
+--
+-- TOC entry 3828 (class 1259 OID 63971)
+-- Name: clinical_notes_risk_level_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX clinical_notes_risk_level_idx ON public.clinical_notes USING btree (risk_level);
+
+
+--
+-- TOC entry 3829 (class 1259 OID 63968)
+-- Name: clinical_notes_session_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX clinical_notes_session_id_idx ON public.clinical_notes USING btree (session_id);
+
+
+--
+-- TOC entry 3830 (class 1259 OID 63970)
+-- Name: clinical_notes_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX clinical_notes_therapist_id_idx ON public.clinical_notes USING btree (therapist_id);
+
+
+--
+-- TOC entry 3758 (class 1259 OID 63923)
+-- Name: companies_created_by_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX companies_created_by_idx ON public.companies USING btree (created_by);
+
+
+--
+-- TOC entry 3759 (class 1259 OID 63921)
+-- Name: companies_email_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX companies_email_idx ON public.companies USING btree (email);
+
+
+--
+-- TOC entry 3760 (class 1259 OID 63919)
+-- Name: companies_email_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX companies_email_key ON public.companies USING btree (email);
+
+
+--
+-- TOC entry 3761 (class 1259 OID 63922)
+-- Name: companies_is_active_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX companies_is_active_idx ON public.companies USING btree (is_active);
+
+
+--
+-- TOC entry 3762 (class 1259 OID 63920)
+-- Name: companies_name_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX companies_name_idx ON public.companies USING btree (name);
+
+
+--
+-- TOC entry 3885 (class 1259 OID 64006)
+-- Name: company_employees_company_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX company_employees_company_id_idx ON public.company_employees USING btree (company_id);
+
+
+--
+-- TOC entry 3886 (class 1259 OID 64008)
+-- Name: company_employees_is_active_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX company_employees_is_active_idx ON public.company_employees USING btree (is_active);
+
+
+--
+-- TOC entry 3887 (class 1259 OID 64007)
+-- Name: company_employees_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX company_employees_patient_id_idx ON public.company_employees USING btree (patient_id);
+
+
+--
+-- TOC entry 3765 (class 1259 OID 63925)
+-- Name: contracts_company_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX contracts_company_id_idx ON public.contracts USING btree (company_id);
+
+
+--
+-- TOC entry 3766 (class 1259 OID 63928)
+-- Name: contracts_contract_number_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX contracts_contract_number_idx ON public.contracts USING btree (contract_number);
+
+
+--
+-- TOC entry 3767 (class 1259 OID 63924)
+-- Name: contracts_contract_number_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX contracts_contract_number_key ON public.contracts USING btree (contract_number);
+
+
+--
+-- TOC entry 3768 (class 1259 OID 63927)
+-- Name: contracts_end_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX contracts_end_date_idx ON public.contracts USING btree (end_date);
+
+
+--
+-- TOC entry 3771 (class 1259 OID 63926)
+-- Name: contracts_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX contracts_status_idx ON public.contracts USING btree (status);
+
+
+--
+-- TOC entry 3854 (class 1259 OID 63990)
+-- Name: diagnoses_diagnosis_code_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX diagnoses_diagnosis_code_idx ON public.diagnoses USING btree (diagnosis_code);
+
+
+--
+-- TOC entry 3855 (class 1259 OID 63989)
+-- Name: diagnoses_is_active_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX diagnoses_is_active_idx ON public.diagnoses USING btree (is_active);
+
+
+--
+-- TOC entry 3856 (class 1259 OID 63987)
+-- Name: diagnoses_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX diagnoses_patient_id_idx ON public.diagnoses USING btree (patient_id);
+
+
+--
+-- TOC entry 3859 (class 1259 OID 63988)
+-- Name: diagnoses_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX diagnoses_therapist_id_idx ON public.diagnoses USING btree (therapist_id);
+
+
+--
+-- TOC entry 3860 (class 1259 OID 63993)
+-- Name: document_templates_created_by_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX document_templates_created_by_idx ON public.document_templates USING btree (created_by);
+
+
+--
+-- TOC entry 3861 (class 1259 OID 63992)
+-- Name: document_templates_is_public_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX document_templates_is_public_idx ON public.document_templates USING btree (is_public);
+
+
+--
+-- TOC entry 3864 (class 1259 OID 63991)
+-- Name: document_templates_template_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX document_templates_template_type_idx ON public.document_templates USING btree (template_type);
+
+
+--
+-- TOC entry 3796 (class 1259 OID 63948)
+-- Name: monthly_contract_reports_company_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_contract_reports_company_id_idx ON public.monthly_contract_reports USING btree (company_id);
+
+
+--
+-- TOC entry 3797 (class 1259 OID 63947)
+-- Name: monthly_contract_reports_contract_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_contract_reports_contract_id_idx ON public.monthly_contract_reports USING btree (contract_id);
+
+
+--
+-- TOC entry 3798 (class 1259 OID 63952)
+-- Name: monthly_contract_reports_contract_id_report_month_report_ye_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX monthly_contract_reports_contract_id_report_month_report_ye_key ON public.monthly_contract_reports USING btree (contract_id, report_month, report_year);
+
+
+--
+-- TOC entry 3799 (class 1259 OID 63951)
+-- Name: monthly_contract_reports_due_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_contract_reports_due_date_idx ON public.monthly_contract_reports USING btree (due_date);
+
+
+--
+-- TOC entry 3800 (class 1259 OID 63950)
+-- Name: monthly_contract_reports_payment_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_contract_reports_payment_status_idx ON public.monthly_contract_reports USING btree (payment_status);
+
+
+--
+-- TOC entry 3803 (class 1259 OID 63949)
+-- Name: monthly_contract_reports_report_year_report_month_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_contract_reports_report_year_report_month_idx ON public.monthly_contract_reports USING btree (report_year, report_month);
+
+
+--
+-- TOC entry 3804 (class 1259 OID 63955)
+-- Name: monthly_report_sessions_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_report_sessions_patient_id_idx ON public.monthly_report_sessions USING btree (patient_id);
+
+
+--
+-- TOC entry 3807 (class 1259 OID 63953)
+-- Name: monthly_report_sessions_report_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_report_sessions_report_id_idx ON public.monthly_report_sessions USING btree (report_id);
+
+
+--
+-- TOC entry 3808 (class 1259 OID 63957)
+-- Name: monthly_report_sessions_report_id_session_id_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX monthly_report_sessions_report_id_session_id_key ON public.monthly_report_sessions USING btree (report_id, session_id);
+
+
+--
+-- TOC entry 3809 (class 1259 OID 63956)
+-- Name: monthly_report_sessions_session_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_report_sessions_session_date_idx ON public.monthly_report_sessions USING btree (session_date);
+
+
+--
+-- TOC entry 3810 (class 1259 OID 63954)
+-- Name: monthly_report_sessions_session_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX monthly_report_sessions_session_id_idx ON public.monthly_report_sessions USING btree (session_id);
+
+
+--
+-- TOC entry 3811 (class 1259 OID 63962)
+-- Name: notifications_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notifications_created_at_idx ON public.notifications USING btree (created_at);
+
+
+--
+-- TOC entry 3814 (class 1259 OID 63961)
+-- Name: notifications_priority_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notifications_priority_idx ON public.notifications USING btree (priority);
+
+
+--
+-- TOC entry 3815 (class 1259 OID 63960)
+-- Name: notifications_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notifications_type_idx ON public.notifications USING btree (type);
+
+
+--
+-- TOC entry 3816 (class 1259 OID 63958)
+-- Name: notifications_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notifications_user_id_idx ON public.notifications USING btree (user_id);
+
+
+--
+-- TOC entry 3817 (class 1259 OID 63959)
+-- Name: notifications_user_id_is_read_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notifications_user_id_is_read_idx ON public.notifications USING btree (user_id, is_read);
+
+
+--
+-- TOC entry 3781 (class 1259 OID 63937)
+-- Name: patient_attachments_file_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patient_attachments_file_type_idx ON public.patient_attachments USING btree (file_type);
+
+
+--
+-- TOC entry 3782 (class 1259 OID 63936)
+-- Name: patient_attachments_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patient_attachments_patient_id_idx ON public.patient_attachments USING btree (patient_id);
+
+
+--
+-- TOC entry 3785 (class 1259 OID 63938)
+-- Name: patient_attachments_uploaded_by_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patient_attachments_uploaded_by_idx ON public.patient_attachments USING btree (uploaded_by);
+
+
+--
+-- TOC entry 3881 (class 1259 OID 64004)
+-- Name: patient_emergency_contacts_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patient_emergency_contacts_patient_id_idx ON public.patient_emergency_contacts USING btree (patient_id);
+
+
+--
+-- TOC entry 3882 (class 1259 OID 64005)
+-- Name: patient_emergency_contacts_patient_id_is_primary_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patient_emergency_contacts_patient_id_is_primary_idx ON public.patient_emergency_contacts USING btree (patient_id, is_primary);
+
+
+--
+-- TOC entry 3772 (class 1259 OID 63935)
+-- Name: patients_birth_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_birth_date_idx ON public.patients USING btree (birth_date);
+
+
+--
+-- TOC entry 3773 (class 1259 OID 63932)
+-- Name: patients_company_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_company_id_idx ON public.patients USING btree (company_id);
+
+
+--
+-- TOC entry 3774 (class 1259 OID 63931)
+-- Name: patients_email_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_email_idx ON public.patients USING btree (email);
+
+
+--
+-- TOC entry 3775 (class 1259 OID 63929)
+-- Name: patients_email_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX patients_email_key ON public.patients USING btree (email);
+
+
+--
+-- TOC entry 3776 (class 1259 OID 63930)
+-- Name: patients_name_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_name_idx ON public.patients USING btree (name);
+
+
+--
+-- TOC entry 3779 (class 1259 OID 63933)
+-- Name: patients_primary_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_primary_therapist_id_idx ON public.patients USING btree (primary_therapist_id);
+
+
+--
+-- TOC entry 3780 (class 1259 OID 63934)
+-- Name: patients_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX patients_status_idx ON public.patients USING btree (status);
+
+
+--
+-- TOC entry 3847 (class 1259 OID 63984)
+-- Name: payment_transactions_contract_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_transactions_contract_id_idx ON public.payment_transactions USING btree (contract_id);
+
+
+--
+-- TOC entry 3848 (class 1259 OID 63983)
+-- Name: payment_transactions_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_transactions_patient_id_idx ON public.payment_transactions USING btree (patient_id);
+
+
+--
+-- TOC entry 3851 (class 1259 OID 63982)
+-- Name: payment_transactions_session_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_transactions_session_id_idx ON public.payment_transactions USING btree (session_id);
+
+
+--
+-- TOC entry 3852 (class 1259 OID 63986)
+-- Name: payment_transactions_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_transactions_status_idx ON public.payment_transactions USING btree (status);
+
+
+--
+-- TOC entry 3853 (class 1259 OID 63985)
+-- Name: payment_transactions_transaction_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_transactions_transaction_date_idx ON public.payment_transactions USING btree (transaction_date);
+
+
+--
+-- TOC entry 3878 (class 1259 OID 64001)
+-- Name: session_techniques_session_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX session_techniques_session_id_idx ON public.session_techniques USING btree (session_id);
+
+
+--
+-- TOC entry 3879 (class 1259 OID 64002)
+-- Name: session_techniques_technique_category_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX session_techniques_technique_category_idx ON public.session_techniques USING btree (technique_category);
+
+
+--
+-- TOC entry 3880 (class 1259 OID 64003)
+-- Name: session_techniques_technique_name_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX session_techniques_technique_name_idx ON public.session_techniques USING btree (technique_name);
+
+
+--
+-- TOC entry 3786 (class 1259 OID 63946)
+-- Name: sessions_appointment_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_appointment_type_idx ON public.sessions USING btree (appointment_type);
+
+
+--
+-- TOC entry 3787 (class 1259 OID 63945)
+-- Name: sessions_billing_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_billing_type_idx ON public.sessions USING btree (billing_type);
+
+
+--
+-- TOC entry 3788 (class 1259 OID 63941)
+-- Name: sessions_contract_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_contract_id_idx ON public.sessions USING btree (contract_id);
+
+
+--
+-- TOC entry 3789 (class 1259 OID 63939)
+-- Name: sessions_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_patient_id_idx ON public.sessions USING btree (patient_id);
+
+
+--
+-- TOC entry 3790 (class 1259 OID 63944)
+-- Name: sessions_payment_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_payment_status_idx ON public.sessions USING btree (payment_status);
+
+
+--
+-- TOC entry 3793 (class 1259 OID 63942)
+-- Name: sessions_session_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_session_date_idx ON public.sessions USING btree (session_date);
+
+
+--
+-- TOC entry 3794 (class 1259 OID 63943)
+-- Name: sessions_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_status_idx ON public.sessions USING btree (status);
+
+
+--
+-- TOC entry 3795 (class 1259 OID 63940)
+-- Name: sessions_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sessions_therapist_id_idx ON public.sessions USING btree (therapist_id);
+
+
+--
+-- TOC entry 3865 (class 1259 OID 63996)
+-- Name: system_settings_category_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX system_settings_category_idx ON public.system_settings USING btree (category);
+
+
+--
+-- TOC entry 3868 (class 1259 OID 63995)
+-- Name: system_settings_setting_key_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX system_settings_setting_key_idx ON public.system_settings USING btree (setting_key);
+
+
+--
+-- TOC entry 3869 (class 1259 OID 63994)
+-- Name: system_settings_setting_key_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX system_settings_setting_key_key ON public.system_settings USING btree (setting_key);
+
+
+--
+-- TOC entry 3818 (class 1259 OID 63963)
+-- Name: tasks_assigned_to_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tasks_assigned_to_idx ON public.tasks USING btree (assigned_to);
+
+
+--
+-- TOC entry 3819 (class 1259 OID 63965)
+-- Name: tasks_due_date_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tasks_due_date_idx ON public.tasks USING btree (due_date);
+
+
+--
+-- TOC entry 3822 (class 1259 OID 63966)
+-- Name: tasks_priority_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tasks_priority_idx ON public.tasks USING btree (priority);
+
+
+--
+-- TOC entry 3823 (class 1259 OID 63967)
+-- Name: tasks_related_entity_type_related_entity_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tasks_related_entity_type_related_entity_id_idx ON public.tasks USING btree (related_entity_type, related_entity_id);
+
+
+--
+-- TOC entry 3824 (class 1259 OID 63964)
+-- Name: tasks_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tasks_status_idx ON public.tasks USING btree (status);
+
+
+--
+-- TOC entry 3831 (class 1259 OID 63972)
+-- Name: therapeutic_goals_patient_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapeutic_goals_patient_id_idx ON public.therapeutic_goals USING btree (patient_id);
+
+
+--
+-- TOC entry 3834 (class 1259 OID 63973)
+-- Name: therapeutic_goals_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapeutic_goals_status_idx ON public.therapeutic_goals USING btree (status);
+
+
+--
+-- TOC entry 3835 (class 1259 OID 63974)
+-- Name: therapeutic_goals_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapeutic_goals_therapist_id_idx ON public.therapeutic_goals USING btree (therapist_id);
+
+
+--
+-- TOC entry 3836 (class 1259 OID 63976)
+-- Name: therapist_availability_day_of_week_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapist_availability_day_of_week_idx ON public.therapist_availability USING btree (day_of_week);
+
+
+--
+-- TOC entry 3837 (class 1259 OID 63977)
+-- Name: therapist_availability_effective_from_effective_until_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapist_availability_effective_from_effective_until_idx ON public.therapist_availability USING btree (effective_from, effective_until);
+
+
+--
+-- TOC entry 3840 (class 1259 OID 63975)
+-- Name: therapist_availability_therapist_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX therapist_availability_therapist_id_idx ON public.therapist_availability USING btree (therapist_id);
+
+
+--
+-- TOC entry 3755 (class 1259 OID 63918)
+-- Name: user_profiles_email_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX user_profiles_email_key ON public.user_profiles USING btree (email);
+
+
+--
+-- TOC entry 4082 (class 2618 OID 64906)
+-- Name: active_patients_summary _RETURN; Type: RULE; Schema: public; Owner: postgres
+--
+
+CREATE OR REPLACE VIEW public.active_patients_summary AS
+ SELECT p.id,
+    p.name,
+    p.email,
+    p.phone,
+    p.birth_date,
+    public.get_patient_age(p.birth_date) AS age,
+    p.gender,
+    p.company_id,
+    COALESCE(c.name, p.company_name) AS company_name,
+    p.therapy_type,
+    p.status,
+    p.primary_therapist_id,
+    up.full_name AS therapist_name,
+    count(DISTINCT s.id) AS total_sessions,
+    count(DISTINCT s.id) FILTER (WHERE (s.status = 'completed'::text)) AS completed_sessions,
+    count(DISTINCT s.id) FILTER (WHERE (s.status = 'scheduled'::text)) AS scheduled_sessions,
+    max(s.session_date) AS last_session_date,
+    sum(s.session_cost) FILTER (WHERE (s.status = 'completed'::text)) AS total_billed,
+    sum(s.paid_amount) AS total_paid,
+    p.created_at,
+    p.updated_at
+   FROM (((public.patients p
+     LEFT JOIN public.companies c ON ((p.company_id = c.id)))
+     LEFT JOIN public.user_profiles up ON ((p.primary_therapist_id = up.id)))
+     LEFT JOIN public.sessions s ON (((p.id = s.patient_id) AND (s.deleted_at IS NULL))))
+  WHERE ((p.status = 'active'::text) AND (p.deleted_at IS NULL))
+  GROUP BY p.id, c.name, up.full_name;
+
+
+--
+-- TOC entry 4083 (class 2618 OID 64911)
+-- Name: therapist_workload _RETURN; Type: RULE; Schema: public; Owner: postgres
+--
+
+CREATE OR REPLACE VIEW public.therapist_workload AS
+ SELECT up.id AS therapist_id,
+    up.full_name AS therapist_name,
+    up.specialty,
+    up.is_active,
+    count(DISTINCT p.id) AS active_patients,
+    count(DISTINCT s.id) FILTER (WHERE ((s.status = 'scheduled'::text) AND (s.session_date >= CURRENT_DATE))) AS upcoming_sessions,
+    count(DISTINCT s.id) FILTER (WHERE ((s.status = 'completed'::text) AND (s.session_date >= (CURRENT_DATE - '30 days'::interval)))) AS sessions_last_30_days,
+    sum(s.session_cost) FILTER (WHERE ((s.status = 'completed'::text) AND (s.session_date >= (CURRENT_DATE - '30 days'::interval)))) AS revenue_last_30_days,
+    avg(s.session_duration_minutes) FILTER (WHERE (s.status = 'completed'::text)) AS avg_session_duration,
+    min(s.session_date) FILTER (WHERE ((s.status = 'scheduled'::text) AND (s.session_date >= CURRENT_DATE))) AS next_session_date
+   FROM ((public.user_profiles up
+     LEFT JOIN public.patients p ON (((up.id = p.primary_therapist_id) AND (p.status = 'active'::text) AND (p.deleted_at IS NULL))))
+     LEFT JOIN public.sessions s ON (((up.id = s.therapist_id) AND (s.deleted_at IS NULL))))
+  WHERE ((up.role = ANY (ARRAY['therapist'::text, 'admin'::text])) AND (up.is_active = true))
+  GROUP BY up.id;
+
+
+--
+-- TOC entry 4084 (class 2618 OID 64916)
+-- Name: company_contracts_overview _RETURN; Type: RULE; Schema: public; Owner: postgres
+--
+
+CREATE OR REPLACE VIEW public.company_contracts_overview AS
+ SELECT c.id AS company_id,
+    c.name AS company_name,
+    c.email AS company_email,
+    c.is_active AS company_active,
+    count(DISTINCT ct.id) AS total_contracts,
+    count(DISTINCT ct.id) FILTER (WHERE (ct.status = 'active'::text)) AS active_contracts,
+    count(DISTINCT ct.id) FILTER (WHERE (ct.status = 'expired'::text)) AS expired_contracts,
+    count(DISTINCT p.id) AS total_patients,
+    count(DISTINCT p.id) FILTER (WHERE (p.status = 'active'::text)) AS active_patients,
+    count(DISTINCT s.id) AS total_sessions,
+    count(DISTINCT s.id) FILTER (WHERE (s.payment_status = 'pending'::text)) AS pending_payment_sessions,
+    sum(s.session_cost) FILTER (WHERE (s.billing_type = 'contract'::text)) AS total_contract_billing,
+    sum(s.paid_amount) FILTER (WHERE (s.billing_type = 'contract'::text)) AS total_contract_paid,
+    max(s.session_date) AS last_session_date,
+    c.created_at,
+    c.updated_at
+   FROM (((public.companies c
+     LEFT JOIN public.contracts ct ON (((c.id = ct.company_id) AND (ct.deleted_at IS NULL))))
+     LEFT JOIN public.patients p ON (((c.id = p.company_id) AND (p.deleted_at IS NULL))))
+     LEFT JOIN public.sessions s ON (((p.id = s.patient_id) AND (s.deleted_at IS NULL))))
+  WHERE (c.deleted_at IS NULL)
+  GROUP BY c.id;
+
+
+--
+-- TOC entry 3926 (class 2606 OID 64189)
+-- Name: appointment_reminders appointment_reminders_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.appointment_reminders
+    ADD CONSTRAINT appointment_reminders_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3925 (class 2606 OID 64184)
+-- Name: appointment_reminders appointment_reminders_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.appointment_reminders
+    ADD CONSTRAINT appointment_reminders_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3937 (class 2606 OID 64244)
+-- Name: audit_log audit_log_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.audit_log
+    ADD CONSTRAINT audit_log_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3920 (class 2606 OID 64159)
+-- Name: clinical_notes clinical_notes_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.clinical_notes
+    ADD CONSTRAINT clinical_notes_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3919 (class 2606 OID 64154)
+-- Name: clinical_notes clinical_notes_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.clinical_notes
+    ADD CONSTRAINT clinical_notes_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3921 (class 2606 OID 64164)
+-- Name: clinical_notes clinical_notes_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.clinical_notes
+    ADD CONSTRAINT clinical_notes_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3890 (class 2606 OID 64009)
+-- Name: companies companies_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.companies
+    ADD CONSTRAINT companies_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3891 (class 2606 OID 64014)
+-- Name: companies companies_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.companies
+    ADD CONSTRAINT companies_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3941 (class 2606 OID 64264)
+-- Name: company_employees company_employees_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.company_employees
+    ADD CONSTRAINT company_employees_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3942 (class 2606 OID 64269)
+-- Name: company_employees company_employees_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.company_employees
+    ADD CONSTRAINT company_employees_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3892 (class 2606 OID 64019)
+-- Name: contracts contracts_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contracts
+    ADD CONSTRAINT contracts_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3893 (class 2606 OID 64024)
+-- Name: contracts contracts_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contracts
+    ADD CONSTRAINT contracts_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3894 (class 2606 OID 64029)
+-- Name: contracts contracts_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contracts
+    ADD CONSTRAINT contracts_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3932 (class 2606 OID 64219)
+-- Name: diagnoses diagnoses_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagnoses
+    ADD CONSTRAINT diagnoses_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3934 (class 2606 OID 64229)
+-- Name: diagnoses diagnoses_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagnoses
+    ADD CONSTRAINT diagnoses_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3933 (class 2606 OID 64224)
+-- Name: diagnoses diagnoses_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagnoses
+    ADD CONSTRAINT diagnoses_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3935 (class 2606 OID 64234)
+-- Name: document_templates document_templates_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.document_templates
+    ADD CONSTRAINT document_templates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3908 (class 2606 OID 64099)
+-- Name: monthly_contract_reports monthly_contract_reports_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3907 (class 2606 OID 64094)
+-- Name: monthly_contract_reports monthly_contract_reports_contract_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3910 (class 2606 OID 64109)
+-- Name: monthly_contract_reports monthly_contract_reports_generated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_generated_by_fkey FOREIGN KEY (generated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3909 (class 2606 OID 64104)
+-- Name: monthly_contract_reports monthly_contract_reports_paid_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_paid_by_fkey FOREIGN KEY (paid_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3911 (class 2606 OID 64114)
+-- Name: monthly_contract_reports monthly_contract_reports_sent_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_contract_reports
+    ADD CONSTRAINT monthly_contract_reports_sent_by_fkey FOREIGN KEY (sent_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3914 (class 2606 OID 64129)
+-- Name: monthly_report_sessions monthly_report_sessions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_report_sessions
+    ADD CONSTRAINT monthly_report_sessions_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3912 (class 2606 OID 64119)
+-- Name: monthly_report_sessions monthly_report_sessions_report_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_report_sessions
+    ADD CONSTRAINT monthly_report_sessions_report_id_fkey FOREIGN KEY (report_id) REFERENCES public.monthly_contract_reports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3913 (class 2606 OID 64124)
+-- Name: monthly_report_sessions monthly_report_sessions_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_report_sessions
+    ADD CONSTRAINT monthly_report_sessions_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3915 (class 2606 OID 64134)
+-- Name: monthly_report_sessions monthly_report_sessions_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monthly_report_sessions
+    ADD CONSTRAINT monthly_report_sessions_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3916 (class 2606 OID 64139)
+-- Name: notifications notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3899 (class 2606 OID 64054)
+-- Name: patient_attachments patient_attachments_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patient_attachments
+    ADD CONSTRAINT patient_attachments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3900 (class 2606 OID 64059)
+-- Name: patient_attachments patient_attachments_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patient_attachments
+    ADD CONSTRAINT patient_attachments_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3940 (class 2606 OID 64259)
+-- Name: patient_emergency_contacts patient_emergency_contacts_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patient_emergency_contacts
+    ADD CONSTRAINT patient_emergency_contacts_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3895 (class 2606 OID 64034)
+-- Name: patients patients_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3897 (class 2606 OID 64044)
+-- Name: patients patients_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3896 (class 2606 OID 64039)
+-- Name: patients patients_primary_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_primary_therapist_id_fkey FOREIGN KEY (primary_therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3898 (class 2606 OID 64049)
+-- Name: patients patients_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3929 (class 2606 OID 64204)
+-- Name: payment_transactions payment_transactions_contract_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3928 (class 2606 OID 64199)
+-- Name: payment_transactions payment_transactions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3931 (class 2606 OID 64214)
+-- Name: payment_transactions payment_transactions_processed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_processed_by_fkey FOREIGN KEY (processed_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3930 (class 2606 OID 64209)
+-- Name: payment_transactions payment_transactions_report_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_report_id_fkey FOREIGN KEY (report_id) REFERENCES public.monthly_contract_reports(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3927 (class 2606 OID 64194)
+-- Name: payment_transactions payment_transactions_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_transactions
+    ADD CONSTRAINT payment_transactions_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3939 (class 2606 OID 64254)
+-- Name: session_techniques session_techniques_clinical_note_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.session_techniques
+    ADD CONSTRAINT session_techniques_clinical_note_id_fkey FOREIGN KEY (clinical_note_id) REFERENCES public.clinical_notes(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3938 (class 2606 OID 64249)
+-- Name: session_techniques session_techniques_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.session_techniques
+    ADD CONSTRAINT session_techniques_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3904 (class 2606 OID 64079)
+-- Name: sessions sessions_cancelled_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_cancelled_by_fkey FOREIGN KEY (cancelled_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3903 (class 2606 OID 64074)
+-- Name: sessions sessions_contract_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3905 (class 2606 OID 64084)
+-- Name: sessions sessions_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3901 (class 2606 OID 64064)
+-- Name: sessions sessions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3902 (class 2606 OID 64069)
+-- Name: sessions sessions_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3906 (class 2606 OID 64089)
+-- Name: sessions sessions_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3936 (class 2606 OID 64239)
+-- Name: system_settings system_settings_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.system_settings
+    ADD CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3917 (class 2606 OID 64144)
+-- Name: tasks tasks_assigned_to_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3918 (class 2606 OID 64149)
+-- Name: tasks tasks_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3922 (class 2606 OID 64169)
+-- Name: therapeutic_goals therapeutic_goals_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.therapeutic_goals
+    ADD CONSTRAINT therapeutic_goals_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3923 (class 2606 OID 64174)
+-- Name: therapeutic_goals therapeutic_goals_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.therapeutic_goals
+    ADD CONSTRAINT therapeutic_goals_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 3924 (class 2606 OID 64179)
+-- Name: therapist_availability therapist_availability_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.therapist_availability
+    ADD CONSTRAINT therapist_availability_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.user_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+-- Completed on 2025-10-20 22:22:01 CST
+
+--
+-- PostgreSQL database dump complete
+--
+
+-- Completed on 2025-10-20 22:22:01 CST
+
+--
+-- PostgreSQL database cluster dump complete
+--
+
