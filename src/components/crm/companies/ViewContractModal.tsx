@@ -72,37 +72,51 @@ export default function ViewContractModal({
   const {
     isOpen: isGenerateOpen,
     onOpen: onGenerateOpen,
-    onClose: onGenerateClose
+    onClose: onGenerateClose,
   } = useDisclosure();
 
   if (!contract) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'pending': return 'yellow';
-      case 'expired': return 'red';
-      case 'cancelled': return 'gray';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'expired':
+        return 'red';
+      case 'cancelled':
+        return 'gray';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'pending': return 'Pendiente';
-      case 'expired': return 'Vencido';
-      case 'cancelled': return 'Cancelado';
-      default: return status;
+      case 'active':
+        return 'Activo';
+      case 'pending':
+        return 'Pendiente';
+      case 'expired':
+        return 'Vencido';
+      case 'cancelled':
+        return 'Cancelado';
+      default:
+        return status;
     }
   };
 
   const getPaymentFrequencyText = (frequency: string) => {
     switch (frequency) {
-      case 'monthly': return 'Mensual';
-      case 'quarterly': return 'Trimestral';
-      case 'annual': return 'Anual';
-      default: return frequency;
+      case 'monthly':
+        return 'Mensual';
+      case 'quarterly':
+        return 'Trimestral';
+      case 'annual':
+        return 'Anual';
+      default:
+        return frequency;
     }
   };
 
@@ -110,11 +124,19 @@ export default function ViewContractModal({
   const isExpiringSoon = daysUntilExpiration >= 0 && daysUntilExpiration <= 30;
   const totalDays = differenceInDays(contract.endDate, contract.startDate);
   const elapsedDays = differenceInDays(new Date(), contract.startDate);
-  const progressPercentage = Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
+  const progressPercentage = Math.min(
+    Math.max((elapsedDays / totalDays) * 100, 0),
+    100,
+  );
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="6xl"
+        scrollBehavior="inside"
+      >
         <ModalOverlay bg="blackAlpha.600" />
         <ModalContent maxH="90vh">
           <ModalHeader>
@@ -157,178 +179,251 @@ export default function ViewContractModal({
                 {/* Tab 1: Contract Information */}
                 <TabPanel>
                   <VStack spacing={6} align="stretch">
-            <Card bg={cardBg}>
-              <CardBody>
-                <HStack spacing={4} justify="space-between" align="center">
-                  <VStack spacing={1} align="start">
-                    <Text fontSize="xs" color="gray.600">Estado del Contrato</Text>
-                    <Badge
-                      colorScheme={getStatusColor(contract.status)}
-                      variant="solid"
-                      px={3}
-                      py={1}
-                      fontSize="md"
+                    <Card bg={cardBg}>
+                      <CardBody>
+                        <HStack
+                          spacing={4}
+                          justify="space-between"
+                          align="center"
+                        >
+                          <VStack spacing={1} align="start">
+                            <Text fontSize="xs" color="gray.600">
+                              Estado del Contrato
+                            </Text>
+                            <Badge
+                              colorScheme={getStatusColor(contract.status)}
+                              variant="solid"
+                              px={3}
+                              py={1}
+                              fontSize="md"
+                            >
+                              {getStatusText(contract.status)}
+                            </Badge>
+                          </VStack>
+                          {contract.status === 'active' && isExpiringSoon && (
+                            <Badge colorScheme="orange" px={3} py={1}>
+                              <HStack spacing={1}>
+                                <AlertCircle size={14} />
+                                <Text>Vence en {daysUntilExpiration} días</Text>
+                              </HStack>
+                            </Badge>
+                          )}
+                          {contract.status === 'active' &&
+                            !isExpiringSoon &&
+                            daysUntilExpiration > 0 && (
+                              <Badge colorScheme="green" px={3} py={1}>
+                                <HStack spacing={1}>
+                                  <CheckCircle size={14} />
+                                  <Text>
+                                    {daysUntilExpiration} días restantes
+                                  </Text>
+                                </HStack>
+                              </Badge>
+                            )}
+                        </HStack>
+                      </CardBody>
+                    </Card>
+
+                    <Grid
+                      templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                      gap={6}
                     >
-                      {getStatusText(contract.status)}
-                    </Badge>
-                  </VStack>
-                  {contract.status === 'active' && isExpiringSoon && (
-                    <Badge colorScheme="orange" px={3} py={1}>
-                      <HStack spacing={1}>
-                        <AlertCircle size={14} />
-                        <Text>Vence en {daysUntilExpiration} días</Text>
-                      </HStack>
-                    </Badge>
-                  )}
-                  {contract.status === 'active' && !isExpiringSoon && daysUntilExpiration > 0 && (
-                    <Badge colorScheme="green" px={3} py={1}>
-                      <HStack spacing={1}>
-                        <CheckCircle size={14} />
-                        <Text>{daysUntilExpiration} días restantes</Text>
-                      </HStack>
-                    </Badge>
-                  )}
-                </HStack>
-              </CardBody>
-            </Card>
+                      <Box>
+                        <HStack spacing={2} mb={3}>
+                          <Calendar size={18} color="#3182CE" />
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color="gray.700"
+                          >
+                            Período de Vigencia
+                          </Text>
+                        </HStack>
+                        <VStack spacing={3} align="stretch" pl={6}>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Inicio:
+                            </Text>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {format(contract.startDate, 'dd MMMM yyyy', {
+                                locale: es,
+                              })}
+                            </Text>
+                          </HStack>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Fin:
+                            </Text>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {format(contract.endDate, 'dd MMMM yyyy', {
+                                locale: es,
+                              })}
+                            </Text>
+                          </HStack>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Duración:
+                            </Text>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {totalDays} días
+                            </Text>
+                          </HStack>
+                        </VStack>
+                      </Box>
 
-            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
-              <Box>
-                <HStack spacing={2} mb={3}>
-                  <Calendar size={18} color="#3182CE" />
-                  <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                    Período de Vigencia
-                  </Text>
-                </HStack>
-                <VStack spacing={3} align="stretch" pl={6}>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Inicio:</Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {format(contract.startDate, 'dd MMMM yyyy', { locale: es })}
-                    </Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Fin:</Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {format(contract.endDate, 'dd MMMM yyyy', { locale: es })}
-                    </Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Duración:</Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {totalDays} días
-                    </Text>
-                  </HStack>
-                </VStack>
-              </Box>
+                      <Box>
+                        <HStack spacing={2} mb={3}>
+                          <DollarSign size={18} color="#38A169" />
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color="gray.700"
+                          >
+                            Términos Financieros
+                          </Text>
+                        </HStack>
+                        <VStack spacing={3} align="stretch" pl={6}>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Costo por Sesión:
+                            </Text>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color="green.600"
+                            >
+                              ${contract.costPerSession.toLocaleString()} MXN
+                            </Text>
+                          </HStack>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Límite Mensual:
+                            </Text>
+                            <Text fontSize="sm" fontWeight="medium">
+                              {contract.monthlyLimit
+                                ? `$${contract.monthlyLimit.toLocaleString()} MXN`
+                                : 'Sin límite'}
+                            </Text>
+                          </HStack>
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" color="gray.600">
+                              Frecuencia de Pago:
+                            </Text>
+                            <Badge colorScheme="blue" fontSize="xs">
+                              {getPaymentFrequencyText(
+                                contract.paymentFrequency,
+                              )}
+                            </Badge>
+                          </HStack>
+                        </VStack>
+                      </Box>
+                    </Grid>
 
-              <Box>
-                <HStack spacing={2} mb={3}>
-                  <DollarSign size={18} color="#38A169" />
-                  <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                    Términos Financieros
-                  </Text>
-                </HStack>
-                <VStack spacing={3} align="stretch" pl={6}>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Costo por Sesión:</Text>
-                    <Text fontSize="sm" fontWeight="medium" color="green.600">
-                      ${contract.costPerSession.toLocaleString()} MXN
-                    </Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Límite Mensual:</Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {contract.monthlyLimit
-                        ? `$${contract.monthlyLimit.toLocaleString()} MXN`
-                        : 'Sin límite'}
-                    </Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.600">Frecuencia de Pago:</Text>
-                    <Badge colorScheme="blue" fontSize="xs">
-                      {getPaymentFrequencyText(contract.paymentFrequency)}
-                    </Badge>
-                  </HStack>
-                </VStack>
-              </Box>
-            </Grid>
-
-            {contract.status === 'active' && (
-              <>
-                <Divider />
-                <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={3} color="gray.700">
-                    Progreso del Contrato
-                  </Text>
-                  <Box
-                    w="full"
-                    h="8px"
-                    bg="gray.200"
-                    borderRadius="full"
-                    overflow="hidden"
-                  >
-                    <Box
-                      h="full"
-                      w={`${progressPercentage}%`}
-                      bg={isExpiringSoon ? 'orange.400' : 'blue.400'}
-                      transition="width 0.3s"
-                    />
-                  </Box>
-                  <HStack justify="space-between" mt={2}>
-                    <Text fontSize="xs" color="gray.500">
-                      {Math.round(progressPercentage)}% completado
-                    </Text>
-                    <Text fontSize="xs" color="gray.500">
-                      {elapsedDays} de {totalDays} días
-                    </Text>
-                  </HStack>
-                </Box>
-              </>
-            )}
-
-            {contract.notes && (
-              <>
-                <Divider />
-                <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={3} color="gray.700">
-                    Notas Adicionales
-                  </Text>
-                  <Card bg={cardBg}>
-                    <CardBody>
-                      <Text fontSize="sm" lineHeight="1.8" color="gray.700">
-                        {contract.notes}
-                      </Text>
-                    </CardBody>
-                  </Card>
-                </Box>
-              </>
-            )}
-
-            <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
-              <CardBody>
-                <VStack spacing={3} align="stretch">
-                  <Text fontSize="sm" fontWeight="semibold" color="blue.700">
-                    Resumen de Costos
-                  </Text>
-                  <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                    <VStack spacing={1} align="start">
-                      <Text fontSize="xs" color="gray.600">Costo por Sesión</Text>
-                      <Text fontSize="lg" fontWeight="bold" color="blue.700">
-                        ${contract.costPerSession.toLocaleString()}
-                      </Text>
-                    </VStack>
-                    {contract.monthlyLimit && (
-                      <VStack spacing={1} align="start">
-                        <Text fontSize="xs" color="gray.600">Límite Mensual</Text>
-                        <Text fontSize="lg" fontWeight="bold" color="orange.600">
-                          ${contract.monthlyLimit.toLocaleString()}
-                        </Text>
-                      </VStack>
+                    {contract.status === 'active' && (
+                      <>
+                        <Divider />
+                        <Box>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            mb={3}
+                            color="gray.700"
+                          >
+                            Progreso del Contrato
+                          </Text>
+                          <Box
+                            w="full"
+                            h="8px"
+                            bg="gray.200"
+                            borderRadius="full"
+                            overflow="hidden"
+                          >
+                            <Box
+                              h="full"
+                              w={`${progressPercentage}%`}
+                              bg={isExpiringSoon ? 'orange.400' : 'blue.400'}
+                              transition="width 0.3s"
+                            />
+                          </Box>
+                          <HStack justify="space-between" mt={2}>
+                            <Text fontSize="xs" color="gray.500">
+                              {Math.round(progressPercentage)}% completado
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              {elapsedDays} de {totalDays} días
+                            </Text>
+                          </HStack>
+                        </Box>
+                      </>
                     )}
-                  </Grid>
-                </VStack>
-              </CardBody>
+
+                    {contract.notes && (
+                      <>
+                        <Divider />
+                        <Box>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            mb={3}
+                            color="gray.700"
+                          >
+                            Notas Adicionales
+                          </Text>
+                          <Card bg={cardBg}>
+                            <CardBody>
+                              <Text
+                                fontSize="sm"
+                                lineHeight="1.8"
+                                color="gray.700"
+                              >
+                                {contract.notes}
+                              </Text>
+                            </CardBody>
+                          </Card>
+                        </Box>
+                      </>
+                    )}
+
+                    <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
+                      <CardBody>
+                        <VStack spacing={3} align="stretch">
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color="blue.700"
+                          >
+                            Resumen de Costos
+                          </Text>
+                          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                            <VStack spacing={1} align="start">
+                              <Text fontSize="xs" color="gray.600">
+                                Costo por Sesión
+                              </Text>
+                              <Text
+                                fontSize="lg"
+                                fontWeight="bold"
+                                color="blue.700"
+                              >
+                                ${contract.costPerSession.toLocaleString()}
+                              </Text>
+                            </VStack>
+                            {contract.monthlyLimit && (
+                              <VStack spacing={1} align="start">
+                                <Text fontSize="xs" color="gray.600">
+                                  Límite Mensual
+                                </Text>
+                                <Text
+                                  fontSize="lg"
+                                  fontWeight="bold"
+                                  color="orange.600"
+                                >
+                                  ${contract.monthlyLimit.toLocaleString()}
+                                </Text>
+                              </VStack>
+                            )}
+                          </Grid>
+                        </VStack>
+                      </CardBody>
                     </Card>
                   </VStack>
                 </TabPanel>
@@ -337,11 +432,17 @@ export default function ViewContractModal({
                 <TabPanel>
                   <VStack spacing={6} align="stretch">
                     <Box>
-                      <Text fontSize="lg" fontWeight="semibold" mb={2} color="gray.800">
+                      <Text
+                        fontSize="lg"
+                        fontWeight="semibold"
+                        mb={2}
+                        color="gray.800"
+                      >
                         Generar Reporte Mensual
                       </Text>
                       <Text fontSize="sm" color="gray.600" mb={4}>
-                        Genera un reporte de las sesiones del mes para facturar a la empresa
+                        Genera un reporte de las sesiones del mes para facturar
+                        a la empresa
                       </Text>
                       <Button
                         leftIcon={<TrendingUp size={20} />}
@@ -370,9 +471,7 @@ export default function ViewContractModal({
           </ModalBody>
 
           <ModalFooter>
-            <Button onClick={onClose}>
-              Cerrar
-            </Button>
+            <Button onClick={onClose}>Cerrar</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

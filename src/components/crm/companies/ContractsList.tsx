@@ -95,30 +95,44 @@ export default function ContractsList({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'pending': return 'yellow';
-      case 'expired': return 'red';
-      case 'cancelled': return 'gray';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'expired':
+        return 'red';
+      case 'cancelled':
+        return 'gray';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'pending': return 'Pendiente';
-      case 'expired': return 'Vencido';
-      case 'cancelled': return 'Cancelado';
-      default: return status;
+      case 'active':
+        return 'Activo';
+      case 'pending':
+        return 'Pendiente';
+      case 'expired':
+        return 'Vencido';
+      case 'cancelled':
+        return 'Cancelado';
+      default:
+        return status;
     }
   };
 
   const getPaymentFrequencyText = (frequency: string) => {
     switch (frequency) {
-      case 'monthly': return 'Mensual';
-      case 'quarterly': return 'Trimestral';
-      case 'annual': return 'Anual';
-      default: return frequency;
+      case 'monthly':
+        return 'Mensual';
+      case 'quarterly':
+        return 'Trimestral';
+      case 'annual':
+        return 'Anual';
+      default:
+        return frequency;
     }
   };
 
@@ -131,8 +145,10 @@ export default function ContractsList({
     return days >= 0 && days <= 30;
   };
 
-  const activeContracts = mockContracts.filter(c => c.status === 'active');
-  const expiringContracts = activeContracts.filter(c => isExpiringSoon(c.endDate));
+  const activeContracts = mockContracts.filter((c) => c.status === 'active');
+  const expiringContracts = activeContracts.filter((c) =>
+    isExpiringSoon(c.endDate),
+  );
 
   return (
     <VStack spacing={6} align="stretch">
@@ -175,7 +191,8 @@ export default function ContractsList({
                   No hay contratos registrados
                 </Text>
                 <Text fontSize="sm" color="gray.400" textAlign="center">
-                  Crea un nuevo contrato para comenzar a registrar los acuerdos comerciales
+                  Crea un nuevo contrato para comenzar a registrar los acuerdos
+                  comerciales
                 </Text>
                 <Button
                   leftIcon={<Plus size={16} />}
@@ -203,7 +220,9 @@ export default function ContractsList({
             </Thead>
             <Tbody>
               {mockContracts.map((contract) => {
-                const daysUntilExpiration = getDaysUntilExpiration(contract.endDate);
+                const daysUntilExpiration = getDaysUntilExpiration(
+                  contract.endDate,
+                );
                 const isExpiring = isExpiringSoon(contract.endDate);
 
                 return (
@@ -211,7 +230,11 @@ export default function ContractsList({
                     <Td>
                       <VStack spacing={1} align="start">
                         <HStack spacing={2}>
-                          <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                          <Text
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="gray.800"
+                          >
                             {contract.contractName}
                           </Text>
                           {isExpiring && contract.status === 'active' && (
@@ -233,26 +256,36 @@ export default function ContractsList({
                     <Td>
                       <VStack spacing={0} align="start">
                         <Text fontSize="sm" color="gray.700">
-                          {format(contract.startDate, 'dd/MM/yyyy', { locale: es })}
+                          {format(contract.startDate, 'dd/MM/yyyy', {
+                            locale: es,
+                          })}
                         </Text>
                         <Text fontSize="xs" color="gray.500">
-                          hasta {format(contract.endDate, 'dd/MM/yyyy', { locale: es })}
+                          hasta{' '}
+                          {format(contract.endDate, 'dd/MM/yyyy', {
+                            locale: es,
+                          })}
                         </Text>
-                        {contract.status === 'active' && daysUntilExpiration > 0 && (
-                          <Text
-                            fontSize="xs"
-                            color={isExpiring ? 'orange.600' : 'gray.500'}
-                            fontWeight={isExpiring ? 'medium' : 'normal'}
-                          >
-                            {daysUntilExpiration} días restantes
-                          </Text>
-                        )}
+                        {contract.status === 'active' &&
+                          daysUntilExpiration > 0 && (
+                            <Text
+                              fontSize="xs"
+                              color={isExpiring ? 'orange.600' : 'gray.500'}
+                              fontWeight={isExpiring ? 'medium' : 'normal'}
+                            >
+                              {daysUntilExpiration} días restantes
+                            </Text>
+                          )}
                       </VStack>
                     </Td>
                     <Td>
                       <HStack spacing={1}>
                         <DollarSign size={12} color="#718096" />
-                        <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                        <Text
+                          fontSize="sm"
+                          fontWeight="medium"
+                          color="gray.700"
+                        >
                           ${contract.costPerSession.toLocaleString()} MXN
                         </Text>
                       </HStack>
@@ -261,8 +294,7 @@ export default function ContractsList({
                       <Text fontSize="sm" color="gray.700">
                         {contract.monthlyLimit
                           ? `$${contract.monthlyLimit.toLocaleString()} MXN`
-                          : 'Sin límite'
-                        }
+                          : 'Sin límite'}
                       </Text>
                     </Td>
                     <Td>
@@ -323,19 +355,25 @@ export default function ContractsList({
           <CardBody>
             <HStack spacing={8} justify="space-around">
               <VStack spacing={1}>
-                <Text fontSize="xs" color="gray.600">Total Contratos</Text>
+                <Text fontSize="xs" color="gray.600">
+                  Total Contratos
+                </Text>
                 <Text fontSize="2xl" fontWeight="bold" color="blue.600">
                   {mockContracts.length}
                 </Text>
               </VStack>
               <VStack spacing={1}>
-                <Text fontSize="xs" color="gray.600">Contratos Activos</Text>
+                <Text fontSize="xs" color="gray.600">
+                  Contratos Activos
+                </Text>
                 <Text fontSize="2xl" fontWeight="bold" color="green.600">
                   {activeContracts.length}
                 </Text>
               </VStack>
               <VStack spacing={1}>
-                <Text fontSize="xs" color="gray.600">Por Vencer</Text>
+                <Text fontSize="xs" color="gray.600">
+                  Por Vencer
+                </Text>
                 <Text fontSize="2xl" fontWeight="bold" color="orange.600">
                   {expiringContracts.length}
                 </Text>

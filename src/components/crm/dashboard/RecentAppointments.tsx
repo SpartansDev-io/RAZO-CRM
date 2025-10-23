@@ -26,7 +26,9 @@ interface RecentAppointmentsProps {
   onNewSession?: (patient: { id: string; name: string }) => void;
 }
 
-export default function RecentAppointments({ onNewSession }: RecentAppointmentsProps) {
+export default function RecentAppointments({
+  onNewSession,
+}: RecentAppointmentsProps) {
   const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +136,9 @@ export default function RecentAppointments({ onNewSession }: RecentAppointmentsP
         <HStack mb={4} spacing={3}>
           <Calendar size={20} color="#3182CE" />
           <Heading size="md">Citas de Hoy</Heading>
-          <Badge colorScheme="blue" ml="auto">{appointments.length}</Badge>
+          <Badge colorScheme="blue" ml="auto">
+            {appointments.length}
+          </Badge>
         </HStack>
 
         {appointments.length === 0 ? (
@@ -160,7 +164,11 @@ export default function RecentAppointments({ onNewSession }: RecentAppointmentsP
                       <Text fontSize="xs" color="gray.500">
                         {appointment.type}
                       </Text>
-                      <Box as={getAppointmentIcon(appointment.appointmentType)} size={12} color="gray.500" />
+                      <Box
+                        as={getAppointmentIcon(appointment.appointmentType)}
+                        size={12}
+                        color="gray.500"
+                      />
                     </HStack>
                   </Box>
                   <VStack spacing={1} align="end">
@@ -185,10 +193,12 @@ export default function RecentAppointments({ onNewSession }: RecentAppointmentsP
                       size="sm"
                       colorScheme="blue"
                       variant="ghost"
-                      onClick={() => onNewSession?.({
-                        id: appointment.patientId,
-                        name: appointment.patientName
-                      })}
+                      onClick={() =>
+                        onNewSession?.({
+                          id: appointment.patientId,
+                          name: appointment.patientName,
+                        })
+                      }
                     />
                   </Tooltip>
                 </HStack>

@@ -58,7 +58,9 @@ interface PatientAttachmentsProps {
   patientId: string;
 }
 
-export default function PatientAttachments({ patientId }: PatientAttachmentsProps) {
+export default function PatientAttachments({
+  patientId,
+}: PatientAttachmentsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
@@ -126,7 +128,8 @@ export default function PatientAttachments({ patientId }: PatientAttachmentsProp
     {
       id: '6',
       title: 'Informe de Progreso Trimestral',
-      description: 'Evaluación del progreso del paciente en el último trimestre',
+      description:
+        'Evaluación del progreso del paciente en el último trimestre',
       fileName: 'progreso_trimestral_q4_2023.pdf',
       fileType: 'PDF',
       fileSize: '1.5 MB',
@@ -187,10 +190,13 @@ export default function PatientAttachments({ patientId }: PatientAttachmentsProp
   const filteredAttachments = mockAttachments.filter((attachment) => {
     const matchesSearch =
       attachment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      attachment.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      attachment.description
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       attachment.fileName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = filterCategory === 'all' || attachment.category === filterCategory;
+    const matchesCategory =
+      filterCategory === 'all' || attachment.category === filterCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -215,14 +221,11 @@ export default function PatientAttachments({ patientId }: PatientAttachmentsProp
             Archivos Adjuntos
           </Text>
           <Text fontSize="sm" color="gray.600">
-            {filteredAttachments.length} {filteredAttachments.length === 1 ? 'archivo' : 'archivos'}
+            {filteredAttachments.length}{' '}
+            {filteredAttachments.length === 1 ? 'archivo' : 'archivos'}
           </Text>
         </Box>
-        <Button
-          leftIcon={<Plus size={16} />}
-          colorScheme="blue"
-          size="sm"
-        >
+        <Button leftIcon={<Plus size={16} />} colorScheme="blue" size="sm">
           Subir Archivo
         </Button>
       </HStack>
@@ -287,15 +290,18 @@ export default function PatientAttachments({ patientId }: PatientAttachmentsProp
               <Text fontSize="sm" color="gray.400" textAlign="center">
                 {searchTerm
                   ? 'Intenta con otros términos de búsqueda'
-                  : 'Aún no hay archivos adjuntos para este paciente'
-                }
+                  : 'Aún no hay archivos adjuntos para este paciente'}
               </Text>
             </VStack>
           </CardBody>
         </Card>
       ) : (
         <Grid
-          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          templateColumns={{
+            base: '1fr',
+            md: 'repeat(2, 1fr)',
+            lg: 'repeat(3, 1fr)',
+          }}
           gap={4}
         >
           {filteredAttachments.map((attachment) => {
@@ -395,11 +401,18 @@ export default function PatientAttachments({ patientId }: PatientAttachmentsProp
                       </HStack>
                     </Box>
 
-                    <HStack justify="space-between" pt={2} borderTop="1px" borderColor={borderColor}>
+                    <HStack
+                      justify="space-between"
+                      pt={2}
+                      borderTop="1px"
+                      borderColor={borderColor}
+                    >
                       <HStack spacing={1} fontSize="xs" color="gray.500">
                         <Calendar size={12} />
                         <Text>
-                          {format(attachment.uploadDate, 'dd MMM yyyy', { locale: es })}
+                          {format(attachment.uploadDate, 'dd MMM yyyy', {
+                            locale: es,
+                          })}
                         </Text>
                       </HStack>
                       <HStack spacing={1} fontSize="xs" color="gray.500">

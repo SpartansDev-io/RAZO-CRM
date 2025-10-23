@@ -24,7 +24,17 @@ import {
   Divider,
   Box,
 } from '@chakra-ui/react';
-import { UserPlus, User, Mail, Phone, Building, Briefcase, Home, Cake, AlertCircle } from 'lucide-react';
+import {
+  UserPlus,
+  User,
+  Mail,
+  Phone,
+  Building,
+  Briefcase,
+  Home,
+  Cake,
+  AlertCircle,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -110,7 +120,7 @@ export default function NewPatientModal({
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast({
         title: 'Paciente registrado exitosamente',
@@ -124,7 +134,8 @@ export default function NewPatientModal({
     } catch (error) {
       toast({
         title: 'Error al registrar el paciente',
-        description: 'Hubo un problema al guardar la información. Intente nuevamente.',
+        description:
+          'Hubo un problema al guardar la información. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -156,20 +167,30 @@ export default function NewPatientModal({
             <VStack spacing={6} align="stretch">
               {/* Basic Information Section */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   <HStack spacing={2}>
                     <User size={20} />
                     <Text>Información Básica</Text>
                   </HStack>
                 </Text>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                  gap={4}
+                >
                   <GridItem colSpan={{ base: 1, md: 2 }}>
                     <FormControl isRequired isInvalid={!!errors.name}>
                       <FormLabel>Nombre Completo</FormLabel>
                       <Input
                         placeholder="Ej: María González López"
-                        {...register('name', { required: 'El nombre es requerido' })}
+                        {...register('name', {
+                          required: 'El nombre es requerido',
+                        })}
                       />
                       {errors.name && (
                         <Text fontSize="sm" color="red.500" mt={1}>
@@ -214,7 +235,9 @@ export default function NewPatientModal({
                     <Input
                       type="tel"
                       placeholder="+52 555 123 4567"
-                      {...register('phone', { required: 'El teléfono es requerido' })}
+                      {...register('phone', {
+                        required: 'El teléfono es requerido',
+                      })}
                     />
                     {errors.phone && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -233,7 +256,9 @@ export default function NewPatientModal({
                     <Input
                       type="date"
                       max={format(new Date(), 'yyyy-MM-dd')}
-                      {...register('birthDate', { required: 'La fecha de nacimiento es requerida' })}
+                      {...register('birthDate', {
+                        required: 'La fecha de nacimiento es requerida',
+                      })}
                     />
                     {errors.birthDate && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -257,11 +282,19 @@ export default function NewPatientModal({
 
               {/* Personal Information Section */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Información Personal
                 </Text>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                  gap={4}
+                >
                   <FormControl isRequired isInvalid={!!errors.occupation}>
                     <FormLabel>
                       <HStack spacing={1}>
@@ -271,7 +304,9 @@ export default function NewPatientModal({
                     </FormLabel>
                     <Input
                       placeholder="Ej: Ingeniero de Software"
-                      {...register('occupation', { required: 'La ocupación es requerida' })}
+                      {...register('occupation', {
+                        required: 'La ocupación es requerida',
+                      })}
                     />
                     {errors.occupation && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -314,11 +349,19 @@ export default function NewPatientModal({
 
               {/* Sociodemographic Information */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Datos Sociodemográficos
                 </Text>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                  gap={4}
+                >
                   <FormControl>
                     <FormLabel>Estado Civil</FormLabel>
                     <Select {...register('maritalStatus')}>
@@ -392,19 +435,29 @@ export default function NewPatientModal({
 
               {/* Emergency Contact */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   <HStack spacing={2}>
                     <AlertCircle size={20} color="#E53E3E" />
                     <Text>Contacto de Emergencia</Text>
                   </HStack>
                 </Text>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                  gap={4}
+                >
                   <FormControl isRequired isInvalid={!!errors.emergencyContact}>
                     <FormLabel>Nombre del Contacto</FormLabel>
                     <Input
                       placeholder="Nombre completo"
-                      {...register('emergencyContact', { required: 'El contacto de emergencia es requerido' })}
+                      {...register('emergencyContact', {
+                        required: 'El contacto de emergencia es requerido',
+                      })}
                     />
                     {errors.emergencyContact && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -418,7 +471,9 @@ export default function NewPatientModal({
                     <Input
                       type="tel"
                       placeholder="+52 555 123 4567"
-                      {...register('emergencyPhone', { required: 'El teléfono de emergencia es requerido' })}
+                      {...register('emergencyPhone', {
+                        required: 'El teléfono de emergencia es requerido',
+                      })}
                     />
                     {errors.emergencyPhone && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -433,11 +488,19 @@ export default function NewPatientModal({
 
               {/* Therapy Information */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Información de Terapia
                 </Text>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                  gap={4}
+                >
                   <FormControl isRequired>
                     <FormLabel>Tipo de Terapia</FormLabel>
                     <Select {...register('therapyType', { required: true })}>
@@ -457,12 +520,17 @@ export default function NewPatientModal({
                   </FormControl>
 
                   <GridItem colSpan={{ base: 1, md: 2 }}>
-                    <FormControl isRequired isInvalid={!!errors.reasonForTherapy}>
+                    <FormControl
+                      isRequired
+                      isInvalid={!!errors.reasonForTherapy}
+                    >
                       <FormLabel>Motivo de Consulta</FormLabel>
                       <Textarea
                         placeholder="Describa brevemente el motivo principal de consulta"
                         rows={4}
-                        {...register('reasonForTherapy', { required: 'El motivo de consulta es requerido' })}
+                        {...register('reasonForTherapy', {
+                          required: 'El motivo de consulta es requerido',
+                        })}
                       />
                       {errors.reasonForTherapy && (
                         <Text fontSize="sm" color="red.500" mt={1}>
@@ -489,7 +557,12 @@ export default function NewPatientModal({
 
               {/* Clinical Information */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Información Clínica
                 </Text>
 
@@ -557,10 +630,18 @@ export default function NewPatientModal({
               </Box>
 
               {/* Important Note */}
-              <Box bg="blue.50" p={4} borderRadius="md" borderWidth="1px" borderColor="blue.200">
+              <Box
+                bg="blue.50"
+                p={4}
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <Text fontSize="xs" color="blue.700" lineHeight="1.6">
-                  <strong>Nota de Confidencialidad:</strong> Toda la información proporcionada es confidencial
-                  y forma parte del expediente clínico del paciente. Está protegida por las leyes de privacidad médica.
+                  <strong>Nota de Confidencialidad:</strong> Toda la información
+                  proporcionada es confidencial y forma parte del expediente
+                  clínico del paciente. Está protegida por las leyes de
+                  privacidad médica.
                 </Text>
               </Box>
             </VStack>
@@ -568,7 +649,11 @@ export default function NewPatientModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

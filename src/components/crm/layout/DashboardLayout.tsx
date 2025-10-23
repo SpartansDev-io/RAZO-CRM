@@ -12,7 +12,10 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isSidebarOpen, toggleSidebar } = useDashboardStore();
-  const sidebarWidth = useBreakpointValue({ base: 0, md: isSidebarOpen ? 250 : 70 });
+  const sidebarWidth = useBreakpointValue({
+    base: 0,
+    md: isSidebarOpen ? 250 : 70,
+  });
 
   return (
     <Box minH="100vh" bg="gray.50">
@@ -20,7 +23,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Sidebar - Hidden on mobile when closed, full width when open */}
         <Box
           display={{ base: isSidebarOpen ? 'block' : 'none', md: 'block' }}
-          width={{ base: "280px", md: isSidebarOpen ? "250px" : "70px" }}
+          width={{ base: '280px', md: isSidebarOpen ? '250px' : '70px' }}
           transition="width 0.3s ease"
           overflow="hidden"
         >

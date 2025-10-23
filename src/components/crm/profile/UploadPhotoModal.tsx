@@ -37,7 +37,9 @@ export default function UploadPhotoModal({
   onUpdate,
 }: UploadPhotoModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentPhotoUrl);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(
+    currentPhotoUrl,
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -161,12 +163,7 @@ export default function UploadPhotoModal({
             </Alert>
 
             <VStack spacing={4}>
-              <Avatar
-                size="2xl"
-                src={previewUrl}
-                bg="blue.500"
-                name="User"
-              />
+              <Avatar size="2xl" src={previewUrl} bg="blue.500" name="User" />
 
               <Input
                 ref={fileInputRef}
@@ -225,13 +222,19 @@ export default function UploadPhotoModal({
             </VStack>
 
             <Text fontSize="xs" color="gray.500" textAlign="center">
-              Formatos aceptados: JPG, PNG, GIF. La imagen se redimensionará automáticamente.
+              Formatos aceptados: JPG, PNG, GIF. La imagen se redimensionará
+              automáticamente.
             </Text>
           </VStack>
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={handleClose} isDisabled={isLoading}>
+          <Button
+            variant="ghost"
+            mr={3}
+            onClick={handleClose}
+            isDisabled={isLoading}
+          >
             Cancelar
           </Button>
           <Button

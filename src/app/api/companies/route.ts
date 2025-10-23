@@ -3,12 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, address, website, industry, employee_count, is_active } = body;
+    const {
+      name,
+      email,
+      phone,
+      address,
+      website,
+      industry,
+      employee_count,
+      is_active,
+    } = body;
 
     if (!name || !email) {
       return NextResponse.json(
         { error: 'Name and email are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,13 +38,13 @@ export async function POST(request: NextRequest) {
           created_at: new Date().toISOString(),
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error('Error creating company:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -47,13 +56,13 @@ export async function GET() {
         success: true,
         data: [],
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error('Error fetching companies:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

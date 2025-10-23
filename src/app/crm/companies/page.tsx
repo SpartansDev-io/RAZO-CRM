@@ -117,7 +117,7 @@ export default function CompaniesPage() {
 
   const totalEmployees = mockCompanies.reduce(
     (sum, company) => sum + company.employeeCount,
-    0
+    0,
   );
   const activeCompanies = mockCompanies.filter((c) => c.isActive).length;
 
@@ -133,9 +133,7 @@ export default function CompaniesPage() {
             <Heading size="lg" color="gray.800" mb={2}>
               Empresas
             </Heading>
-            <Text color="gray.600">
-              Gestiona las empresas asociadas al CRM
-            </Text>
+            <Text color="gray.600">Gestiona las empresas asociadas al CRM</Text>
           </Box>
 
           <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
@@ -264,7 +262,9 @@ export default function CompaniesPage() {
                 onDelete={(id) => console.log('Eliminar empresa:', id)}
                 onAddEmployee={(id) => console.log('Agregar empleado a:', id)}
                 onViewEmployees={(id) => console.log('Ver empleados de:', id)}
-                onGenerateReport={(id) => console.log('Generar reporte de:', id)}
+                onGenerateReport={(id) =>
+                  console.log('Generar reporte de:', id)
+                }
               />
             ))}
           </Grid>

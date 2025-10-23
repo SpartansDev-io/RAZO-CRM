@@ -9,17 +9,19 @@ export class AuthService {
   /**
    * Authenticate user credentials
    */
-  async authenticateUser(credentials: ILoginRequest): Promise<{ user: IUser; token: string } | null> {
+  async authenticateUser(
+    credentials: ILoginRequest,
+  ): Promise<{ user: IUser; token: string } | null> {
     try {
       // Find user by email
       const user = await prisma.user.findUnique({
-        where: { 
+        where: {
           email: credentials.email,
-          isActive: true 
+          isActive: true,
         },
         include: {
-          role: true
-        }
+          role: true,
+        },
       });
 
       if (!user) {
@@ -27,7 +29,10 @@ export class AuthService {
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(credentials.password, user.passwordHash);
+      const isValidPassword = await bcrypt.compare(
+        credentials.password,
+        user.passwordHash,
+      );
       if (!isValidPassword) {
         return null;
       }
@@ -40,7 +45,7 @@ export class AuthService {
 
       return {
         user: userWithoutPassword as IUser,
-        token
+        token,
       };
     } catch (error) {
       console.error('Authentication error:', error);
@@ -56,10 +61,10 @@ export class AuthService {
       {
         userId: user.id,
         email: user.email,
-        roleId: user.roleId
+        roleId: user.roleId,
       },
       this.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '24h' },
     );
   }
 

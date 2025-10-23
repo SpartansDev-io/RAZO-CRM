@@ -5,9 +5,11 @@ Esta carpeta contiene todos los endpoints de la API para el dashboard del CRM de
 ## 🎯 Endpoints Disponibles
 
 ### 1. **GET /api/dashboard/stats**
+
 Obtiene las estadísticas generales del dashboard.
 
 **Respuesta:**
+
 ```typescript
 {
   success: true,
@@ -43,6 +45,7 @@ Obtiene las estadísticas generales del dashboard.
 ```
 
 **Métricas incluidas:**
+
 - **Pacientes activos**: Total de pacientes con status 'active'
 - **Citas hoy**: Sesiones agendadas/confirmadas para hoy
 - **Ingresos del mes**: Total de ingresos de sesiones completadas este mes
@@ -51,18 +54,22 @@ Obtiene las estadísticas generales del dashboard.
 ---
 
 ### 2. **GET /api/dashboard/appointments**
+
 Obtiene las citas del día (o de una fecha específica).
 
 **Query Parameters:**
+
 - `date` (opcional): Fecha en formato YYYY-MM-DD (default: hoy)
 - `limit` (opcional): Número máximo de citas a retornar (default: 10)
 
 **Ejemplo:**
+
 ```
 GET /api/dashboard/appointments?date=2025-10-13&limit=20
 ```
 
 **Respuesta:**
+
 ```typescript
 {
   success: true,
@@ -100,11 +107,13 @@ GET /api/dashboard/appointments?date=2025-10-13&limit=20
 ```
 
 **Estados de cita:**
+
 - `scheduled`: Agendada (sin confirmar)
 - `confirmed`: Confirmada
 - `in_progress`: En progreso
 
 **Tipos de cita:**
+
 - `presencial`: Sesión presencial en consultorio
 - `videollamada`: Sesión en línea (incluye meet_link)
 - `visita`: Visita domiciliaria
@@ -112,9 +121,11 @@ GET /api/dashboard/appointments?date=2025-10-13&limit=20
 ---
 
 ### 3. **GET /api/dashboard/patients**
+
 Obtiene la lista de pacientes recientes con información adicional.
 
 **Query Parameters:**
+
 - `limit` (opcional): Número de pacientes (default: 10)
 - `sortBy` (opcional): Campo de ordenamiento
   - `created_at`: Por fecha de creación
@@ -123,11 +134,13 @@ Obtiene la lista de pacientes recientes con información adicional.
 - `order` (opcional): `asc` o `desc` (default: `desc`)
 
 **Ejemplo:**
+
 ```
 GET /api/dashboard/patients?limit=15&sortBy=last_session&order=desc
 ```
 
 **Respuesta:**
+
 ```typescript
 {
   success: true,
@@ -169,6 +182,7 @@ GET /api/dashboard/patients?limit=15&sortBy=last_session&order=desc
 ```
 
 **Información incluida:**
+
 - Datos básicos del paciente
 - Empresa asociada (si aplica)
 - Terapeuta primario asignado
@@ -178,9 +192,11 @@ GET /api/dashboard/patients?limit=15&sortBy=last_session&order=desc
 ---
 
 ### 4. **GET /api/dashboard/overview**
+
 Obtiene un resumen general del dashboard con alertas y actividad.
 
 **Respuesta:**
+
 ```typescript
 {
   success: true,
@@ -215,6 +231,7 @@ Obtiene un resumen general del dashboard con alertas y actividad.
 ```
 
 **Alertas incluidas:**
+
 - **Notificaciones no leídas**: Total de notificaciones pendientes
 - **Tareas pendientes**: Tareas en progreso o pendientes
 - **Tareas vencidas**: Tareas con fecha de vencimiento pasada
@@ -223,9 +240,11 @@ Obtiene un resumen general del dashboard con alertas y actividad.
 - **Reportes pendientes**: Reportes mensuales sin pagar
 
 **Información financiera:**
+
 - Pagos pendientes (cantidad y monto total)
 
 **Actividad:**
+
 - Pacientes únicos con sesiones hoy
 - Tasa de cancelación (últimos 30 días)
 - Empresas activas con contratos
@@ -235,17 +254,19 @@ Obtiene un resumen general del dashboard con alertas y actividad.
 ## 🔧 Uso desde el Frontend
 
 ### Importar funciones helper:
+
 ```typescript
 import {
   getDashboardStats,
   getDashboardAppointments,
   getDashboardPatients,
   getDashboardOverview,
-  getDashboardData // Obtiene todo en una llamada
+  getDashboardData, // Obtiene todo en una llamada
 } from '@/lib/api/dashboard.api';
 ```
 
 ### Ejemplo de uso:
+
 ```typescript
 // Obtener estadísticas
 const { data, success, error } = await getDashboardStats();
@@ -273,8 +294,8 @@ console.log(dashboardData.data.overview);
 
 Todos los endpoints consultan directamente a **Supabase PostgreSQL** utilizando el cliente de import { prisma } from '@/lib/prisma'; // Asegúrate de tener exportado tu cliente Prisma
 
-
 ### Tablas consultadas:
+
 - `patients` - Pacientes
 - `sessions` - Sesiones terapéuticas
 - `user_profiles` - Perfiles de terapeutas
@@ -308,6 +329,7 @@ Todos los endpoints retornan un formato consistente de error:
 ```
 
 **Status codes:**
+
 - `200`: Éxito
 - `500`: Error del servidor
 
@@ -316,6 +338,7 @@ Todos los endpoints retornan un formato consistente de error:
 ## 📊 Performance
 
 ### Optimizaciones implementadas:
+
 - ✅ Uso de `count` queries para conteos eficientes
 - ✅ Índices en columnas de búsqueda frecuente
 - ✅ Límite de resultados configurable
@@ -323,6 +346,7 @@ Todos los endpoints retornan un formato consistente de error:
 - ✅ Cache deshabilitado (`cache: 'no-store'`) para datos en tiempo real
 
 ### Tiempos de respuesta estimados:
+
 - `/stats`: ~200-400ms
 - `/appointments`: ~150-300ms
 - `/patients`: ~300-500ms (incluye subconsultas)
@@ -358,6 +382,7 @@ curl http://localhost:3000/api/dashboard/overview
 Todos los tipos están definidos en: `src/types/dashboard.types.ts`
 
 Incluye:
+
 - `DashboardStats`
 - `DashboardAppointment`
 - `AppointmentsResponse`

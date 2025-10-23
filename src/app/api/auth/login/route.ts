@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/modules/auth/infrastructure/auth.service';
-import { ILoginRequest, ResponseWrapper, ILoginResponse } from '@/modules/shared/domain/types/auth.types';
+import {
+  ILoginRequest,
+  ResponseWrapper,
+  ILoginResponse,
+} from '@/modules/shared/domain/types/auth.types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +15,7 @@ export async function POST(request: NextRequest) {
       const response: ResponseWrapper<null> = {
         success: false,
         message: 'Email y contraseña son requeridos',
-        data: null
+        data: null,
       };
       return NextResponse.json(response, { status: 400 });
     }
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
       const response: ResponseWrapper<null> = {
         success: false,
         message: 'Credenciales inválidas',
-        data: null
+        data: null,
       };
       return NextResponse.json(response, { status: 401 });
     }
@@ -32,20 +36,19 @@ export async function POST(request: NextRequest) {
     const response: ResponseWrapper<ILoginResponse> = {
       success: true,
       message: 'Autenticación exitosa',
-      data: result
+      data: result,
     };
 
     return NextResponse.json(response, { status: 200 });
-
   } catch (error) {
     console.error('Login error:', error);
-    
+
     const response: ResponseWrapper<null> = {
       success: false,
       message: 'Error interno del servidor',
-      data: null
+      data: null,
     };
-    
+
     return NextResponse.json(response, { status: 500 });
   }
 }

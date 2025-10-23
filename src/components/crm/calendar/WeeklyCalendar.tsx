@@ -21,7 +21,15 @@ import {
   Plus,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay, isToday } from 'date-fns';
+import {
+  format,
+  startOfWeek,
+  addDays,
+  addWeeks,
+  subWeeks,
+  isSameDay,
+  isToday,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@chakra-ui/react';
 import AppointmentModal from './AppointmentModal';
@@ -49,15 +57,27 @@ interface TimeSlot {
 const getMockAppointments = (currentWeek: Date): Appointment[] => {
   const today = new Date();
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
-  
+
   return [
     {
       id: '1',
       patientName: 'María González',
       therapyType: 'Terapia Individual',
       appointmentType: 'videollamada',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 1, 9, 0), // Tuesday 9:00
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 1, 10, 0),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 1,
+        9,
+        0,
+      ), // Tuesday 9:00
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 1,
+        10,
+        0,
+      ),
       meetLink: 'https://meet.google.com/abc-defg-hij',
       status: 'confirmed',
     },
@@ -66,8 +86,20 @@ const getMockAppointments = (currentWeek: Date): Appointment[] => {
       patientName: 'Carlos Rodríguez',
       therapyType: 'Evaluación Inicial',
       appointmentType: 'presencial',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 1, 14, 30), // Tuesday 14:30
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 1, 15, 30),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 1,
+        14,
+        30,
+      ), // Tuesday 14:30
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 1,
+        15,
+        30,
+      ),
       status: 'pending',
     },
     {
@@ -75,8 +107,20 @@ const getMockAppointments = (currentWeek: Date): Appointment[] => {
       patientName: 'Ana López',
       therapyType: 'Terapia Familiar',
       appointmentType: 'presencial',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 2, 11, 0), // Wednesday 11:00
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 2, 12, 0),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 2,
+        11,
+        0,
+      ), // Wednesday 11:00
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 2,
+        12,
+        0,
+      ),
       status: 'confirmed',
     },
     {
@@ -84,8 +128,20 @@ const getMockAppointments = (currentWeek: Date): Appointment[] => {
       patientName: 'Pedro Martínez',
       therapyType: 'Seguimiento',
       appointmentType: 'visita',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 3, 10, 30), // Thursday 10:30
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 3, 11, 30),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 3,
+        10,
+        30,
+      ), // Thursday 10:30
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 3,
+        11,
+        30,
+      ),
       status: 'confirmed',
     },
     {
@@ -93,8 +149,20 @@ const getMockAppointments = (currentWeek: Date): Appointment[] => {
       patientName: 'Laura Fernández',
       therapyType: 'Terapia de Pareja',
       appointmentType: 'videollamada',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 4, 16, 0), // Friday 16:00
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 4, 17, 30),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 4,
+        16,
+        0,
+      ), // Friday 16:00
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 4,
+        17,
+        30,
+      ),
       meetLink: 'https://meet.google.com/xyz-uvwx-rst',
       status: 'pending',
     },
@@ -103,8 +171,20 @@ const getMockAppointments = (currentWeek: Date): Appointment[] => {
       patientName: 'Miguel Santos',
       therapyType: 'Terapia Individual',
       appointmentType: 'presencial',
-      startTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 0, 15, 0), // Monday 15:00
-      endTime: new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 0, 16, 0),
+      startTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 0,
+        15,
+        0,
+      ), // Monday 15:00
+      endTime: new Date(
+        weekStart.getFullYear(),
+        weekStart.getMonth(),
+        weekStart.getDate() + 0,
+        16,
+        0,
+      ),
       status: 'confirmed',
     },
   ];
@@ -116,21 +196,22 @@ export default function WeeklyCalendar() {
     date: Date;
     time: string;
   } | null>(null);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const toast = useToast();
-  
-  const { 
-    isOpen: isCreateOpen = false, 
-    onOpen: onCreateOpen, 
-    onClose: onCreateClose 
+
+  const {
+    isOpen: isCreateOpen = false,
+    onOpen: onCreateOpen,
+    onClose: onCreateClose,
   } = useDisclosure();
-  
-  const { 
-    isOpen: isViewOpen = false, 
-    onOpen: onViewOpen, 
-    onClose: onViewClose 
+
+  const {
+    isOpen: isViewOpen = false,
+    onOpen: onViewOpen,
+    onClose: onViewClose,
   } = useDisclosure();
-  
+
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const todayBg = useColorModeValue('blue.50', 'blue.900');
@@ -165,29 +246,33 @@ export default function WeeklyCalendar() {
 
   // Check if a time slot has an appointment
   const getAppointmentForSlot = (date: Date, timeSlot: TimeSlot) => {
-    return mockAppointments.find(appointment => 
-      isSameDay(appointment.startTime, date) &&
-      appointment.startTime.getHours() === timeSlot.hour
+    return mockAppointments.find(
+      (appointment) =>
+        isSameDay(appointment.startTime, date) &&
+        appointment.startTime.getHours() === timeSlot.hour,
     );
   };
 
   // Check if appointment spans multiple hours and get position info
-  const getAppointmentSpanInfo = (appointment: Appointment, currentHour: number) => {
+  const getAppointmentSpanInfo = (
+    appointment: Appointment,
+    currentHour: number,
+  ) => {
     const startHour = appointment.startTime.getHours();
     const startMinute = appointment.startTime.getMinutes();
     const endHour = appointment.endTime.getHours();
     const endMinute = appointment.endTime.getMinutes();
-    
+
     // Calculate if this hour slot should show the appointment
     const isInRange = currentHour >= startHour && currentHour < endHour;
     const isLastHour = currentHour === endHour && endMinute > 0;
-    
+
     if (!isInRange && !isLastHour) return null;
-    
+
     // Calculate the visual positioning within the hour slot
     let topOffset = 0;
     let height = 100; // Full height by default
-    
+
     if (currentHour === startHour) {
       // First hour - start from the minute position
       topOffset = (startMinute / 60) * 100;
@@ -202,13 +287,13 @@ export default function WeeklyCalendar() {
       // Last hour - end at the minute position
       height = (endMinute / 60) * 100;
     }
-    
+
     return {
       topOffset,
       height,
       isFirst: currentHour === startHour,
       isLast: currentHour === endHour && endMinute > 0,
-      showContent: currentHour === startHour // Only show content in first slot
+      showContent: currentHour === startHour, // Only show content in first slot
     };
   };
 
@@ -218,12 +303,13 @@ export default function WeeklyCalendar() {
     const now = new Date();
     const selectedDateTime = new Date(date);
     selectedDateTime.setHours(timeSlot.hour, 0, 0, 0);
-    
+
     if (selectedDateTime < now) {
       // Show error message for past time slots
       toast({
         title: 'Fecha y hora inválidas',
-        description: 'No puedes programar una cita en el pasado. Selecciona una fecha y hora futura.',
+        description:
+          'No puedes programar una cita en el pasado. Selecciona una fecha y hora futura.',
         status: 'error',
         duration: 4000,
         isClosable: true,
@@ -235,20 +321,21 @@ export default function WeeklyCalendar() {
     let clickedMinute = 0;
     if (clickY !== undefined) {
       // Convert click position to minutes (assuming clickY is percentage of slot height)
-      clickedMinute = Math.round((clickY / 100) * 60 / 15) * 15; // Round to 15-minute intervals
+      clickedMinute = Math.round(((clickY / 100) * 60) / 15) * 15; // Round to 15-minute intervals
     }
-    
+
     // Create the exact clicked time
     const clickedDateTime = new Date(date);
     clickedDateTime.setHours(timeSlot.hour, clickedMinute, 0, 0);
-    
+
     // Find appointment that contains the exact clicked time
-    const appointment = mockAppointments.find(app => 
-      isSameDay(app.startTime, date) &&
-      clickedDateTime >= app.startTime &&
-      clickedDateTime < app.endTime
+    const appointment = mockAppointments.find(
+      (app) =>
+        isSameDay(app.startTime, date) &&
+        clickedDateTime >= app.startTime &&
+        clickedDateTime < app.endTime,
     );
-    
+
     if (appointment) {
       setSelectedAppointment(appointment);
       onViewOpen();
@@ -263,10 +350,14 @@ export default function WeeklyCalendar() {
   // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'green';
-      case 'pending': return 'yellow';
-      case 'cancelled': return 'red';
-      default: return 'gray';
+      case 'confirmed':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'cancelled':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -303,8 +394,14 @@ export default function WeeklyCalendar() {
               variant="ghost"
               onClick={goToPreviousWeek}
             />
-            <Text fontSize="lg" fontWeight="semibold" minW="200px" textAlign="center">
-              {format(weekDays[0], 'd MMM', { locale: es })} - {format(weekDays[6], 'd MMM yyyy', { locale: es })}
+            <Text
+              fontSize="lg"
+              fontWeight="semibold"
+              minW="200px"
+              textAlign="center"
+            >
+              {format(weekDays[0], 'd MMM', { locale: es })} -{' '}
+              {format(weekDays[6], 'd MMM yyyy', { locale: es })}
             </Text>
             <IconButton
               aria-label="Semana siguiente"
@@ -324,7 +421,7 @@ export default function WeeklyCalendar() {
         <Grid templateColumns="80px repeat(7, 1fr)" gap={1}>
           {/* Time column header */}
           <Box />
-          
+
           {/* Day headers */}
           {weekDays.map((day) => (
             <Box
@@ -339,7 +436,11 @@ export default function WeeklyCalendar() {
               <Text fontSize="sm" fontWeight="bold" color="gray.700">
                 {format(day, 'EEE', { locale: es })}
               </Text>
-              <Text fontSize="lg" fontWeight="semibold" color={isToday(day) ? 'blue.600' : 'gray.800'}>
+              <Text
+                fontSize="lg"
+                fontWeight="semibold"
+                color={isToday(day) ? 'blue.600' : 'gray.800'}
+              >
                 {format(day, 'd')}
               </Text>
             </Box>
@@ -363,13 +464,17 @@ export default function WeeklyCalendar() {
               {/* Day slots */}
               {weekDays.map((day) => {
                 // Find all appointments that might overlap with this hour
-                const overlappingAppointments = mockAppointments.filter(app => 
-                  isSameDay(app.startTime, day) &&
-                  ((app.startTime.getHours() <= timeSlot.hour && app.endTime.getHours() > timeSlot.hour) ||
-                   (app.endTime.getHours() === timeSlot.hour && app.endTime.getMinutes() > 0))
+                const overlappingAppointments = mockAppointments.filter(
+                  (app) =>
+                    isSameDay(app.startTime, day) &&
+                    ((app.startTime.getHours() <= timeSlot.hour &&
+                      app.endTime.getHours() > timeSlot.hour) ||
+                      (app.endTime.getHours() === timeSlot.hour &&
+                        app.endTime.getMinutes() > 0)),
                 );
-                
-                const isSelected = selectedSlot?.date === day && 
+
+                const isSelected =
+                  selectedSlot?.date === day &&
                   parseInt(selectedSlot?.time.split(':')[0]) === timeSlot.hour;
 
                 return (
@@ -384,20 +489,24 @@ export default function WeeklyCalendar() {
                     borderRadius="md"
                     _hover={{
                       bg: selectedSlotBg,
-                      shadow: 'sm'
+                      shadow: 'sm',
                     }}
                     transition="all 0.2s"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
-                      const clickY = ((e.clientY - rect.top) / rect.height) * 100;
+                      const clickY =
+                        ((e.clientY - rect.top) / rect.height) * 100;
                       handleSlotClick(day, timeSlot, clickY);
                     }}
                   >
                     {/* Render appointments that overlap with this hour */}
                     {overlappingAppointments.map((appointment) => {
-                      const spanInfo = getAppointmentSpanInfo(appointment, timeSlot.hour);
+                      const spanInfo = getAppointmentSpanInfo(
+                        appointment,
+                        timeSlot.hour,
+                      );
                       if (!spanInfo) return null;
-                      
+
                       return (
                         <Box
                           key={appointment.id}
@@ -411,9 +520,13 @@ export default function WeeklyCalendar() {
                           p={spanInfo.showContent ? { base: 1, md: 2 } : 0}
                           zIndex={2}
                           border="1px solid"
-                          borderColor={spanInfo.showContent ? "blue.600" : "blue.500"}
-                          borderStyle={spanInfo.showContent ? "solid" : "dashed"}
-                          borderWidth={spanInfo.showContent ? "1px" : "2px"}
+                          borderColor={
+                            spanInfo.showContent ? 'blue.600' : 'blue.500'
+                          }
+                          borderStyle={
+                            spanInfo.showContent ? 'solid' : 'dashed'
+                          }
+                          borderWidth={spanInfo.showContent ? '1px' : '2px'}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedAppointment(appointment);
@@ -427,20 +540,38 @@ export default function WeeklyCalendar() {
                           cursor="pointer"
                         >
                           {spanInfo.showContent && (
-                            <VStack spacing={{ base: 0.5, md: 1 }} align="stretch" h="full" justify="flex-start">
-                              <HStack spacing={1} justify="space-between" display={{ base: 'none', sm: 'flex' }}>
+                            <VStack
+                              spacing={{ base: 0.5, md: 1 }}
+                              align="stretch"
+                              h="full"
+                              justify="flex-start"
+                            >
+                              <HStack
+                                spacing={1}
+                                justify="space-between"
+                                display={{ base: 'none', sm: 'flex' }}
+                              >
                                 <Text fontSize="xs" color="blue.100">
-                                  {appointment.appointmentType === 'videollamada' ? '💻' :
-                                   appointment.appointmentType === 'visita' ? '🏠' : '🏢'}
+                                  {appointment.appointmentType ===
+                                  'videollamada'
+                                    ? '💻'
+                                    : appointment.appointmentType === 'visita'
+                                      ? '🏠'
+                                      : '🏢'}
                                 </Text>
                                 <Badge
                                   size="xs"
-                                  colorScheme={getStatusColor(appointment.status)}
+                                  colorScheme={getStatusColor(
+                                    appointment.status,
+                                  )}
                                   variant="solid"
                                   fontSize={{ base: '9px', md: 'xs' }}
                                 >
-                                  {appointment.status === 'confirmed' ? 'Confirmada' :
-                                   appointment.status === 'pending' ? 'Pendiente' : 'Cancelada'}
+                                  {appointment.status === 'confirmed'
+                                    ? 'Confirmada'
+                                    : appointment.status === 'pending'
+                                      ? 'Pendiente'
+                                      : 'Cancelada'}
                                 </Badge>
                               </HStack>
                               <Text
@@ -456,11 +587,12 @@ export default function WeeklyCalendar() {
                                 color="blue.100"
                                 noOfLines={1}
                               >
-                                {format(appointment.startTime, 'HH:mm')} - {format(appointment.endTime, 'HH:mm')}
+                                {format(appointment.startTime, 'HH:mm')} -{' '}
+                                {format(appointment.endTime, 'HH:mm')}
                               </Text>
                             </VStack>
                           )}
-                          
+
                           {/* Continuation indicator for split appointments */}
                           {!spanInfo.showContent && (
                             <Flex
@@ -479,7 +611,11 @@ export default function WeeklyCalendar() {
                                 p={1}
                                 boxShadow="sm"
                               >
-                                <Text fontSize="xs" color="blue.600" fontWeight="bold">
+                                <Text
+                                  fontSize="xs"
+                                  color="blue.600"
+                                  fontWeight="bold"
+                                >
                                   ⋯
                                 </Text>
                               </Box>
@@ -488,10 +624,15 @@ export default function WeeklyCalendar() {
                         </Box>
                       );
                     })}
-                    
+
                     {/* Empty slot indicator */}
                     {overlappingAppointments.length === 0 && (
-                      <Flex align="center" justify="center" h="full" opacity={0.3}>
+                      <Flex
+                        align="center"
+                        justify="center"
+                        h="full"
+                        opacity={0.3}
+                      >
                         <Plus size={16} color="#3182CE" />
                       </Flex>
                     )}

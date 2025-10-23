@@ -3,7 +3,7 @@ import type {
   DashboardStats,
   AppointmentsResponse,
   PatientsResponse,
-  DashboardOverview
+  DashboardOverview,
 } from '@/types/dashboard.types';
 
 const API_BASE_URL = '/api/dashboard';
@@ -11,14 +11,16 @@ const API_BASE_URL = '/api/dashboard';
 /**
  * Obtiene las estadísticas generales del dashboard
  */
-export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
+export async function getDashboardStats(): Promise<
+  ApiResponse<DashboardStats>
+> {
   try {
     const response = await fetch(`${API_BASE_URL}/stats`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store' // Siempre obtener datos frescos
+      cache: 'no-store', // Siempre obtener datos frescos
     });
 
     if (!response.ok) {
@@ -32,7 +34,7 @@ export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> 
     return {
       success: false,
       error: 'Error al obtener estadísticas',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -42,7 +44,7 @@ export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> 
  */
 export async function getDashboardAppointments(
   date?: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<ApiResponse<AppointmentsResponse>> {
   try {
     const params = new URLSearchParams();
@@ -54,7 +56,7 @@ export async function getDashboardAppointments(
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store'
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -68,7 +70,7 @@ export async function getDashboardAppointments(
     return {
       success: false,
       error: 'Error al obtener citas',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -79,13 +81,13 @@ export async function getDashboardAppointments(
 export async function getDashboardPatients(
   limit: number = 10,
   sortBy: 'created_at' | 'updated_at' | 'last_session' = 'created_at',
-  order: 'asc' | 'desc' = 'desc'
+  order: 'asc' | 'desc' = 'desc',
 ): Promise<ApiResponse<PatientsResponse>> {
   try {
     const params = new URLSearchParams({
       limit: limit.toString(),
       sortBy,
-      order
+      order,
     });
 
     const response = await fetch(`${API_BASE_URL}/patients?${params}`, {
@@ -93,7 +95,7 @@ export async function getDashboardPatients(
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store'
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -107,7 +109,7 @@ export async function getDashboardPatients(
     return {
       success: false,
       error: 'Error al obtener pacientes',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -115,14 +117,16 @@ export async function getDashboardPatients(
 /**
  * Obtiene el resumen general del dashboard (alertas, actividad, etc.)
  */
-export async function getDashboardOverview(): Promise<ApiResponse<DashboardOverview>> {
+export async function getDashboardOverview(): Promise<
+  ApiResponse<DashboardOverview>
+> {
   try {
     const response = await fetch(`${API_BASE_URL}/overview`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store'
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -136,7 +140,7 @@ export async function getDashboardOverview(): Promise<ApiResponse<DashboardOverv
     return {
       success: false,
       error: 'Error al obtener resumen del dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -151,7 +155,7 @@ export async function getDashboardData() {
       getDashboardStats(),
       getDashboardAppointments(),
       getDashboardPatients(),
-      getDashboardOverview()
+      getDashboardOverview(),
     ]);
 
     return {
@@ -160,21 +164,21 @@ export async function getDashboardData() {
         stats: stats.data,
         appointments: appointments.data,
         patients: patients.data,
-        overview: overview.data
+        overview: overview.data,
       },
       errors: [
         stats.error,
         appointments.error,
         patients.error,
-        overview.error
-      ].filter(Boolean)
+        overview.error,
+      ].filter(Boolean),
     };
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     return {
       success: false,
       error: 'Error al obtener datos del dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
