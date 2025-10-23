@@ -36,8 +36,15 @@ import { getDashboardStats } from '@/lib/api/dashboard.api';
 import type { DashboardStats } from '@/types/dashboard.types';
 
 export default function DashboardPage() {
-  const { isOpen: isSessionModalOpen, onOpen: onSessionModalOpen, onClose: onSessionModalClose } = useDisclosure();
-  const [selectedPatient, setSelectedPatient] = useState<{ id: string; name: string } | null>(null);
+  const {
+    isOpen: isSessionModalOpen,
+    onOpen: onSessionModalOpen,
+    onClose: onSessionModalClose,
+  } = useDisclosure();
+  const [selectedPatient, setSelectedPatient] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,9 +93,7 @@ export default function DashboardPage() {
             <Heading size="lg" color="gray.800" mb={2}>
               Panel de Control
             </Heading>
-            <Text color="gray.600">
-              Resumen de tu consulta psicológica
-            </Text>
+            <Text color="gray.600">Resumen de tu consulta psicológica</Text>
           </Box>
 
           {/* Statistics Cards */}
@@ -105,7 +110,10 @@ export default function DashboardPage() {
               </Box>
             </Alert>
           ) : stats ? (
-            <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
+            <Grid
+              templateColumns="repeat(auto-fit, minmax(250px, 1fr))"
+              gap={6}
+            >
               <StatisticsCard
                 title="Pacientes Activos"
                 value={stats.activePatients.value.toString()}
@@ -142,7 +150,7 @@ export default function DashboardPage() {
           ) : null}
 
           {/* Main Content Grid */}
-          <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
+          <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
             {/* Recent Appointments */}
             <GridItem>
               <RecentAppointments onNewSession={handleOpenSessionModal} />
@@ -160,13 +168,16 @@ export default function DashboardPage() {
               <Heading size="md" mb={4}>
                 Acciones Rápidas
               </Heading>
-              <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+              <Grid
+                templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                gap={4}
+              >
                 <Box
                   p={4}
                   borderRadius="lg"
                   bg="blue.50"
                   cursor="pointer"
-                  _hover={{ bg: "blue.100" }}
+                  _hover={{ bg: 'blue.100' }}
                   transition="all 0.2s"
                 >
                   <HStack>
@@ -181,7 +192,7 @@ export default function DashboardPage() {
                   borderRadius="lg"
                   bg="green.50"
                   cursor="pointer"
-                  _hover={{ bg: "green.100" }}
+                  _hover={{ bg: 'green.100' }}
                   transition="all 0.2s"
                 >
                   <HStack>
@@ -196,7 +207,7 @@ export default function DashboardPage() {
                   borderRadius="lg"
                   bg="teal.50"
                   cursor="pointer"
-                  _hover={{ bg: "teal.100" }}
+                  _hover={{ bg: 'teal.100' }}
                   transition="all 0.2s"
                   onClick={() => handleOpenSessionModal()}
                 >

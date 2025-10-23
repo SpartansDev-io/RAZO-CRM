@@ -40,12 +40,19 @@ export default function NewCompanyPage() {
     isActive: true,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseInt(value) || 0 : value,
+      [name]:
+        type === 'checkbox'
+          ? checked
+          : type === 'number'
+            ? parseInt(value) || 0
+            : value,
     }));
   };
 
@@ -99,7 +106,8 @@ export default function NewCompanyPage() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Error al crear la empresa',
+        description:
+          error instanceof Error ? error.message : 'Error al crear la empresa',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -142,7 +150,10 @@ export default function NewCompanyPage() {
             borderColor={borderColor}
           >
             <VStack spacing={6} align="stretch">
-              <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
+              <Grid
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                gap={6}
+              >
                 <FormControl isRequired>
                   <FormLabel>Nombre de la Empresa</FormLabel>
                   <Input
@@ -199,7 +210,9 @@ export default function NewCompanyPage() {
                   >
                     <option value="Tecnología">Tecnología</option>
                     <option value="Consultoría">Consultoría</option>
-                    <option value="Desarrollo de Software">Desarrollo de Software</option>
+                    <option value="Desarrollo de Software">
+                      Desarrollo de Software
+                    </option>
                     <option value="Marketing">Marketing</option>
                     <option value="Recursos Humanos">Recursos Humanos</option>
                     <option value="Finanzas">Finanzas</option>
@@ -213,7 +226,9 @@ export default function NewCompanyPage() {
                     <option value="Inmobiliaria">Inmobiliaria</option>
                     <option value="Legal">Legal</option>
                     <option value="Contabilidad">Contabilidad</option>
-                    <option value="Telecomunicaciones">Telecomunicaciones</option>
+                    <option value="Telecomunicaciones">
+                      Telecomunicaciones
+                    </option>
                     <option value="Energía">Energía</option>
                     <option value="Alimentación">Alimentación</option>
                     <option value="Otra">Otra</option>

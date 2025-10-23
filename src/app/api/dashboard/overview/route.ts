@@ -58,12 +58,18 @@ export async function GET() {
     });
 
     const totalPendingAmount = pendingPayments.reduce(
-      (sum: number, s: { sessionCost: number | string | null; paidAmount: number | string | null }) => {
+      (
+        sum: number,
+        s: {
+          sessionCost: number | string | null;
+          paidAmount: number | string | null;
+        },
+      ) => {
         const cost = Number(s.sessionCost) || 0;
         const paid = Number(s.paidAmount) || 0;
         return sum + (cost - paid);
       },
-      0
+      0,
     );
 
     const pendingPaymentsCount = pendingPayments.length;
@@ -98,7 +104,9 @@ export async function GET() {
     });
 
     const uniquePatientsToday = new Set(
-      todaySessionsPatients.map((s: { patientId: string | number | null }) => s.patientId)
+      todaySessionsPatients.map(
+        (s: { patientId: string | number | null }) => s.patientId,
+      ),
     ).size;
 
     /** 9️⃣ Tasa de cancelación últimos 30 días */
@@ -112,11 +120,14 @@ export async function GET() {
 
     const totalRecentSessions = recentSessions.length;
     const cancelledSessions = recentSessions.filter(
-      (s: { status: string }) => s.status === 'cancelled' || s.status === 'no_show',
+      (s: { status: string }) =>
+        s.status === 'cancelled' || s.status === 'no_show',
     ).length;
 
     const cancellationRate =
-      totalRecentSessions > 0 ? ((cancelledSessions / totalRecentSessions) * 100).toFixed(1) : '0';
+      totalRecentSessions > 0
+        ? ((cancelledSessions / totalRecentSessions) * 100).toFixed(1)
+        : '0';
 
     /** 🔟 Empresas activas con contratos vigentes */
     const activeCompaniesWithContracts = await prisma.company.count({

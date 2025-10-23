@@ -1,23 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Button, 
-  Input, 
-  InputGroup, 
-  IconButton, 
-  VStack, 
-  Heading, 
-  Text, 
-  Card, 
-  CardBody, 
-  Spinner, 
+import {
+  Box,
+  Button,
+  Input,
+  InputGroup,
+  IconButton,
+  VStack,
+  Heading,
+  Text,
+  Card,
+  CardBody,
+  Spinner,
   Alert,
   AlertIcon,
   FormControl,
   FormLabel,
-  InputRightElement
+  InputRightElement,
 } from '@chakra-ui/react';
 import { Eye, EyeOff, Lock, Mail, Brain } from 'lucide-react';
 import { useAuthStore } from '@/modules/auth/application/auth.store';
@@ -30,7 +30,8 @@ export function LoginForm() {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
 
   // Clear error when component mounts or form data changes
   useEffect(() => {
@@ -48,7 +49,7 @@ export function LoginForm() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -56,7 +57,7 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email.trim() || !formData.password.trim()) {
       return;
     }
@@ -150,8 +151,18 @@ export function LoginForm() {
                     />
                     <InputRightElement>
                       <IconButton
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        icon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        aria-label={
+                          showPassword
+                            ? 'Ocultar contraseña'
+                            : 'Mostrar contraseña'
+                        }
+                        icon={
+                          showPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )
+                        }
                         variant="ghost"
                         size="sm"
                         onClick={togglePasswordVisibility}
@@ -172,7 +183,11 @@ export function LoginForm() {
                   loadingText="Iniciando sesión..."
                   spinner={<Spinner size="sm" />}
                   leftIcon={!isLoading ? <Lock size={18} /> : undefined}
-                  disabled={!formData.email.trim() || !formData.password.trim() || isLoading}
+                  disabled={
+                    !formData.email.trim() ||
+                    !formData.password.trim() ||
+                    isLoading
+                  }
                   _hover={{
                     transform: 'translateY(-2px)',
                     shadow: 'lg',

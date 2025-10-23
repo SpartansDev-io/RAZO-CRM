@@ -67,17 +67,22 @@ export default function ContractModal({
     notes: contract?.notes || '',
   });
 
-  const [hasMonthlyLimit, setHasMonthlyLimit] = useState(!!contract?.monthlyLimit);
+  const [hasMonthlyLimit, setHasMonthlyLimit] = useState(
+    !!contract?.monthlyLimit,
+  );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'costPerSession' || name === 'monthlyLimit'
-        ? parseFloat(value) || 0
-        : value,
+      [name]:
+        name === 'costPerSession' || name === 'monthlyLimit'
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -94,7 +99,12 @@ export default function ContractModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.contractName || !formData.startDate || !formData.endDate || !formData.costPerSession) {
+    if (
+      !formData.contractName ||
+      !formData.startDate ||
+      !formData.endDate ||
+      !formData.costPerSession
+    ) {
       toast({
         title: 'Error',
         description: 'Por favor completa todos los campos requeridos',
@@ -127,7 +137,10 @@ export default function ContractModal({
       return;
     }
 
-    if (hasMonthlyLimit && (!formData.monthlyLimit || formData.monthlyLimit <= 0)) {
+    if (
+      hasMonthlyLimit &&
+      (!formData.monthlyLimit || formData.monthlyLimit <= 0)
+    ) {
       toast({
         title: 'Error',
         description: 'El límite mensual debe ser mayor a 0',
@@ -197,7 +210,10 @@ export default function ContractModal({
                 />
               </FormControl>
 
-              <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+              <Grid
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                gap={4}
+              >
                 <FormControl isRequired>
                   <FormLabel fontSize="sm">Fecha de Inicio</FormLabel>
                   <Input
@@ -223,7 +239,10 @@ export default function ContractModal({
                 </FormControl>
               </Grid>
 
-              <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+              <Grid
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                gap={4}
+              >
                 <FormControl isRequired>
                   <FormLabel fontSize="sm">Costo por Sesión (MXN)</FormLabel>
                   <InputGroup>
@@ -249,7 +268,9 @@ export default function ContractModal({
                       <Switch
                         size="sm"
                         isChecked={hasMonthlyLimit}
-                        onChange={(e) => handleMonthlyLimitToggle(e.target.checked)}
+                        onChange={(e) =>
+                          handleMonthlyLimitToggle(e.target.checked)
+                        }
                       />
                     </HStack>
                   </FormLabel>
@@ -260,7 +281,7 @@ export default function ContractModal({
                       type="number"
                       step="0.01"
                       min="0"
-                      value={hasMonthlyLimit ? (formData.monthlyLimit || '') : ''}
+                      value={hasMonthlyLimit ? formData.monthlyLimit || '' : ''}
                       onChange={handleChange}
                       placeholder="15000.00"
                       bg={inputBg}
@@ -269,12 +290,17 @@ export default function ContractModal({
                     />
                   </InputGroup>
                   <Text fontSize="xs" color="gray.500" mt={1}>
-                    {hasMonthlyLimit ? 'Límite de gasto mensual' : 'Sin límite de gasto'}
+                    {hasMonthlyLimit
+                      ? 'Límite de gasto mensual'
+                      : 'Sin límite de gasto'}
                   </Text>
                 </FormControl>
               </Grid>
 
-              <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+              <Grid
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                gap={4}
+              >
                 <FormControl isRequired>
                   <FormLabel fontSize="sm">Frecuencia de Pago</FormLabel>
                   <Select

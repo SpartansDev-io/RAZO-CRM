@@ -79,28 +79,40 @@ export default function PatientProfileModal({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'pending': return 'yellow';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'pending':
+        return 'yellow';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'inactive': return 'Inactivo';
-      case 'pending': return 'Pendiente';
-      default: return 'Desconocido';
+      case 'active':
+        return 'Activo';
+      case 'inactive':
+        return 'Inactivo';
+      case 'pending':
+        return 'Pendiente';
+      default:
+        return 'Desconocido';
     }
   };
 
   const getGenderText = (gender: string) => {
     switch (gender) {
-      case 'M': return 'Masculino';
-      case 'F': return 'Femenino';
-      case 'Other': return 'Otro';
-      default: return 'No especificado';
+      case 'M':
+        return 'Masculino';
+      case 'F':
+        return 'Femenino';
+      case 'Other':
+        return 'Otro';
+      default:
+        return 'No especificado';
     }
   };
 
@@ -122,11 +134,7 @@ export default function PatientProfileModal({
             <Card bg={cardBg}>
               <CardBody>
                 <HStack spacing={4} align="center">
-                  <Avatar
-                    size="lg"
-                    name={patient.name}
-                    bg="blue.500"
-                  />
+                  <Avatar size="lg" name={patient.name} bg="blue.500" />
                   <Box flex="1">
                     <HStack spacing={3} mb={2}>
                       <Text fontSize="xl" fontWeight="bold" color="gray.800">
@@ -145,7 +153,10 @@ export default function PatientProfileModal({
                       {patient.age} años • {getGenderText(patient.gender)}
                     </Text>
                     <Text color="gray.500" fontSize="sm">
-                      Paciente desde {format(patient.registrationDate, 'MMMM yyyy', { locale: es })}
+                      Paciente desde{' '}
+                      {format(patient.registrationDate, 'MMMM yyyy', {
+                        locale: es,
+                      })}
                     </Text>
                   </Box>
                 </HStack>
@@ -153,7 +164,10 @@ export default function PatientProfileModal({
             </Card>
 
             {/* Statistics */}
-            <Grid templateColumns="repeat(auto-fit, minmax(150px, 1fr))" gap={4}>
+            <Grid
+              templateColumns="repeat(auto-fit, minmax(150px, 1fr))"
+              gap={4}
+            >
               <Card>
                 <CardBody>
                   <Stat>
@@ -180,10 +194,11 @@ export default function PatientProfileModal({
                       </HStack>
                     </StatLabel>
                     <StatNumber fontSize="lg" color="green.600">
-                      {patient.lastSession 
-                        ? format(patient.lastSession, 'dd/MM/yyyy', { locale: es })
-                        : 'Sin sesiones'
-                      }
+                      {patient.lastSession
+                        ? format(patient.lastSession, 'dd/MM/yyyy', {
+                            locale: es,
+                          })
+                        : 'Sin sesiones'}
                     </StatNumber>
                     {patient.lastSession && (
                       <StatHelpText fontSize="xs">
@@ -203,9 +218,11 @@ export default function PatientProfileModal({
                   Información de Contacto
                 </Text>
               </HStack>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+              <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Email</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Email
+                  </Text>
                   <HStack spacing={2}>
                     <Mail size={16} color="#718096" />
                     <Text fontSize="sm" color="gray.800">
@@ -214,7 +231,9 @@ export default function PatientProfileModal({
                   </HStack>
                 </Box>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Teléfono</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Teléfono
+                  </Text>
                   <HStack spacing={2}>
                     <Phone size={16} color="#718096" />
                     <Text fontSize="sm" color="gray.800">
@@ -235,9 +254,11 @@ export default function PatientProfileModal({
                   Contacto de Emergencia
                 </Text>
               </HStack>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+              <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Nombre</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Nombre
+                  </Text>
                   <HStack spacing={2}>
                     <User size={16} color="#718096" />
                     <Text fontSize="sm" color="gray.800">
@@ -246,7 +267,9 @@ export default function PatientProfileModal({
                   </HStack>
                 </Box>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Teléfono</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Teléfono
+                  </Text>
                   <HStack spacing={2}>
                     <Phone size={16} color="#718096" />
                     <Text fontSize="sm" color="gray.800">
@@ -267,10 +290,12 @@ export default function PatientProfileModal({
                   Datos Sociodemográficos
                 </Text>
               </HStack>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+              <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
                 {patient.maritalStatus && (
                   <Box>
-                    <Text fontSize="sm" color="gray.600" mb={1}>Estado Civil</Text>
+                    <Text fontSize="sm" color="gray.600" mb={1}>
+                      Estado Civil
+                    </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="medium">
                       {patient.maritalStatus}
                     </Text>
@@ -278,7 +303,9 @@ export default function PatientProfileModal({
                 )}
                 {patient.educationLevel && (
                   <Box>
-                    <Text fontSize="sm" color="gray.600" mb={1}>Nivel Educativo</Text>
+                    <Text fontSize="sm" color="gray.600" mb={1}>
+                      Nivel Educativo
+                    </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="medium">
                       {patient.educationLevel}
                     </Text>
@@ -286,14 +313,18 @@ export default function PatientProfileModal({
                 )}
                 {patient.occupation && (
                   <Box>
-                    <Text fontSize="sm" color="gray.600" mb={1}>Ocupación</Text>
+                    <Text fontSize="sm" color="gray.600" mb={1}>
+                      Ocupación
+                    </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="medium">
                       {patient.occupation}
                     </Text>
                   </Box>
                 )}
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Empresa</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Empresa
+                  </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
                     {patient.company}
                   </Text>
@@ -311,26 +342,34 @@ export default function PatientProfileModal({
                   Información de Terapia
                 </Text>
               </HStack>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+              <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Tipo de Terapia</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Tipo de Terapia
+                  </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
                     {patient.therapyType}
                   </Text>
                 </Box>
                 <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>Fecha de Registro</Text>
+                  <Text fontSize="sm" color="gray.600" mb={1}>
+                    Fecha de Registro
+                  </Text>
                   <HStack spacing={2}>
                     <Calendar size={16} color="#718096" />
                     <Text fontSize="sm" color="gray.800">
-                      {format(patient.registrationDate, 'dd MMMM yyyy', { locale: es })}
+                      {format(patient.registrationDate, 'dd MMMM yyyy', {
+                        locale: es,
+                      })}
                     </Text>
                   </HStack>
                 </Box>
               </Grid>
               {patient.reasonForTherapy && (
                 <Box mt={4}>
-                  <Text fontSize="sm" color="gray.600" mb={2}>Motivo de Consulta</Text>
+                  <Text fontSize="sm" color="gray.600" mb={2}>
+                    Motivo de Consulta
+                  </Text>
                   <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
                     <CardBody p={3}>
                       <Text fontSize="sm" lineHeight="1.6" color="gray.700">
@@ -345,10 +384,18 @@ export default function PatientProfileModal({
             {/* Quick Actions */}
             <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
               <CardBody>
-                <Text fontSize="sm" fontWeight="semibold" color="blue.700" mb={3}>
+                <Text
+                  fontSize="sm"
+                  fontWeight="semibold"
+                  color="blue.700"
+                  mb={3}
+                >
                   Acciones Rápidas
                 </Text>
-                <Grid templateColumns="repeat(auto-fit, minmax(150px, 1fr))" gap={3}>
+                <Grid
+                  templateColumns="repeat(auto-fit, minmax(150px, 1fr))"
+                  gap={3}
+                >
                   <Button
                     size="sm"
                     leftIcon={<Calendar size={14} />}
@@ -388,9 +435,7 @@ export default function PatientProfileModal({
             <Button variant="outline" onClick={onClose}>
               Cerrar
             </Button>
-            <Button colorScheme="blue">
-              Editar Paciente
-            </Button>
+            <Button colorScheme="blue">Editar Paciente</Button>
           </HStack>
         </ModalFooter>
       </ModalContent>

@@ -41,7 +41,7 @@ function NavItem({
   href,
   isActive = false,
   isCollapsed = false,
-  onClick
+  onClick,
 }: NavItemProps) {
   const router = useRouter();
   const { toggleSidebar } = useDashboardStore();
@@ -130,7 +130,7 @@ export default function Sidebar() {
       bg={bg}
       borderRight="1px"
       borderColor={borderColor}
-      w={{ base: "280px", md: isSidebarOpen ? "250px" : "70px" }}
+      w={{ base: '280px', md: isSidebarOpen ? '250px' : '70px' }}
       h="full"
       display="block"
       position={{ base: 'fixed', md: 'relative' }}
@@ -142,8 +142,14 @@ export default function Sidebar() {
     >
       <VStack spacing={0} align="stretch" h="full">
         {/* Logo - Always show full on mobile */}
-        <Box p={{ base: 4, md: 6 }} borderBottom="1px" borderColor={borderColor}>
-          <Box display={{ base: 'block', md: isSidebarOpen ? 'block' : 'none' }}>
+        <Box
+          p={{ base: 4, md: 6 }}
+          borderBottom="1px"
+          borderColor={borderColor}
+        >
+          <Box
+            display={{ base: 'block', md: isSidebarOpen ? 'block' : 'none' }}
+          >
             <HStack spacing={3}>
               <Brain size={32} color="#2196F3" />
               <Box>
@@ -156,7 +162,9 @@ export default function Sidebar() {
               </Box>
             </HStack>
           </Box>
-          <Box display={{ base: 'none', md: !isSidebarOpen ? 'block' : 'none' }}>
+          <Box
+            display={{ base: 'none', md: !isSidebarOpen ? 'block' : 'none' }}
+          >
             <Flex justify="center">
               <Brain size={32} color="#2196F3" />
             </Flex>
@@ -166,8 +174,14 @@ export default function Sidebar() {
         {/* Toggle Button - Desktop only */}
         <Box px={4} py={2} display={{ base: 'none', md: 'block' }}>
           <IconButton
-            aria-label={isSidebarOpen ? "Colapsar sidebar" : "Expandir sidebar"}
-            icon={isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            aria-label={isSidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'}
+            icon={
+              isSidebarOpen ? (
+                <ChevronLeft size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              )
+            }
             size="sm"
             variant="ghost"
             w="full"

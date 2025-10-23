@@ -211,19 +211,23 @@ export default function PatientsPage() {
   const {
     isOpen: isNewPatientOpen,
     onOpen: onNewPatientOpen,
-    onClose: onNewPatientClose
+    onClose: onNewPatientClose,
   } = useDisclosure();
 
   // Filter and search logic
   const filteredPatients = useMemo(() => {
     return mockPatients.filter((patient) => {
-      const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           patient.phone.includes(searchTerm);
-      
-      const matchesStatus = statusFilter === 'all' || patient.status === statusFilter;
-      const matchesTherapy = therapyFilter === 'all' || patient.therapyType === therapyFilter;
-      const matchesCompany = companyFilter === 'all' || patient.company === companyFilter;
+      const matchesSearch =
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.phone.includes(searchTerm);
+
+      const matchesStatus =
+        statusFilter === 'all' || patient.status === statusFilter;
+      const matchesTherapy =
+        therapyFilter === 'all' || patient.therapyType === therapyFilter;
+      const matchesCompany =
+        companyFilter === 'all' || patient.company === companyFilter;
 
       return matchesSearch && matchesStatus && matchesTherapy && matchesCompany;
     });
@@ -232,7 +236,10 @@ export default function PatientsPage() {
   // Pagination logic
   const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedPatients = filteredPatients.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedPatients = filteredPatients.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
 
   // Reset to first page when filters change
   const handleFilterChange = () => {
@@ -240,24 +247,34 @@ export default function PatientsPage() {
   };
 
   // Get unique therapy types for filter
-  const therapyTypes = Array.from(new Set(mockPatients.map(p => p.therapyType)));
-  const companies = Array.from(new Set(mockPatients.map(p => p.company)));
+  const therapyTypes = Array.from(
+    new Set(mockPatients.map((p) => p.therapyType)),
+  );
+  const companies = Array.from(new Set(mockPatients.map((p) => p.company)));
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'pending': return 'yellow';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'pending':
+        return 'yellow';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'inactive': return 'Inactivo';
-      case 'pending': return 'Pendiente';
-      default: return 'Desconocido';
+      case 'active':
+        return 'Activo';
+      case 'inactive':
+        return 'Inactivo';
+      case 'pending':
+        return 'Pendiente';
+      default:
+        return 'Desconocido';
     }
   };
 
@@ -371,7 +388,8 @@ export default function PatientsPage() {
 
                 {/* Results count */}
                 <Text fontSize="sm" color="gray.600">
-                  Mostrando {paginatedPatients.length} de {filteredPatients.length} pacientes
+                  Mostrando {paginatedPatients.length} de{' '}
+                  {filteredPatients.length} pacientes
                 </Text>
               </VStack>
             </CardBody>
@@ -426,13 +444,22 @@ export default function PatientsPage() {
                                   {patient.name}
                                 </Text>
                                 <Text fontSize="xs" color="gray.500">
-                                  {patient.age} años • {patient.gender === 'M' ? 'Masculino' : patient.gender === 'F' ? 'Femenino' : 'Otro'}
+                                  {patient.age} años •{' '}
+                                  {patient.gender === 'M'
+                                    ? 'Masculino'
+                                    : patient.gender === 'F'
+                                      ? 'Femenino'
+                                      : 'Otro'}
                                 </Text>
                               </Box>
                             </HStack>
                           </Td>
                           <Td>
-                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                            <Text
+                              fontSize="sm"
+                              color="gray.700"
+                              fontWeight="medium"
+                            >
                               {patient.company}
                             </Text>
                           </Td>
@@ -470,7 +497,9 @@ export default function PatientsPage() {
                             {patient.lastSession ? (
                               <VStack spacing={0} align="start">
                                 <Text fontSize="sm" color="gray.700">
-                                  {format(patient.lastSession, 'dd/MM/yyyy', { locale: es })}
+                                  {format(patient.lastSession, 'dd/MM/yyyy', {
+                                    locale: es,
+                                  })}
                                 </Text>
                                 <Text fontSize="xs" color="gray.500">
                                   {format(patient.lastSession, 'HH:mm')}
@@ -483,7 +512,11 @@ export default function PatientsPage() {
                             )}
                           </Td>
                           <Td>
-                            <Text fontSize="sm" fontWeight="medium" color="blue.600">
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color="blue.600"
+                            >
                               {patient.totalSessions}
                             </Text>
                           </Td>
@@ -524,25 +557,31 @@ export default function PatientsPage() {
                       isDisabled={currentPage === 1}
                       onClick={() => setCurrentPage(currentPage - 1)}
                     />
-                    
+
                     {/* Page numbers */}
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                      const pageNum =
+                        Math.max(1, Math.min(totalPages - 4, currentPage - 2)) +
+                        i;
                       if (pageNum > totalPages) return null;
-                      
+
                       return (
                         <Button
                           key={pageNum}
                           size="sm"
-                          variant={currentPage === pageNum ? 'solid' : 'outline'}
-                          colorScheme={currentPage === pageNum ? 'blue' : 'gray'}
+                          variant={
+                            currentPage === pageNum ? 'solid' : 'outline'
+                          }
+                          colorScheme={
+                            currentPage === pageNum ? 'blue' : 'gray'
+                          }
                           onClick={() => setCurrentPage(pageNum)}
                         >
                           {pageNum}
                         </Button>
                       );
                     })}
-                    
+
                     <IconButton
                       aria-label="Página siguiente"
                       icon={<ChevronRight size={16} />}

@@ -119,11 +119,23 @@ export default function MonthlyReportsHistory({
   contractName,
 }: MonthlyReportsHistoryProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [reports, setReports] = useState<MonthlyReport[]>(getMockReports(contractId));
-  const [selectedReport, setSelectedReport] = useState<MonthlyReport | null>(null);
+  const [reports, setReports] = useState<MonthlyReport[]>(
+    getMockReports(contractId),
+  );
+  const [selectedReport, setSelectedReport] = useState<MonthlyReport | null>(
+    null,
+  );
 
-  const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure();
-  const { isOpen: isPaidOpen, onOpen: onPaidOpen, onClose: onPaidClose } = useDisclosure();
+  const {
+    isOpen: isViewOpen,
+    onOpen: onViewOpen,
+    onClose: onViewClose,
+  } = useDisclosure();
+  const {
+    isOpen: isPaidOpen,
+    onOpen: onPaidOpen,
+    onClose: onPaidClose,
+  } = useDisclosure();
 
   const toast = useToast();
 
@@ -147,7 +159,7 @@ export default function MonthlyReportsHistory({
     });
 
     // Simulate PDF generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     toast({
       title: 'PDF descargado',
@@ -185,8 +197,8 @@ export default function MonthlyReportsHistory({
   };
 
   const calculateTotals = () => {
-    const paidReports = reports.filter(r => r.paymentStatus === 'paid');
-    const pendingReports = reports.filter(r => r.paymentStatus === 'pending');
+    const paidReports = reports.filter((r) => r.paymentStatus === 'paid');
+    const pendingReports = reports.filter((r) => r.paymentStatus === 'pending');
 
     return {
       totalPaid: paidReports.reduce((sum, r) => sum + r.totalAmount, 0),
@@ -261,7 +273,12 @@ export default function MonthlyReportsHistory({
           </CardBody>
         </Card>
 
-        <Card flex="1" bg="orange.50" borderWidth="1px" borderColor="orange.200">
+        <Card
+          flex="1"
+          bg="orange.50"
+          borderWidth="1px"
+          borderColor="orange.200"
+        >
           <CardBody>
             <VStack spacing={2} align="stretch">
               <HStack spacing={2}>
@@ -323,7 +340,8 @@ export default function MonthlyReportsHistory({
                       <Td>
                         <VStack spacing={0} align="start">
                           <Text fontSize="sm" fontWeight="medium">
-                            {getMonthName(report.reportMonth)} {report.reportYear}
+                            {getMonthName(report.reportMonth)}{' '}
+                            {report.reportYear}
                           </Text>
                           <Text fontSize="xs" color="gray.500">
                             {report.reportMonth}/{report.reportYear}
@@ -350,7 +368,11 @@ export default function MonthlyReportsHistory({
                         <Text
                           fontSize="sm"
                           fontWeight="bold"
-                          color={report.paymentStatus === 'paid' ? 'green.600' : 'orange.600'}
+                          color={
+                            report.paymentStatus === 'paid'
+                              ? 'green.600'
+                              : 'orange.600'
+                          }
                         >
                           ${report.totalAmount.toLocaleString()}
                         </Text>
@@ -366,14 +388,22 @@ export default function MonthlyReportsHistory({
                       </Td>
                       <Td>
                         <Text fontSize="xs" color="gray.600">
-                          {format(report.generatedAt, 'dd/MM/yyyy', { locale: es })}
+                          {format(report.generatedAt, 'dd/MM/yyyy', {
+                            locale: es,
+                          })}
                         </Text>
                       </Td>
                       <Td>
                         {report.paymentStatus === 'paid' && report.paidAt ? (
                           <VStack spacing={0} align="start">
-                            <Text fontSize="xs" color="gray.700" fontWeight="medium">
-                              {format(report.paidAt, 'dd/MM/yyyy', { locale: es })}
+                            <Text
+                              fontSize="xs"
+                              color="gray.700"
+                              fontWeight="medium"
+                            >
+                              {format(report.paidAt, 'dd/MM/yyyy', {
+                                locale: es,
+                              })}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
                               {getPaymentMethodText(report.paymentMethod)}

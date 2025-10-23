@@ -25,7 +25,13 @@ import {
   CardBody,
   Textarea,
 } from '@chakra-ui/react';
-import { DollarSign, CreditCard, Banknote, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  DollarSign,
+  CreditCard,
+  Banknote,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
@@ -87,7 +93,9 @@ export default function RegisterPaymentModal({
 }: RegisterPaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [pendingSessions, setPendingSessions] = useState<PendingSession[]>([]);
-  const [selectedSession, setSelectedSession] = useState<PendingSession | null>(null);
+  const [selectedSession, setSelectedSession] = useState<PendingSession | null>(
+    null,
+  );
   const toast = useToast();
 
   const {
@@ -120,7 +128,7 @@ export default function RegisterPaymentModal({
 
   useEffect(() => {
     if (watchedSessionId) {
-      const session = pendingSessions.find(s => s.id === watchedSessionId);
+      const session = pendingSessions.find((s) => s.id === watchedSessionId);
       setSelectedSession(session || null);
       if (session) {
         setValue('paymentAmount', session.remainingDebt);
@@ -134,7 +142,7 @@ export default function RegisterPaymentModal({
     setIsLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast({
         title: 'Pago registrado exitosamente',
@@ -148,7 +156,8 @@ export default function RegisterPaymentModal({
     } catch (error) {
       toast({
         title: 'Error al registrar el pago',
-        description: 'Hubo un problema al procesar el pago. Intente nuevamente.',
+        description:
+          'Hubo un problema al procesar el pago. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -165,7 +174,8 @@ export default function RegisterPaymentModal({
   };
 
   const getRemainingDebtAfterPayment = () => {
-    if (!selectedSession || !watchedPaymentAmount) return selectedSession?.remainingDebt || 0;
+    if (!selectedSession || !watchedPaymentAmount)
+      return selectedSession?.remainingDebt || 0;
     return selectedSession.remainingDebt - watchedPaymentAmount;
   };
 
@@ -190,7 +200,13 @@ export default function RegisterPaymentModal({
           <ModalBody>
             <VStack spacing={6} align="stretch">
               {/* Patient Info */}
-              <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+              <Box
+                p={4}
+                bg="blue.50"
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <VStack spacing={2} align="stretch">
                   <HStack justify="space-between">
                     <Text fontSize="sm" fontWeight="semibold" color="gray.700">
@@ -216,12 +232,17 @@ export default function RegisterPaymentModal({
                 <FormLabel>Seleccionar Sesión</FormLabel>
                 <Select
                   placeholder="Selecciona la sesión a pagar"
-                  {...register('sessionId', { required: 'Seleccione una sesión' })}
+                  {...register('sessionId', {
+                    required: 'Seleccione una sesión',
+                  })}
                 >
                   {pendingSessions.map((session) => (
                     <option key={session.id} value={session.id}>
-                      {format(session.sessionDate, 'dd/MM/yyyy', { locale: es })} - {session.sessionType} -
-                      Adeudo: ${session.remainingDebt.toLocaleString()} MXN
+                      {format(session.sessionDate, 'dd/MM/yyyy', {
+                        locale: es,
+                      })}{' '}
+                      - {session.sessionType} - Adeudo: $
+                      {session.remainingDebt.toLocaleString()} MXN
                     </option>
                   ))}
                 </Select>
@@ -237,14 +258,20 @@ export default function RegisterPaymentModal({
                 <Card bg="gray.50" borderWidth="1px" borderColor="gray.200">
                   <CardBody>
                     <VStack spacing={3} align="stretch">
-                      <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        color="gray.700"
+                      >
                         Detalles de la Sesión
                       </Text>
                       <Divider />
                       <HStack justify="space-between" fontSize="sm">
                         <Text color="gray.600">Fecha de sesión:</Text>
                         <Text fontWeight="medium">
-                          {format(selectedSession.sessionDate, 'dd MMMM yyyy', { locale: es })}
+                          {format(selectedSession.sessionDate, 'dd MMMM yyyy', {
+                            locale: es,
+                          })}
                         </Text>
                       </HStack>
                       <HStack justify="space-between" fontSize="sm">
@@ -255,7 +282,14 @@ export default function RegisterPaymentModal({
                       </HStack>
                       <HStack justify="space-between" fontSize="sm">
                         <Text color="gray.600">Pagado anteriormente:</Text>
-                        <Text fontWeight="medium" color={selectedSession.paidAmount > 0 ? 'green.600' : 'gray.600'}>
+                        <Text
+                          fontWeight="medium"
+                          color={
+                            selectedSession.paidAmount > 0
+                              ? 'green.600'
+                              : 'gray.600'
+                          }
+                        >
                           ${selectedSession.paidAmount.toLocaleString()} MXN
                         </Text>
                       </HStack>
@@ -287,21 +321,29 @@ export default function RegisterPaymentModal({
                     </HStack>
                   </FormLabel>
                   <HStack>
-                    <Text fontSize="lg" color="gray.600">$</Text>
+                    <Text fontSize="lg" color="gray.600">
+                      $
+                    </Text>
                     <Input
                       type="number"
                       placeholder="0.00"
                       {...register('paymentAmount', {
                         required: 'El monto es requerido',
-                        min: { value: 0.01, message: 'El monto debe ser mayor a 0' },
+                        min: {
+                          value: 0.01,
+                          message: 'El monto debe ser mayor a 0',
+                        },
                         max: {
                           value: selectedSession?.remainingDebt || 0,
-                          message: 'El monto no puede exceder el adeudo restante',
+                          message:
+                            'El monto no puede exceder el adeudo restante',
                         },
                         valueAsNumber: true,
                       })}
                     />
-                    <Text fontSize="lg" color="gray.600">MXN</Text>
+                    <Text fontSize="lg" color="gray.600">
+                      MXN
+                    </Text>
                   </HStack>
                   {errors.paymentAmount && (
                     <Text fontSize="sm" color="red.500" mt={1}>
@@ -322,7 +364,9 @@ export default function RegisterPaymentModal({
                           <HStack spacing={1}>
                             <AlertCircle size={12} />
                             <Text>
-                              Pago Parcial - Quedará adeudo de: ${getRemainingDebtAfterPayment().toLocaleString()} MXN
+                              Pago Parcial - Quedará adeudo de: $
+                              {getRemainingDebtAfterPayment().toLocaleString()}{' '}
+                              MXN
                             </Text>
                           </HStack>
                         </Badge>
@@ -387,7 +431,11 @@ export default function RegisterPaymentModal({
                     <CardBody>
                       <VStack spacing={2} align="stretch">
                         <HStack justify="space-between">
-                          <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color="gray.700"
+                          >
                             Resumen del Pago
                           </Text>
                           <Badge
@@ -401,7 +449,8 @@ export default function RegisterPaymentModal({
                         <HStack justify="space-between" fontSize="sm">
                           <Text color="gray.600">Adeudo actual:</Text>
                           <Text fontWeight="bold">
-                            ${selectedSession.remainingDebt.toLocaleString()} MXN
+                            ${selectedSession.remainingDebt.toLocaleString()}{' '}
+                            MXN
                           </Text>
                         </HStack>
                         <HStack justify="space-between" fontSize="sm">
@@ -412,13 +461,17 @@ export default function RegisterPaymentModal({
                         </HStack>
                         <HStack justify="space-between" fontSize="sm">
                           <Text color="gray.600" fontWeight="semibold">
-                            {isFullPayment() ? 'Sesión quedará:' : 'Adeudo restante:'}
+                            {isFullPayment()
+                              ? 'Sesión quedará:'
+                              : 'Adeudo restante:'}
                           </Text>
                           <Text
                             fontWeight="bold"
                             color={isFullPayment() ? 'green.600' : 'orange.600'}
                           >
-                            {isFullPayment() ? 'PAGADA' : `$${getRemainingDebtAfterPayment().toLocaleString()} MXN`}
+                            {isFullPayment()
+                              ? 'PAGADA'
+                              : `$${getRemainingDebtAfterPayment().toLocaleString()} MXN`}
                           </Text>
                         </HStack>
                       </VStack>
@@ -431,7 +484,11 @@ export default function RegisterPaymentModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

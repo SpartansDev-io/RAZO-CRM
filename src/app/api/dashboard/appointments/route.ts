@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     // Asegurar que estamos usando el día correcto en GMT-6
     const dateString = targetDate.toISOString().split('T')[0];
-    
+
     // Rango del día en GMT-6 convertido a UTC
     const dayStart = new Date(`${dateString}T00:00:00-06:00`);
     const dayEnd = new Date(`${dateString}T23:59:59.999-06:00`);
@@ -90,14 +90,14 @@ export async function GET(request: Request) {
       type: string;
       duration: number;
       appointmentType: string;
-      meetLink?: string;
+      meetLink?: string | null;
       status: string;
       confirmed: boolean;
       therapistId?: string;
       therapistName: string;
       therapistAvatar: string | null;
     };
-    
+
     // Transformar resultados
     // Define the type for the session object returned by Prisma
     type SessionWithRelations = {
@@ -105,8 +105,8 @@ export async function GET(request: Request) {
       sessionDate: Date;
       sessionType: string;
       sessionDurationMinutes: number;
-      appointmentType?: string;
-      meetLink?: string;
+      appointmentType?: string | null;
+      meetLink?: string | null;
       status: string;
       confirmedAt?: Date | null;
       deletedAt?: Date | null;
@@ -124,38 +124,40 @@ export async function GET(request: Request) {
       } | null;
     };
 
-    const formattedAppointments: FormattedAppointment[] = appointments.map((apt: SessionWithRelations) => {
-      const sessionDate = new Date(apt.sessionDate);
-      
-      // Convertir a hora local GMT-6 para display
-      const timeString = sessionDate.toLocaleTimeString('es-MX', {
-        timeZone: 'America/Mexico_City', // Ajusta según tu zona GMT-6
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-    
-      return {
-        id: apt.id,
-        patientId: apt.patient?.id,
-        patientName: apt.patient?.name || 'Desconocido',
-        patientEmail: apt.patient?.email || '',
-        patientPhone: apt.patient?.phone || '',
-        patientPhoto: apt.patient?.photoUrl || null,
-        time: timeString,
-        fullDateTime: apt.sessionDate,
-        type: apt.sessionType,
-        duration: apt.sessionDurationMinutes,
-        appointmentType: apt.appointmentType || 'presencial',
-        meetLink: apt.meetLink,
-        status: apt.status,
-        confirmed: apt.confirmedAt ? true : false,
-        therapistId: apt.therapist?.id,
-        therapistName: apt.therapist?.fullName || 'Sin asignar',
-        therapistAvatar: apt.therapist?.avatarUrl || null,
-      };
-    });
-    
+    const formattedAppointments: FormattedAppointment[] = appointments.map(
+      (apt: SessionWithRelations) => {
+        const sessionDate = new Date(apt.sessionDate);
+
+        // Convertir a hora local GMT-6 para display
+        const timeString = sessionDate.toLocaleTimeString('es-MX', {
+          timeZone: 'America/Mexico_City', // Ajusta según tu zona GMT-6
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+
+        return {
+          id: apt.id,
+          patientId: apt.patient?.id,
+          patientName: apt.patient?.name || 'Desconocido',
+          patientEmail: apt.patient?.email || '',
+          patientPhone: apt.patient?.phone || '',
+          patientPhoto: apt.patient?.photoUrl || null,
+          time: timeString,
+          fullDateTime: apt.sessionDate,
+          type: apt.sessionType,
+          duration: apt.sessionDurationMinutes,
+          appointmentType: apt.appointmentType || 'presencial',
+          meetLink: apt.meetLink,
+          status: apt.status,
+          confirmed: apt.confirmedAt ? true : false,
+          therapistId: apt.therapist?.id,
+          therapistName: apt.therapist?.fullName || 'Sin asignar',
+          therapistAvatar: apt.therapist?.avatarUrl || null,
+        };
+      },
+    );
+
     // Obtener conteo total del día
     const totalCount = await prisma.session.count({
       where: {
@@ -169,12 +171,18 @@ export async function GET(request: Request) {
         deletedAt: null,
       },
     });
-    
+
     // Generar resumen
     const summary = {
-      confirmed: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'confirmed').length,
-      pending: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'scheduled').length,
-      inProgress: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'in_progress').length,
+      confirmed: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'confirmed',
+      ).length,
+      pending: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'scheduled',
+      ).length,
+      inProgress: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'in_progress',
+      ).length,
     };
 
     return NextResponse.json({
@@ -187,9 +195,9 @@ export async function GET(request: Request) {
         debug: {
           dateRange: {
             start: dayStart.toISOString(),
-            end: dayEnd.toISOString()
-          }
-        }
+            end: dayEnd.toISOString(),
+          },
+        },
       },
     });
   } catch (error) {

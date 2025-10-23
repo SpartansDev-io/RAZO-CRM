@@ -117,7 +117,9 @@ export default function RecentPatients() {
         <HStack mb={4} spacing={3}>
           <Users size={20} color="#38A169" />
           <Heading size="md">Pacientes Recientes</Heading>
-          <Badge colorScheme="green" ml="auto">{patients.length}</Badge>
+          <Badge colorScheme="green" ml="auto">
+            {patients.length}
+          </Badge>
         </HStack>
 
         {patients.length === 0 ? (
@@ -179,13 +181,22 @@ export default function RecentPatients() {
                             Última: {patient.lastSession.formatted}
                           </Text>
                         ) : (
-                          <Text fontSize="xs" color="gray.400" fontStyle="italic">
+                          <Text
+                            fontSize="xs"
+                            color="gray.400"
+                            fontStyle="italic"
+                          >
                             Sin sesiones
                           </Text>
                         )}
                         {patient.sessionCount.total > 0 && (
-                          <Text fontSize="xs" color="blue.500" fontWeight="medium">
-                            {patient.sessionCount.completed}/{patient.sessionCount.total} sesiones
+                          <Text
+                            fontSize="xs"
+                            color="blue.500"
+                            fontWeight="medium"
+                          >
+                            {patient.sessionCount.completed}/
+                            {patient.sessionCount.total} sesiones
                           </Text>
                         )}
                       </VStack>

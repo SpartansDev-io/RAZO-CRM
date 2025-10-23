@@ -113,7 +113,8 @@ const getMockCompany = (id: string): Company | null => {
       registrationDate: new Date('2023-01-15'),
       contactPerson: 'Juan Pérez',
       taxId: 'TES230115XXX',
-      notes: 'Cliente corporativo prioritario. Renovación de contrato en diciembre.',
+      notes:
+        'Cliente corporativo prioritario. Renovación de contrato en diciembre.',
     },
     {
       id: '2',
@@ -132,7 +133,7 @@ const getMockCompany = (id: string): Company | null => {
     },
   ];
 
-  return companies.find(c => c.id === id) || null;
+  return companies.find((c) => c.id === id) || null;
 };
 
 const getMockEmployees = (companyId: string): Employee[] => {
@@ -259,7 +260,10 @@ export default function CompanyProfilePage() {
             <Text fontSize="xl" color="gray.500">
               Empresa no encontrada
             </Text>
-            <Button leftIcon={<ArrowLeft size={16} />} onClick={() => router.back()}>
+            <Button
+              leftIcon={<ArrowLeft size={16} />}
+              onClick={() => router.back()}
+            >
               Volver
             </Button>
           </VStack>
@@ -313,9 +317,7 @@ export default function CompanyProfilePage() {
               <Heading size="lg" color="gray.800">
                 Perfil de Empresa
               </Heading>
-              <Text color="gray.600">
-                Información completa y estadísticas
-              </Text>
+              <Text color="gray.600">Información completa y estadísticas</Text>
             </Box>
           </HStack>
 
@@ -363,12 +365,19 @@ export default function CompanyProfilePage() {
                         </HStack>
                       </HStack>
                       <Text color="gray.500" fontSize="sm">
-                        Cliente desde {format(company.registrationDate, 'MMMM yyyy', { locale: es })}
+                        Cliente desde{' '}
+                        {format(company.registrationDate, 'MMMM yyyy', {
+                          locale: es,
+                        })}
                       </Text>
                     </VStack>
                   </HStack>
 
-                  <HStack spacing={3} flexWrap="wrap" justify={{ base: 'center', md: 'flex-end' }}>
+                  <HStack
+                    spacing={3}
+                    flexWrap="wrap"
+                    justify={{ base: 'center', md: 'flex-end' }}
+                  >
                     <Button
                       leftIcon={<UserPlus size={16} />}
                       colorScheme="blue"
@@ -386,7 +395,10 @@ export default function CompanyProfilePage() {
                   </HStack>
                 </Flex>
 
-                <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                <Grid
+                  templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                  gap={4}
+                >
                   <Card bg={cardBg}>
                     <CardBody>
                       <Stat>
@@ -456,9 +468,7 @@ export default function CompanyProfilePage() {
                         <StatNumber fontSize="2xl" color="purple.600">
                           ${mockStats.monthlyInvestment.toLocaleString()}
                         </StatNumber>
-                        <StatHelpText fontSize="xs">
-                          MXN / mes
-                        </StatHelpText>
+                        <StatHelpText fontSize="xs">MXN / mes</StatHelpText>
                       </Stat>
                     </CardBody>
                   </Card>
@@ -468,7 +478,11 @@ export default function CompanyProfilePage() {
                   <CardBody>
                     <VStack spacing={3} align="stretch">
                       <HStack justify="space-between">
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.700"
+                        >
                           Tasa de Utilización del Servicio
                         </Text>
                         <Text fontSize="lg" fontWeight="bold" color="blue.600">
@@ -482,7 +496,12 @@ export default function CompanyProfilePage() {
                         borderRadius="full"
                       />
                       <Text fontSize="xs" color="gray.500">
-                        {Math.round((mockStats.utilizationRate / 100) * company.employeeCount)} de {company.employeeCount} empleados han usado el servicio
+                        {Math.round(
+                          (mockStats.utilizationRate / 100) *
+                            company.employeeCount,
+                        )}{' '}
+                        de {company.employeeCount} empleados han usado el
+                        servicio
                       </Text>
                     </VStack>
                   </CardBody>
@@ -493,7 +512,11 @@ export default function CompanyProfilePage() {
 
           <Card bg={bg} shadow="md">
             <CardBody p={0}>
-              <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
+              <Tabs
+                index={activeTab}
+                onChange={setActiveTab}
+                variant="enclosed"
+              >
                 <TabList>
                   <Tab>
                     <HStack spacing={2}>
@@ -523,17 +546,27 @@ export default function CompanyProfilePage() {
 
                 <TabPanels>
                   <TabPanel p={6}>
-                    <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={8}>
+                    <Grid
+                      templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+                      gap={8}
+                    >
                       <VStack spacing={6} align="stretch">
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Datos de Contacto
                           </Text>
                           <VStack spacing={4} align="stretch">
                             <HStack justify="space-between">
                               <HStack spacing={2}>
                                 <Mail size={14} color="#718096" />
-                                <Text color="gray.600" fontSize="sm">Email:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Email:
+                                </Text>
                               </HStack>
                               <Text fontWeight="medium">{company.email}</Text>
                             </HStack>
@@ -541,7 +574,9 @@ export default function CompanyProfilePage() {
                               <HStack justify="space-between">
                                 <HStack spacing={2}>
                                   <Phone size={14} color="#718096" />
-                                  <Text color="gray.600" fontSize="sm">Teléfono:</Text>
+                                  <Text color="gray.600" fontSize="sm">
+                                    Teléfono:
+                                  </Text>
                                 </HStack>
                                 <Text fontWeight="medium">{company.phone}</Text>
                               </HStack>
@@ -550,9 +585,11 @@ export default function CompanyProfilePage() {
                               <HStack justify="space-between">
                                 <HStack spacing={2}>
                                   <Globe size={14} color="#718096" />
-                                  <Text color="gray.600" fontSize="sm">Sitio Web:</Text>
+                                  <Text color="gray.600" fontSize="sm">
+                                    Sitio Web:
+                                  </Text>
                                 </HStack>
-                                <Text fontWeight="medium" color="blue.600">    
+                                <Text fontWeight="medium" color="blue.600">
                                   {company.website}
                                 </Text>
                               </HStack>
@@ -561,7 +598,9 @@ export default function CompanyProfilePage() {
                               <HStack justify="space-between">
                                 <HStack spacing={2}>
                                   <MapPin size={14} color="#718096" />
-                                  <Text color="gray.600" fontSize="sm">Dirección:</Text>
+                                  <Text color="gray.600" fontSize="sm">
+                                    Dirección:
+                                  </Text>
                                 </HStack>
                                 <Text fontWeight="medium">
                                   {company.address}
@@ -574,31 +613,52 @@ export default function CompanyProfilePage() {
                         <Divider />
 
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Información Corporativa
                           </Text>
                           <VStack spacing={4} align="stretch">
                             {company.contactPerson && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Persona de Contacto:</Text>
-                                <Text fontWeight="medium">{company.contactPerson}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Persona de Contacto:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {company.contactPerson}
+                                </Text>
                               </HStack>
                             )}
                             {company.taxId && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">RFC:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  RFC:
+                                </Text>
                                 <Text fontWeight="medium">{company.taxId}</Text>
                               </HStack>
                             )}
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Fecha de Registro:</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Fecha de Registro:
+                              </Text>
                               <Text fontWeight="medium">
-                                {format(company.registrationDate, 'dd MMMM yyyy', { locale: es })}
+                                {format(
+                                  company.registrationDate,
+                                  'dd MMMM yyyy',
+                                  { locale: es },
+                                )}
                               </Text>
                             </HStack>
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Empleados Registrados:</Text>
-                              <Text fontWeight="medium">{company.employeeCount}</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Empleados Registrados:
+                              </Text>
+                              <Text fontWeight="medium">
+                                {company.employeeCount}
+                              </Text>
                             </HStack>
                           </VStack>
                         </Box>
@@ -607,12 +667,21 @@ export default function CompanyProfilePage() {
                       <VStack spacing={6} align="stretch">
                         {company.notes && (
                           <Box>
-                            <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                            <Text
+                              fontSize="lg"
+                              fontWeight="semibold"
+                              mb={4}
+                              color="gray.800"
+                            >
                               Notas
                             </Text>
                             <Card bg={cardBg}>
                               <CardBody>
-                                <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                <Text
+                                  fontSize="sm"
+                                  lineHeight="1.6"
+                                  color="gray.700"
+                                >
                                   {company.notes}
                                 </Text>
                               </CardBody>
@@ -621,7 +690,12 @@ export default function CompanyProfilePage() {
                         )}
 
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Acciones Rápidas
                           </Text>
                           <VStack spacing={3} align="stretch">
@@ -676,7 +750,11 @@ export default function CompanyProfilePage() {
                   <TabPanel p={6}>
                     <VStack spacing={4} align="stretch">
                       <HStack justify="space-between">
-                        <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+                        <Text
+                          fontSize="lg"
+                          fontWeight="semibold"
+                          color="gray.800"
+                        >
                           Lista de Empleados
                         </Text>
                         <Button
@@ -708,7 +786,11 @@ export default function CompanyProfilePage() {
                                   <HStack spacing={3}>
                                     <Avatar size="sm" name={employee.name} />
                                     <Box>
-                                      <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                                      <Text
+                                        fontSize="sm"
+                                        fontWeight="medium"
+                                        color="gray.800"
+                                      >
                                         {employee.name}
                                       </Text>
                                       <Text fontSize="xs" color="gray.500">
@@ -735,16 +817,26 @@ export default function CompanyProfilePage() {
                                 <Td>
                                   <Text fontSize="sm" color="gray.700">
                                     {employee.lastSession
-                                      ? format(employee.lastSession, 'dd/MM/yyyy', { locale: es })
+                                      ? format(
+                                          employee.lastSession,
+                                          'dd/MM/yyyy',
+                                          { locale: es },
+                                        )
                                       : 'Sin sesiones'}
                                   </Text>
                                 </Td>
                                 <Td>
                                   <Badge
-                                    colorScheme={employee.status === 'active' ? 'green' : 'red'}
+                                    colorScheme={
+                                      employee.status === 'active'
+                                        ? 'green'
+                                        : 'red'
+                                    }
                                     fontSize="xs"
                                   >
-                                    {employee.status === 'active' ? 'Activo' : 'Inactivo'}
+                                    {employee.status === 'active'
+                                      ? 'Activo'
+                                      : 'Inactivo'}
                                   </Badge>
                                 </Td>
                                 <Td>
@@ -752,7 +844,11 @@ export default function CompanyProfilePage() {
                                     size="xs"
                                     variant="ghost"
                                     colorScheme="blue"
-                                    onClick={() => router.push(`/crm/patients/${employee.id}`)}
+                                    onClick={() =>
+                                      router.push(
+                                        `/crm/patients/${employee.id}`,
+                                      )
+                                    }
                                   >
                                     Ver Perfil
                                   </Button>
@@ -767,13 +863,22 @@ export default function CompanyProfilePage() {
 
                   <TabPanel p={6}>
                     <VStack spacing={4} align="stretch">
-                      <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+                      <Text
+                        fontSize="lg"
+                        fontWeight="semibold"
+                        color="gray.800"
+                      >
                         Actividad Reciente
                       </Text>
 
                       <VStack spacing={3} align="stretch">
                         {recentActivity.map((activity) => (
-                          <Card key={activity.id} bg={cardBg} borderWidth="1px" borderColor={borderColor}>
+                          <Card
+                            key={activity.id}
+                            bg={cardBg}
+                            borderWidth="1px"
+                            borderColor={borderColor}
+                          >
                             <CardBody>
                               <HStack spacing={4} align="start">
                                 <Box
@@ -783,8 +888,8 @@ export default function CompanyProfilePage() {
                                     activity.type === 'session'
                                       ? 'blue.100'
                                       : activity.type === 'employee'
-                                      ? 'green.100'
-                                      : 'purple.100'
+                                        ? 'green.100'
+                                        : 'purple.100'
                                   }
                                 >
                                   {activity.type === 'session' ? (
@@ -796,11 +901,19 @@ export default function CompanyProfilePage() {
                                   )}
                                 </Box>
                                 <Box flex="1">
-                                  <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    color="gray.800"
+                                  >
                                     {activity.description}
                                   </Text>
                                   <Text fontSize="xs" color="gray.500" mt={1}>
-                                    {format(activity.date, "dd MMMM yyyy 'a las' HH:mm", { locale: es })}
+                                    {format(
+                                      activity.date,
+                                      "dd MMMM yyyy 'a las' HH:mm",
+                                      { locale: es },
+                                    )}
                                   </Text>
                                 </Box>
                               </HStack>
@@ -843,14 +956,22 @@ export default function CompanyProfilePage() {
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                ¿Estás seguro de que deseas eliminar este contrato? Esta acción no se puede deshacer.
+                ¿Estás seguro de que deseas eliminar este contrato? Esta acción
+                no se puede deshacer.
               </AlertDialogBody>
 
               <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={() => setContractToDelete(null)}>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setContractToDelete(null)}
+                >
                   Cancelar
                 </Button>
-                <Button colorScheme="red" onClick={confirmDeleteContract} ml={3}>
+                <Button
+                  colorScheme="red"
+                  onClick={confirmDeleteContract}
+                  ml={3}
+                >
                   Eliminar
                 </Button>
               </AlertDialogFooter>
