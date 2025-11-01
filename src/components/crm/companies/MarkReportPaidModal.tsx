@@ -205,7 +205,7 @@ export default function MarkReportPaidModal({
                   <AlertDescription fontSize="xs">
                     Al marcar este reporte como pagado, todas las{' '}
                     {report.totalSessions} sesiones incluidas se actualizarán
-                    automáticamente a estado "pagado".
+                    automáticamente a estado &quot;pagado&quot;.
                   </AlertDescription>
                 </Box>
               </Alert>

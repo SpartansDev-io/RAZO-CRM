@@ -10,7 +10,10 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "lint:debug": "cross-env DEBUG=eslint:* eslint src --ext .ts,.tsx",
-    "prepare": "husky"
+    "prepare": "husky",
+    "pre-push": "npm run format  && npm run lint && npm run test && npm run build",
+    "pre-commit": "npx lint-staged",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx}": [
