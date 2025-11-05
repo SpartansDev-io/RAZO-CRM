@@ -11,7 +11,7 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "lint:debug": "cross-env DEBUG=eslint:* eslint src --ext .ts,.tsx",
     "prisma:generate": "npx prisma generate",
-    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:migrate": "read -p 'Nombre de la migración: ' name && npx prisma migrate dev --name $name",
     "prisma:migrate:reset": "npx prisma migrate reset dev --name init",
     "prepare": "husky",
     "pre-push": "npm run format  && npm run lint && npm run test && npm run build",
