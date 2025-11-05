@@ -393,7 +393,7 @@ model Notification {
 model Task {
   id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   assignedTo        String      @map("assigned_to") @db.Uuid
-  createdBy         String      @map("created_by") @db.Uuid
+  createdBy         String?      @map("created_by") @db.Uuid
   title             String
   description       String?
   priority          String      @default("medium")
@@ -406,7 +406,8 @@ model Task {
   createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   assignedToUser    UserProfile @relation("TaskAssignedTo", fields: [assignedTo], references: [id], onDelete: Cascade)
-  createdByUser     UserProfile @relation("TaskCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdByUser     UserProfile? @relation("TaskCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
 
   @@index([assignedTo])
   @@index([status])
@@ -420,7 +421,7 @@ model ClinicalNote {
   id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sessionId          String             @map("session_id") @db.Uuid
   patientId          String             @map("patient_id") @db.Uuid
-  therapistId        String             @map("therapist_id") @db.Uuid
+  therapistId        String?             @map("therapist_id") @db.Uuid
   subjectiveNote     String?            @map("subjective_note")
   objectiveNote      String?            @map("objective_note")
   assessment         String?
@@ -442,7 +443,7 @@ model ClinicalNote {
   updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   patient            Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
   session            Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  therapist          UserProfile        @relation(fields: [therapistId], references: [id], onDelete: SetNull)
+  therapist          UserProfile?        @relation(fields: [therapistId], references: [id], onDelete: SetNull)
   sessionTechniques  SessionTechnique[]
 
   @@index([sessionId])
