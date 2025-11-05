@@ -7,12 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id                               String         @id @default(uuid()) @db.Uuid
+  name                             String         @unique
+  description                      String?
+  users                            UserProfile[]  @relation("UserRole")
+
+  @@map("roles")
+}
+
 model UserProfile {
   id                               String                  @id @db.Uuid
   fullName                         String                  @map("full_name")
   email                            String                  @unique
   phone                            String?
-  role                             String                  @default("therapist")
+  roleId                           String?                 @db.Uuid @map("role_id")
+  role                             Role?                   @relation("UserRole", fields: [roleId], references: [id])
   specialty                        String?
   licenseNumber                    String?                 @map("license_number")
   bio                              String?
