@@ -14,19 +14,13 @@ export class AuthService {
   ): Promise<{ user: IUser; token: string } | null> {
     try {
       // Find user by email
-      const user = await prisma.user.findUnique({
+      const user = await prisma.userProfile.findUnique({
         where: {
           email: credentials.email,
-          isActive: true,
-        },
-        include: {
-          role: true,
         },
       });
 
-      if (!user) {
-        return null;
-      }
+      if (!user || !user.isActive) return null;
 
       // Verify password
       const isValidPassword = await bcrypt.compare(
@@ -41,7 +35,7 @@ export class AuthService {
       const token = this.generateToken(user);
 
       // Return user without password hash
-      const { passwordHash, ...userWithoutPassword } = user;
+      const { passwordHash: _ignored, ...userWithoutPassword } = user;
 
       return {
         user: userWithoutPassword as IUser,
@@ -71,10 +65,10 @@ export class AuthService {
   /**
    * Verify JWT token
    */
-  verifyToken(token: string): any {
+  verifyToken(token: string): string | jwt.JwtPayload | null {
     try {
       return jwt.verify(token, this.JWT_SECRET);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

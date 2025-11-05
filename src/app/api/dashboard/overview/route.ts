@@ -57,20 +57,11 @@ export async function GET() {
       },
     });
 
-    const totalPendingAmount = pendingPayments.reduce(
-      (
-        sum: number,
-        s: {
-          sessionCost: number | string | null;
-          paidAmount: number | string | null;
-        },
-      ) => {
-        const cost = Number(s.sessionCost) || 0;
-        const paid = Number(s.paidAmount) || 0;
-        return sum + (cost - paid);
-      },
-      0,
-    );
+    const totalPendingAmount = pendingPayments.reduce((sum, s) => {
+      const cost = Number(s.sessionCost) || 0;
+      const paid = Number(s.paidAmount) || 0;
+      return sum + (cost - paid);
+    }, 0);
 
     const pendingPaymentsCount = pendingPayments.length;
 

@@ -6,8 +6,26 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint:debug": "cross-env DEBUG=eslint:* eslint src --ext .ts,.tsx",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:migrate:reset": "npx prisma migrate reset dev --name init",
+    "prepare": "husky",
+    "pre-push": "npm run format  && npm run lint && npm run test && npm run build",
+    "pre-commit": "npx lint-staged",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.1",
@@ -77,6 +95,7 @@
   },
   "devDependencies": {
     "@next/swc-wasm-nodejs": "^16.0.0",
+    "@tailwindcss/postcss": "^4.1.16",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.1",
@@ -84,8 +103,12 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9.38.0",
-    "eslint-config-next": "^16.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.6",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
