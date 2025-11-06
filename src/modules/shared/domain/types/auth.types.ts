@@ -2,7 +2,6 @@ export interface IRole {
   id: string;
   name: string;
   description?: string;
-  createdAt: Date;
 }
 
 export interface IUser {

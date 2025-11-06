@@ -13,10 +13,14 @@
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "read -p 'Nombre de la migración: ' name && npx prisma migrate dev --name $name",
     "prisma:migrate:reset": "npx prisma migrate reset dev --name init",
+    "prisma:seed": "npx prisma db seed",
     "prepare": "husky",
     "pre-push": "npm run format  && npm run lint && npm run test && npm run build",
     "pre-commit": "npx lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx}": [
@@ -98,7 +102,7 @@
     "@tailwindcss/postcss": "^4.1.16",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -114,6 +118,7 @@
     "prettier-plugin-tailwindcss": "^0.7.1",
     "prisma": "^6.17.1",
     "tailwindcss": "^4.1.15",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }

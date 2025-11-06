@@ -18,6 +18,7 @@ export class AuthService {
         where: {
           email: credentials.email,
         },
+        include: { role: true },
       });
 
       if (!user || !user.isActive) return null;
