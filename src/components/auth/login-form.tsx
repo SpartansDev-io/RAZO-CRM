@@ -1,6 +1,6 @@
 'use client';
-
 import { useState, useEffect } from 'react';
+import { Eye, EyeOff, Lock, Mail, Brain } from 'lucide-react';
 import {
   Box,
   Button,
@@ -18,8 +18,9 @@ import {
   FormControl,
   FormLabel,
   InputRightElement,
+  Flex,
 } from '@chakra-ui/react';
-import { Eye, EyeOff, Lock, Mail, Brain } from 'lucide-react';
+
 import { useAuthStore } from '@/modules/auth/application/auth.store';
 import { ILoginRequest } from '@/modules/shared/domain/types/auth.types';
 
@@ -38,7 +39,7 @@ export function LoginForm() {
     if (error) {
       clearError();
     }
-  }, [formData.email, formData.password, clearError]);
+  }, [formData.email, formData.password, error, clearError]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -83,9 +84,9 @@ export function LoginForm() {
           <VStack spacing={6} align="stretch">
             {/* Header */}
             <Box textAlign="center">
-              <Box mb={4}>
+              <Flex justifyContent="center" mb={4}>
                 <Brain size={48} color="#2196F3" />
-              </Box>
+              </Flex>
               <Heading size="lg" color="primary.700" mb={2}>
                 Razo Morales & Asociados
               </Heading>

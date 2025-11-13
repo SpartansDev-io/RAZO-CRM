@@ -1,4 +1,7 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+# Asegurar entorno limpio
+export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+export LC_ALL=C
+export PATH=$PATH:/usr/local/bin
 
-npx lint-staged
+# Ejecutar lint-staged directamente
+npx --yes lint-staged

@@ -1,8 +1,8 @@
 'use client';
-
+import { toast } from 'sonner';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
+
 import {
   IAuthState,
   ILoginRequest,
