@@ -1,11 +1,16 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# --- Entorno seguro para evitar errores ---
+export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+export LC_ALL=C
+export PATH=$PATH:/usr/local/bin
+
 echo "🔍 Ejecutando lint..."
-npm run lint
+npm run lint || exit 1
 
 echo "🔧 Ejecutando build..."
-npm run build
+npm run build || exit 1
 
 echo "🧪 Ejecutando test..."
-#npm test
+npm test || exit 1

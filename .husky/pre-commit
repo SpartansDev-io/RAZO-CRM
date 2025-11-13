@@ -1,7 +1,10 @@
-# Asegurar entorno limpio
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# --- Entorno seguro para evitar errores de registro o locale ---
 export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
 export LC_ALL=C
 export PATH=$PATH:/usr/local/bin
 
-# Ejecutar lint-staged directamente
+# --- Ejecutar lint-staged ---
 npx --yes lint-staged

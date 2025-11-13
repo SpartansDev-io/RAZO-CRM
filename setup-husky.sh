@@ -3,32 +3,47 @@
 echo "🚀 Iniciando configuración de Husky + Pre-commit y Pre-push Hooks..."
 
 # Inicializa husky y prepara carpetas necesarias
-#npx husky-init && rm -f .husky/pre-commit
+# npx husky-init && rm -f .husky/pre-commit
 
-# Crea el pre-commit hook
-echo '#!/bin/sh
+# ====== PRE-COMMIT ======
+cat > .husky/pre-commit << 'EOF'
+#!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npx lint-staged' > .husky/pre-commit
+# --- Entorno seguro para evitar errores de registro o locale ---
+export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+export LC_ALL=C
+export PATH=$PATH:/usr/local/bin
+
+# --- Ejecutar lint-staged ---
+npx --yes lint-staged
+EOF
 
 chmod +x .husky/pre-commit
 
-# Crea el pre-push hook
-echo '#!/bin/sh
+# ====== PRE-PUSH ======
+cat > .husky/pre-push << 'EOF'
+#!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# --- Entorno seguro para evitar errores ---
+export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+export LC_ALL=C
+export PATH=$PATH:/usr/local/bin
+
 echo "🔍 Ejecutando lint..."
-npm run lint
+npm run lint || exit 1
 
 echo "🔧 Ejecutando build..."
-npm run build
+npm run build || exit 1
 
 echo "🧪 Ejecutando test..."
-npm test' > .husky/pre-push
+npm test || exit 1
+EOF
 
 chmod +x .husky/pre-push
 
-# Agrega lint-staged si no está
+# ====== LINT-STAGED CONFIG ======
 if ! grep -q "lint-staged" package.json; then
   npx npm-add-script -k lint-staged -v '{
     "**/*.{js,jsx,ts,tsx}": [
@@ -38,9 +53,9 @@ if ! grep -q "lint-staged" package.json; then
   }'
 fi
 
-# Agrega script prepare si no está
+# ====== PREPARE SCRIPT ======
 if ! grep -q '"prepare":' package.json; then
   npx npm-add-script -k prepare -v "husky install"
 fi
 
-echo "✅ Husky configurado con éxito 🎉"
+echo "✅ Husky configurado con entorno seguro y hooks listos 🎉"
