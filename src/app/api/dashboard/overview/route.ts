@@ -58,9 +58,13 @@ export async function GET() {
     });
 
     const totalPendingAmount = pendingPayments.reduce(
-      (sum: number, s: { sessionCost: number | string | null; paidAmount: number | string | null }) => {
-        const cost = Number(s.sessionCost) || 0;
-        const paid = Number(s.paidAmount) || 0;
+      (sum: number, s: { sessionCost: any; paidAmount: any }) => {
+        const cost = typeof s.sessionCost === 'object' && s.sessionCost !== null && 'toNumber' in s.sessionCost
+          ? s.sessionCost.toNumber()
+          : Number(s.sessionCost) || 0;
+        const paid = typeof s.paidAmount === 'object' && s.paidAmount !== null && 'toNumber' in s.paidAmount
+          ? s.paidAmount.toNumber()
+          : Number(s.paidAmount) || 0;
         return sum + (cost - paid);
       },
       0

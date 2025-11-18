@@ -105,8 +105,8 @@ export async function GET(request: Request) {
       sessionDate: Date;
       sessionType: string;
       sessionDurationMinutes: number;
-      appointmentType?: string;
-      meetLink?: string;
+      appointmentType?: string | null;
+      meetLink?: string | null;
       status: string;
       confirmedAt?: Date | null;
       deletedAt?: Date | null;
@@ -147,7 +147,7 @@ export async function GET(request: Request) {
         type: apt.sessionType,
         duration: apt.sessionDurationMinutes,
         appointmentType: apt.appointmentType || 'presencial',
-        meetLink: apt.meetLink,
+        meetLink: apt.meetLink ?? undefined,
         status: apt.status,
         confirmed: apt.confirmedAt ? true : false,
         therapistId: apt.therapist?.id,
