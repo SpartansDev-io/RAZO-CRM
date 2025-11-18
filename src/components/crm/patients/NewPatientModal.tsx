@@ -109,8 +109,49 @@ export default function NewPatientModal({
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          birthDate: data.birthDate,
+          gender: data.gender,
+          occupation: data.occupation,
+          company: data.company,
+          address: data.address,
+          maritalStatus: data.maritalStatus,
+          educationLevel: data.educationLevel,
+          nationality: data.nationality,
+          religion: data.religion,
+          livingSituation: data.livingSituation,
+          hasChildren: data.hasChildren,
+          childrenCount: data.childrenCount,
+          emergencyContact: data.emergencyContact,
+          emergencyPhone: data.emergencyPhone,
+          therapyType: data.therapyType,
+          referredBy: data.referredBy,
+          reasonForTherapy: data.reasonForTherapy,
+          expectations: data.expectations,
+          previousTherapy: data.previousTherapy,
+          previousTherapyDetails: data.previousTherapyDetails,
+          currentMedications: data.currentMedications,
+          medicalConditions: data.medicalConditions,
+          familyHistory: data.familyHistory,
+          notes: data.notes,
+          supportNetwork: [],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error creating patient');
+      }
+
+      const result = await response.json();
 
       toast({
         title: 'Paciente registrado exitosamente',
@@ -122,9 +163,11 @@ export default function NewPatientModal({
 
       handleClose();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Hubo un problema al guardar la información';
+
       toast({
         title: 'Error al registrar el paciente',
-        description: 'Hubo un problema al guardar la información. Intente nuevamente.',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,

@@ -12,34 +12,32 @@ export class AuthService {
   async authenticateUser(credentials: ILoginRequest): Promise<{ user: IUser; token: string } | null> {
     try {
       // Find user by email
-      const user = await prisma.user.findUnique({
-        where: { 
+      const userProfile = await prisma.userProfile.findUnique({
+        where: {
           email: credentials.email,
-          isActive: true 
-        },
-        include: {
-          role: true
         }
       });
 
-      if (!user) {
-        return null;
-      }
-
-      // Verify password
-      const isValidPassword = await bcrypt.compare(credentials.password, user.passwordHash);
-      if (!isValidPassword) {
+      if (!userProfile || !userProfile.isActive) {
         return null;
       }
 
       // Generate JWT token
-      const token = this.generateToken(user);
+      const token = this.generateToken(userProfile);
 
-      // Return user without password hash
-      const { passwordHash, ...userWithoutPassword } = user;
-
+      // Return user data
       return {
-        user: userWithoutPassword as IUser,
+        user: {
+          id: userProfile.id,
+          email: userProfile.email,
+          fullName: userProfile.fullName,
+          phone: userProfile.phone,
+          roleId: '',
+          role: userProfile.role as any,
+          isActive: userProfile.isActive,
+          createdAt: userProfile.createdAt,
+          updatedAt: userProfile.updatedAt,
+        } as IUser,
         token
       };
     } catch (error) {
@@ -51,12 +49,12 @@ export class AuthService {
   /**
    * Generate JWT token
    */
-  private generateToken(user: any): string {
+  private generateToken(userProfile: any): string {
     return jwt.sign(
       {
-        userId: user.id,
-        email: user.email,
-        roleId: user.roleId
+        userId: userProfile.id,
+        email: userProfile.email,
+        role: userProfile.role
       },
       this.JWT_SECRET,
       { expiresIn: '24h' }
