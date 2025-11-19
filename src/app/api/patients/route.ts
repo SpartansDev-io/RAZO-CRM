@@ -23,10 +23,6 @@ interface CreatePatientRequest {
   hasChildren?: string;
   childrenCount?: number;
 
-  // Contact Information
-  emergencyContact: string;
-  emergencyPhone: string;
-
   // Therapy Information
   therapyType: string;
   referredBy?: string;
@@ -61,13 +57,6 @@ export async function POST(request: NextRequest) {
     if (!body.name || !body.email || !body.phone || !body.birthDate || !body.gender) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    if (!body.emergencyContact || !body.emergencyPhone) {
-      return NextResponse.json(
-        { error: 'Emergency contact information is required' },
         { status: 400 }
       );
     }
@@ -123,8 +112,6 @@ export async function POST(request: NextRequest) {
           livingSituation: body.livingSituation,
           hasChildren: body.hasChildren === 'yes',
           childrenCount: body.childrenCount || 0,
-          emergencyContactName: body.emergencyContact,
-          emergencyContactPhone: body.emergencyPhone,
           therapyType: body.therapyType,
           referredBy: body.referredBy,
           reasonForTherapy: body.reasonForTherapy,

@@ -51,10 +51,6 @@ interface NewPatientFormData {
   hasChildren: string;
   childrenCount?: number;
 
-  // Contact Information
-  emergencyContact: string;
-  emergencyPhone: string;
-
   // Therapy Information
   therapyType: string;
   referredBy?: string;
@@ -70,6 +66,13 @@ interface NewPatientFormData {
 
   // Additional Notes
   notes?: string;
+   supportNetwork?: Array<{
+    fullName: string;
+    relationship: string;
+    phone?: string;
+    email?: string;
+    legalRepresentative?: boolean;
+  }>;
 }
 
 interface NewPatientModalProps {
@@ -130,8 +133,6 @@ export default function NewPatientModal({
           livingSituation: data.livingSituation,
           hasChildren: data.hasChildren,
           childrenCount: data.childrenCount,
-          emergencyContact: data.emergencyContact,
-          emergencyPhone: data.emergencyPhone,
           therapyType: data.therapyType,
           referredBy: data.referredBy,
           reasonForTherapy: data.reasonForTherapy,
@@ -433,7 +434,7 @@ export default function NewPatientModal({
 
               <Divider />
 
-              {/* Emergency Contact */}
+              {/* Emergency Contact 
               <Box>
                 <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
                   <HStack spacing={2}>
@@ -471,6 +472,7 @@ export default function NewPatientModal({
                   </FormControl>
                 </Grid>
               </Box>
+               Emergency Contact */}
 
               <Divider />
 
