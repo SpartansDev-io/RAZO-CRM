@@ -124,40 +124,38 @@ export async function GET(request: Request) {
       } | null;
     };
 
-    const formattedAppointments: FormattedAppointment[] = appointments.map(
-      (apt: SessionWithRelations) => {
-        const sessionDate = new Date(apt.sessionDate);
-
-        // Convertir a hora local GMT-6 para display
-        const timeString = sessionDate.toLocaleTimeString('es-MX', {
-          timeZone: 'America/Mexico_City', // Ajusta según tu zona GMT-6
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        });
-
-        return {
-          id: apt.id,
-          patientId: apt.patient?.id,
-          patientName: apt.patient?.name || 'Desconocido',
-          patientEmail: apt.patient?.email || '',
-          patientPhone: apt.patient?.phone || '',
-          patientPhoto: apt.patient?.photoUrl || null,
-          time: timeString,
-          fullDateTime: apt.sessionDate,
-          type: apt.sessionType,
-          duration: apt.sessionDurationMinutes,
-          appointmentType: apt.appointmentType || 'presencial',
-          meetLink: apt.meetLink,
-          status: apt.status,
-          confirmed: apt.confirmedAt ? true : false,
-          therapistId: apt.therapist?.id,
-          therapistName: apt.therapist?.fullName || 'Sin asignar',
-          therapistAvatar: apt.therapist?.avatarUrl || null,
-        };
-      },
-    );
-
+    const formattedAppointments: FormattedAppointment[] = appointments.map((apt: SessionWithRelations) => {
+      const sessionDate = new Date(apt.sessionDate);
+      
+      // Convertir a hora local GMT-6 para display
+      const timeString = sessionDate.toLocaleTimeString('es-MX', {
+        timeZone: 'America/Mexico_City', // Ajusta según tu zona GMT-6
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+    
+      return {
+        id: apt.id,
+        patientId: apt.patient?.id,
+        patientName: apt.patient?.name || 'Desconocido',
+        patientEmail: apt.patient?.email || '',
+        patientPhone: apt.patient?.phone || '',
+        patientPhoto: apt.patient?.photoUrl || null,
+        time: timeString,
+        fullDateTime: apt.sessionDate,
+        type: apt.sessionType,
+        duration: apt.sessionDurationMinutes,
+        appointmentType: apt.appointmentType || 'presencial',
+        meetLink: apt.meetLink ?? undefined,
+        status: apt.status,
+        confirmed: apt.confirmedAt ? true : false,
+        therapistId: apt.therapist?.id,
+        therapistName: apt.therapist?.fullName || 'Sin asignar',
+        therapistAvatar: apt.therapist?.avatarUrl || null,
+      };
+    });
+    
     // Obtener conteo total del día
     const totalCount = await prisma.session.count({
       where: {
