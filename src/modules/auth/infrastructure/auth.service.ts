@@ -37,6 +37,7 @@ export class AuthService {
       // Return user without password hash
       const { passwordHash: _ignored, ...userWithoutPassword } = user;
 
+      // Return user data
       return {
         user: userWithoutPassword as IUser,
         token,
@@ -50,12 +51,12 @@ export class AuthService {
   /**
    * Generate JWT token
    */
-  private generateToken(user: any): string {
+  private generateToken(userProfile: any): string {
     return jwt.sign(
       {
-        userId: user.id,
-        email: user.email,
-        roleId: user.roleId,
+        userId: userProfile.id,
+        email: userProfile.email,
+        roleId: userProfile.roleId,
       },
       this.JWT_SECRET,
       { expiresIn: '24h' },
