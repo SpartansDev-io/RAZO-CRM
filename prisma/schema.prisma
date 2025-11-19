@@ -127,78 +127,75 @@ model Contract {
 }
 
 model Patient {
-  id                           String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                         String
-  email                        String                    @unique
-  phone                        String
-  birthDate                    DateTime                  @map("birth_date") @db.Date
-  gender                       String
-  companyId                    String?                   @map("company_id") @db.Uuid
-  companyName                  String?                   @map("company_name")
-  occupation                   String?
-  address                      String?
-  city                         String?
-  state                        String?
-  zipCode                      String?                   @map("zip_code")
-  emergencyContactName         String                    @map("emergency_contact_name")
-  emergencyContactRelationship String?                   @map("emergency_contact_relationship")
-  emergencyContactPhone        String                    @map("emergency_contact_phone")
-  maritalStatus                String?                   @map("marital_status")
-  educationLevel               String?                   @map("education_level")
-  nationality                  String?
-  religion                     String?
-  livingSituation              String?                   @map("living_situation")
-  hasChildren                  Boolean                   @default(false) @map("has_children")
-  childrenCount                Int                       @default(0) @map("children_count")
-  primaryTherapistId           String?                   @map("primary_therapist_id") @db.Uuid
-  therapyType                  String                    @map("therapy_type")
-  referredBy                   String?                   @map("referred_by")
-  referralSource               String?                   @map("referral_source")
-  reasonForTherapy             String                    @map("reason_for_therapy")
-  therapeuticGoalsText         String?                   @map("therapeutic_goals")
-  expectations                 String?
-  previousTherapy              Boolean                   @default(false) @map("previous_therapy")
-  previousTherapyDetails       String?                   @map("previous_therapy_details")
-  currentMedications           String?                   @map("current_medications")
-  allergies                    String?
-  medicalConditions            String?                   @map("medical_conditions")
-  psychiatricDiagnoses         String?                   @map("psychiatric_diagnoses")
-  familyPsychiatricHistory     String?                   @map("family_psychiatric_history")
-  substanceUse                 String?                   @map("substance_use")
-  riskAssessment               String?                   @map("risk_assessment")
-  status                       String                    @default("active")
-  dischargeDate                DateTime?                 @map("discharge_date") @db.Date
-  dischargeReason              String?                   @map("discharge_reason")
-  consentSigned                Boolean                   @default(false) @map("consent_signed")
-  consentDate                  DateTime?                 @map("consent_date") @db.Date
-  privacyNoticeAccepted        Boolean                   @default(false) @map("privacy_notice_accepted")
-  photoUrl                     String?                   @map("photo_url")
-  preferredContactMethod       String?                   @map("preferred_contact_method")
-  preferredLanguage            String                    @default("es") @map("preferred_language")
-  insuranceProvider            String?                   @map("insurance_provider")
-  insurancePolicyNumber        String?                   @map("insurance_policy_number")
-  insuranceValidUntil          DateTime?                 @map("insurance_valid_until") @db.Date
-  notes                        String?
-  createdBy                    String?                   @map("created_by") @db.Uuid
-  updatedBy                    String?                   @map("updated_by") @db.Uuid
-  createdAt                    DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                    DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt                    DateTime?                 @map("deleted_at") @db.Timestamptz(6)
-  appointmentReminders         AppointmentReminder[]
-  clinicalNotes                ClinicalNote[]
-  companyEmployee              CompanyEmployee[]
-  diagnoses                    Diagnosis[]
-  monthlyReportSessions        MonthlyReportSession[]
-  attachments                  PatientAttachment[]
-  emergencyContacts            PatientEmergencyContact[]
-  company                      Company?                  @relation(fields: [companyId], references: [id])
-  createdByUser                UserProfile?              @relation("PatientCreatedBy", fields: [createdBy], references: [id])
-  primaryTherapist             UserProfile?              @relation("PatientPrimaryTherapist", fields: [primaryTherapistId], references: [id])
-  updatedByUser                UserProfile?              @relation("PatientUpdatedBy", fields: [updatedBy], references: [id])
-  paymentTransactions          PaymentTransaction[]
-  sessions                     Session[]
-  support_network              support_network[]
-  therapeuticGoals             TherapeuticGoal[]
+  id                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String
+  email                    String                    @unique
+  phone                    String
+  birthDate                DateTime                  @map("birth_date") @db.Date
+  gender                   String
+  companyId                String?                   @map("company_id") @db.Uuid
+  companyName              String?                   @map("company_name")
+  occupation               String?
+  address                  String?
+  city                     String?
+  state                    String?
+  zipCode                  String?                   @map("zip_code")
+  maritalStatus            String?                   @map("marital_status")
+  educationLevel           String?                   @map("education_level")
+  nationality              String?
+  religion                 String?
+  livingSituation          String?                   @map("living_situation")
+  hasChildren              Boolean                   @default(false) @map("has_children")
+  childrenCount            Int                       @default(0) @map("children_count")
+  primaryTherapistId       String?                   @map("primary_therapist_id") @db.Uuid
+  therapyType              String                    @map("therapy_type")
+  referredBy               String?                   @map("referred_by")
+  referralSource           String?                   @map("referral_source")
+  reasonForTherapy         String                    @map("reason_for_therapy")
+  therapeuticGoalsText     String?                   @map("therapeutic_goals")
+  expectations             String?
+  previousTherapy          Boolean                   @default(false) @map("previous_therapy")
+  previousTherapyDetails   String?                   @map("previous_therapy_details")
+  currentMedications       String?                   @map("current_medications")
+  allergies                String?
+  medicalConditions        String?                   @map("medical_conditions")
+  psychiatricDiagnoses     String?                   @map("psychiatric_diagnoses")
+  familyPsychiatricHistory String?                   @map("family_psychiatric_history")
+  substanceUse             String?                   @map("substance_use")
+  riskAssessment           String?                   @map("risk_assessment")
+  status                   String                    @default("active")
+  dischargeDate            DateTime?                 @map("discharge_date") @db.Date
+  dischargeReason          String?                   @map("discharge_reason")
+  consentSigned            Boolean                   @default(false) @map("consent_signed")
+  consentDate              DateTime?                 @map("consent_date") @db.Date
+  privacyNoticeAccepted    Boolean                   @default(false) @map("privacy_notice_accepted")
+  photoUrl                 String?                   @map("photo_url")
+  preferredContactMethod   String?                   @map("preferred_contact_method")
+  preferredLanguage        String                    @default("es") @map("preferred_language")
+  insuranceProvider        String?                   @map("insurance_provider")
+  insurancePolicyNumber    String?                   @map("insurance_policy_number")
+  insuranceValidUntil      DateTime?                 @map("insurance_valid_until") @db.Date
+  notes                    String?
+  createdBy                String?                   @map("created_by") @db.Uuid
+  updatedBy                String?                   @map("updated_by") @db.Uuid
+  createdAt                DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                DateTime?                 @map("deleted_at") @db.Timestamptz(6)
+  appointmentReminders     AppointmentReminder[]
+  clinicalNotes            ClinicalNote[]
+  companyEmployee          CompanyEmployee[]
+  diagnoses                Diagnosis[]
+  monthlyReportSessions    MonthlyReportSession[]
+  attachments              PatientAttachment[]
+  emergencyContacts        PatientEmergencyContact[]
+  company                  Company?                  @relation(fields: [companyId], references: [id])
+  createdByUser            UserProfile?              @relation("PatientCreatedBy", fields: [createdBy], references: [id])
+  primaryTherapist         UserProfile?              @relation("PatientPrimaryTherapist", fields: [primaryTherapistId], references: [id])
+  updatedByUser            UserProfile?              @relation("PatientUpdatedBy", fields: [updatedBy], references: [id])
+  paymentTransactions      PaymentTransaction[]
+  sessions                 Session[]
+  support_network          support_network[]
+  therapeuticGoals         TherapeuticGoal[]
 
   @@index([name])
   @@index([email])
@@ -716,6 +713,7 @@ model support_network {
   relationship         String   @db.VarChar(100)
   phone                String?  @db.VarChar(20)
   email                String?  @db.VarChar(150)
+  emergency_contact    Boolean  @default(false)
   legal_representative Boolean  @default(false)
   created_at           DateTime @default(now()) @db.Timestamp(6)
   updated_at           DateTime @default(now()) @db.Timestamp(6)
