@@ -102,7 +102,8 @@ export default function ChangePasswordModal({
     if (!allRequirementsMet) {
       toast({
         title: 'Contraseña débil',
-        description: 'La contraseña no cumple con todos los requisitos de seguridad.',
+        description:
+          'La contraseña no cumple con todos los requisitos de seguridad.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -129,7 +130,8 @@ export default function ChangePasswordModal({
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'No se pudo cambiar la contraseña. Verifica tu contraseña actual.',
+        description:
+          'No se pudo cambiar la contraseña. Verifica tu contraseña actual.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -149,7 +151,12 @@ export default function ChangePasswordModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg" scrollBehavior="inside">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="lg"
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.600" />
       <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -166,7 +173,8 @@ export default function ChangePasswordModal({
               <Alert status="info" borderRadius="md">
                 <AlertIcon />
                 <AlertDescription fontSize="sm">
-                  Asegúrate de usar una contraseña fuerte y única para proteger tu cuenta.
+                  Asegúrate de usar una contraseña fuerte y única para proteger
+                  tu cuenta.
                 </AlertDescription>
               </Alert>
 
@@ -182,11 +190,23 @@ export default function ChangePasswordModal({
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showCurrentPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      icon={showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      aria-label={
+                        showCurrentPassword
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                      }
+                      icon={
+                        showCurrentPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )
+                      }
                       size="sm"
                       variant="ghost"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      onClick={() =>
+                        setShowCurrentPassword(!showCurrentPassword)
+                      }
                     />
                   </InputRightElement>
                 </InputGroup>
@@ -206,15 +226,26 @@ export default function ChangePasswordModal({
                       required: 'La nueva contraseña es requerida',
                       minLength: {
                         value: 8,
-                        message: 'La contraseña debe tener al menos 8 caracteres',
+                        message:
+                          'La contraseña debe tener al menos 8 caracteres',
                       },
                     })}
                     placeholder="Ingresa tu nueva contraseña"
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      icon={showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      aria-label={
+                        showNewPassword
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                      }
+                      icon={
+                        showNewPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )
+                      }
                       size="sm"
                       variant="ghost"
                       onClick={() => setShowNewPassword(!showNewPassword)}
@@ -229,7 +260,13 @@ export default function ChangePasswordModal({
               </FormControl>
 
               {newPassword && (
-                <VStack spacing={2} align="stretch" p={3} bg="gray.50" borderRadius="md">
+                <VStack
+                  spacing={2}
+                  align="stretch"
+                  p={3}
+                  bg="gray.50"
+                  borderRadius="md"
+                >
                   <Text fontSize="sm" fontWeight="semibold" color="gray.700">
                     Requisitos de contraseña:
                   </Text>
@@ -262,11 +299,23 @@ export default function ChangePasswordModal({
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      icon={showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      aria-label={
+                        showConfirmPassword
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                      }
+                      icon={
+                        showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )
+                      }
                       size="sm"
                       variant="ghost"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     />
                   </InputRightElement>
                 </InputGroup>
@@ -280,7 +329,12 @@ export default function ChangePasswordModal({
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} isDisabled={isLoading}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+              isDisabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button

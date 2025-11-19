@@ -185,7 +185,9 @@ const getMockReports = (): MonthlyReport[] => {
 
 export default function ReportsPage() {
   const [reports, setReports] = useState<MonthlyReport[]>(getMockReports());
-  const [selectedReport, setSelectedReport] = useState<MonthlyReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<MonthlyReport | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   // Filters
@@ -203,41 +205,78 @@ export default function ReportsPage() {
       const matchesSearch =
         report.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.contractName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.paymentReference?.toLowerCase().includes(searchTerm.toLowerCase());
+        report.paymentReference
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'all' || report.paymentStatus === statusFilter;
-      const matchesCompany = companyFilter === 'all' || report.companyId === companyFilter;
-      const matchesMonth = monthFilter === 'all' || report.reportMonth === parseInt(monthFilter);
-      const matchesYear = yearFilter === 'all' || report.reportYear === parseInt(yearFilter);
+      const matchesStatus =
+        statusFilter === 'all' || report.paymentStatus === statusFilter;
+      const matchesCompany =
+        companyFilter === 'all' || report.companyId === companyFilter;
+      const matchesMonth =
+        monthFilter === 'all' || report.reportMonth === parseInt(monthFilter);
+      const matchesYear =
+        yearFilter === 'all' || report.reportYear === parseInt(yearFilter);
 
-      return matchesSearch && matchesStatus && matchesCompany && matchesMonth && matchesYear;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCompany &&
+        matchesMonth &&
+        matchesYear
+      );
     });
-  }, [reports, searchTerm, statusFilter, companyFilter, monthFilter, yearFilter]);
+  }, [
+    reports,
+    searchTerm,
+    statusFilter,
+    companyFilter,
+    monthFilter,
+    yearFilter,
+  ]);
 
   // Calculate metrics
   const metrics = useMemo(() => {
-    const paidReports = filteredReports.filter((r) => r.paymentStatus === 'paid');
-    const pendingReports = filteredReports.filter((r) => r.paymentStatus === 'pending');
+    const paidReports = filteredReports.filter(
+      (r) => r.paymentStatus === 'paid',
+    );
+    const pendingReports = filteredReports.filter(
+      (r) => r.paymentStatus === 'pending',
+    );
 
     const totalPaid = paidReports.reduce((sum, r) => sum + r.totalAmount, 0);
-    const totalPending = pendingReports.reduce((sum, r) => sum + r.totalAmount, 0);
-    const totalSessions = filteredReports.reduce((sum, r) => sum + r.totalSessions, 0);
+    const totalPending = pendingReports.reduce(
+      (sum, r) => sum + r.totalAmount,
+      0,
+    );
+    const totalSessions = filteredReports.reduce(
+      (sum, r) => sum + r.totalSessions,
+      0,
+    );
     const totalPatients = new Set(filteredReports.flatMap(() => [])).size; // Would need patient IDs
 
     // Compare with previous period
     const currentMonth = new Date().getMonth() + 1;
     const currentYear = new Date().getFullYear();
     const currentPeriodReports = reports.filter(
-      (r) => r.reportMonth === currentMonth && r.reportYear === currentYear
+      (r) => r.reportMonth === currentMonth && r.reportYear === currentYear,
     );
     const previousPeriodReports = reports.filter(
-      (r) => r.reportMonth === currentMonth - 1 && r.reportYear === currentYear
+      (r) => r.reportMonth === currentMonth - 1 && r.reportYear === currentYear,
     );
 
-    const currentTotal = currentPeriodReports.reduce((sum, r) => sum + r.totalAmount, 0);
-    const previousTotal = previousPeriodReports.reduce((sum, r) => sum + r.totalAmount, 0);
+    const currentTotal = currentPeriodReports.reduce(
+      (sum, r) => sum + r.totalAmount,
+      0,
+    );
+    const previousTotal = previousPeriodReports.reduce(
+      (sum, r) => sum + r.totalAmount,
+      0,
+    );
     const percentageChange =
-      previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
+      previousTotal > 0
+        ? ((currentTotal - previousTotal) / previousTotal) * 100
+        : 0;
 
     return {
       totalReports: filteredReports.length,
@@ -252,10 +291,18 @@ export default function ReportsPage() {
   }, [filteredReports, reports]);
 
   // Get unique values for filters
-  const companies = Array.from(new Set(reports.map((r) => ({ id: r.companyId, name: r.companyName }))));
-  const uniqueCompanies = Array.from(new Map(companies.map((c) => [c.id, c])).values());
-  const months = Array.from(new Set(reports.map((r) => r.reportMonth))).sort((a, b) => a - b);
-  const years = Array.from(new Set(reports.map((r) => r.reportYear))).sort((a, b) => b - a);
+  const companies = Array.from(
+    new Set(reports.map((r) => ({ id: r.companyId, name: r.companyName }))),
+  );
+  const uniqueCompanies = Array.from(
+    new Map(companies.map((c) => [c.id, c])).values(),
+  );
+  const months = Array.from(new Set(reports.map((r) => r.reportMonth))).sort(
+    (a, b) => a - b,
+  );
+  const years = Array.from(new Set(reports.map((r) => r.reportYear))).sort(
+    (a, b) => b - a,
+  );
 
   const getStatusColor = (status: string) => {
     return status === 'paid' ? 'green' : 'orange';
@@ -324,7 +371,14 @@ export default function ReportsPage() {
           </Flex>
 
           {/* Metrics Cards */}
-          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
+          <Grid
+            templateColumns={{
+              base: '1fr',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            }}
+            gap={4}
+          >
             <Card bg="blue.50" borderWidth="1px" borderColor="blue.200">
               <CardBody>
                 <Stat>
@@ -335,8 +389,13 @@ export default function ReportsPage() {
                     ${metrics.totalRevenue.toLocaleString()}
                   </StatNumber>
                   <StatHelpText>
-                    <StatArrow type={metrics.percentageChange >= 0 ? 'increase' : 'decrease'} />
-                    {Math.abs(metrics.percentageChange).toFixed(1)}% vs mes anterior
+                    <StatArrow
+                      type={
+                        metrics.percentageChange >= 0 ? 'increase' : 'decrease'
+                      }
+                    />
+                    {Math.abs(metrics.percentageChange).toFixed(1)}% vs mes
+                    anterior
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -351,7 +410,9 @@ export default function ReportsPage() {
                   <StatNumber fontSize="2xl" color="green.700">
                     ${metrics.totalPaid.toLocaleString()}
                   </StatNumber>
-                  <StatHelpText>{metrics.paidReports} reportes pagados</StatHelpText>
+                  <StatHelpText>
+                    {metrics.paidReports} reportes pagados
+                  </StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
@@ -365,7 +426,9 @@ export default function ReportsPage() {
                   <StatNumber fontSize="2xl" color="orange.700">
                     ${metrics.totalPending.toLocaleString()}
                   </StatNumber>
-                  <StatHelpText>{metrics.pendingReports} reportes pendientes</StatHelpText>
+                  <StatHelpText>
+                    {metrics.pendingReports} reportes pendientes
+                  </StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
@@ -379,7 +442,9 @@ export default function ReportsPage() {
                   <StatNumber fontSize="2xl" color="purple.700">
                     {metrics.totalSessions}
                   </StatNumber>
-                  <StatHelpText>{metrics.totalReports} reportes generados</StatHelpText>
+                  <StatHelpText>
+                    {metrics.totalReports} reportes generados
+                  </StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
@@ -396,7 +461,14 @@ export default function ReportsPage() {
                   </Text>
                 </HStack>
 
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(5, 1fr)' }} gap={4}>
+                <Grid
+                  templateColumns={{
+                    base: '1fr',
+                    md: 'repeat(2, 1fr)',
+                    lg: 'repeat(5, 1fr)',
+                  }}
+                  gap={4}
+                >
                   {/* Search */}
                   <GridItem colSpan={{ base: 1, lg: 2 }}>
                     <InputGroup>
@@ -412,14 +484,20 @@ export default function ReportsPage() {
                   </GridItem>
 
                   {/* Status Filter */}
-                  <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
                     <option value="all">Todos los estados</option>
                     <option value="paid">Pagados</option>
                     <option value="pending">Pendientes</option>
                   </Select>
 
                   {/* Company Filter */}
-                  <Select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)}>
+                  <Select
+                    value={companyFilter}
+                    onChange={(e) => setCompanyFilter(e.target.value)}
+                  >
                     <option value="all">Todas las empresas</option>
                     {uniqueCompanies.map((company) => (
                       <option key={company.id} value={company.id}>
@@ -429,7 +507,10 @@ export default function ReportsPage() {
                   </Select>
 
                   {/* Month Filter */}
-                  <Select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
+                  <Select
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                  >
                     <option value="all">Todos los meses</option>
                     {months.map((month) => (
                       <option key={month} value={month}>
@@ -440,7 +521,8 @@ export default function ReportsPage() {
                 </Grid>
 
                 <Text fontSize="xs" color="gray.600">
-                  Mostrando {filteredReports.length} de {reports.length} reportes
+                  Mostrando {filteredReports.length} de {reports.length}{' '}
+                  reportes
                 </Text>
               </VStack>
             </CardBody>
@@ -503,7 +585,8 @@ export default function ReportsPage() {
                           <Td>
                             <VStack spacing={0} align="start">
                               <Text fontSize="sm" fontWeight="medium">
-                                {getMonthName(report.reportMonth)} {report.reportYear}
+                                {getMonthName(report.reportMonth)}{' '}
+                                {report.reportYear}
                               </Text>
                               <Text fontSize="xs" color="gray.500">
                                 {report.reportMonth}/{report.reportYear}
@@ -530,7 +613,11 @@ export default function ReportsPage() {
                             <Text
                               fontSize="sm"
                               fontWeight="bold"
-                              color={report.paymentStatus === 'paid' ? 'green.600' : 'orange.600'}
+                              color={
+                                report.paymentStatus === 'paid'
+                                  ? 'green.600'
+                                  : 'orange.600'
+                              }
                             >
                               ${report.totalAmount.toLocaleString()}
                             </Text>
@@ -546,14 +633,23 @@ export default function ReportsPage() {
                           </Td>
                           <Td>
                             <Text fontSize="xs" color="gray.600">
-                              {format(report.generatedAt, 'dd/MM/yyyy', { locale: es })}
+                              {format(report.generatedAt, 'dd/MM/yyyy', {
+                                locale: es,
+                              })}
                             </Text>
                           </Td>
                           <Td>
-                            {report.paymentStatus === 'paid' && report.paidAt ? (
+                            {report.paymentStatus === 'paid' &&
+                            report.paidAt ? (
                               <VStack spacing={0} align="start">
-                                <Text fontSize="xs" color="gray.700" fontWeight="medium">
-                                  {format(report.paidAt, 'dd/MM/yyyy', { locale: es })}
+                                <Text
+                                  fontSize="xs"
+                                  color="gray.700"
+                                  fontWeight="medium"
+                                >
+                                  {format(report.paidAt, 'dd/MM/yyyy', {
+                                    locale: es,
+                                  })}
                                 </Text>
                                 <Text fontSize="xs" color="gray.500">
                                   {getPaymentMethodText(report.paymentMethod)}

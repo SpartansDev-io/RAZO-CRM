@@ -95,13 +95,17 @@ export default function AppointmentModal({
     reset,
     setValue,
     formState: { errors, isValid },
-  } = useForm<AppointmentFormData>({
-  });
+  } = useForm<AppointmentFormData>({});
 
   // Set form values when modal opens or props change
   useEffect(() => {
     if (isOpen) {
-      setValue('date', selectedDate ? format(selectedDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'));
+      setValue(
+        'date',
+        selectedDate
+          ? format(selectedDate, 'yyyy-MM-dd')
+          : format(new Date(), 'yyyy-MM-dd'),
+      );
       setValue('time', selectedTime || '09:00');
       setValue('appointmentType', 'presencial');
       setValue('duration', 60);
@@ -115,11 +119,12 @@ export default function AppointmentModal({
     // Validate that the appointment is not in the past
     const appointmentDateTime = new Date(`${data.date}T${data.time}`);
     const now = new Date();
-    
+
     if (appointmentDateTime <= now) {
       toast({
         title: 'Fecha y hora inválidas',
-        description: 'No puedes programar una cita en el pasado. Selecciona una fecha y hora futura.',
+        description:
+          'No puedes programar una cita en el pasado. Selecciona una fecha y hora futura.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -128,11 +133,11 @@ export default function AppointmentModal({
     }
 
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Mock Google Calendar integration
       if (data.googleCalendar) {
         console.log('Creating Google Calendar event...');
@@ -150,7 +155,8 @@ export default function AppointmentModal({
     } catch (error) {
       toast({
         title: 'Error al crear la cita',
-        description: 'Hubo un problema al programar la cita. Intente nuevamente.',
+        description:
+          'Hubo un problema al programar la cita. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -192,7 +198,10 @@ export default function AppointmentModal({
                   >
                     <Clock size={16} color="#3182CE" />
                     <Text fontSize="sm" fontWeight="medium" color="blue.700">
-                      Cita seleccionada para: {format(selectedDate, 'EEEE, dd MMMM yyyy', { locale: es })}
+                      Cita seleccionada para:{' '}
+                      {format(selectedDate, 'EEEE, dd MMMM yyyy', {
+                        locale: es,
+                      })}
                     </Text>
                   </HStack>
 
@@ -200,16 +209,18 @@ export default function AppointmentModal({
                   <HStack spacing={4}>
                     {/* Date Field */}
                     <FormControl isRequired flex="1">
-                        <HStack spacing={2}>
-                          <CalendarIcon size={16} />
-                          <FormLabel>Fecha</FormLabel>
-                        </HStack>
+                      <HStack spacing={2}>
+                        <CalendarIcon size={16} />
+                        <FormLabel>Fecha</FormLabel>
+                      </HStack>
                       <Input
                         type="date"
                         isReadOnly={true}
                         bg="gray.50"
                         cursor="not-allowed"
-                        {...register('date', { required: 'Seleccione una fecha' })}
+                        {...register('date', {
+                          required: 'Seleccione una fecha',
+                        })}
                       />
                       {errors.date && (
                         <Text fontSize="sm" color="red.500" mt={1}>
@@ -220,14 +231,16 @@ export default function AppointmentModal({
 
                     {/* Time Field */}
                     <FormControl isRequired flex="1">
-                        <HStack spacing={2}>
-                          <Clock size={16} />
-                          <FormLabel>Hora</FormLabel>
-                        </HStack>
+                      <HStack spacing={2}>
+                        <Clock size={16} />
+                        <FormLabel>Hora</FormLabel>
+                      </HStack>
                       <Input
                         type="time"
                         step="900" // 15 minute intervals
-                        {...register('time', { required: 'Seleccione una hora' })}
+                        {...register('time', {
+                          required: 'Seleccione una hora',
+                        })}
                       />
                     </FormControl>
                   </HStack>
@@ -238,13 +251,15 @@ export default function AppointmentModal({
                   <HStack spacing={4}>
                     {/* Date Field */}
                     <FormControl isRequired flex="1">
-                        <HStack spacing={2}>
-                          <CalendarIcon size={16} />
-                          <FormLabel>Fecha</FormLabel>
-                        </HStack>
+                      <HStack spacing={2}>
+                        <CalendarIcon size={16} />
+                        <FormLabel>Fecha</FormLabel>
+                      </HStack>
                       <Input
                         type="date"
-                        {...register('date', { required: 'Seleccione una fecha' })}
+                        {...register('date', {
+                          required: 'Seleccione una fecha',
+                        })}
                       />
                       {errors.date && (
                         <Text fontSize="sm" color="red.500" mt={1}>
@@ -255,14 +270,16 @@ export default function AppointmentModal({
 
                     {/* Time Field */}
                     <FormControl isRequired flex="1">
-                        <HStack spacing={2}>
-                          <Clock size={16} />
-                          <FormLabel>Hora</FormLabel>
-                        </HStack>
+                      <HStack spacing={2}>
+                        <Clock size={16} />
+                        <FormLabel>Hora</FormLabel>
+                      </HStack>
                       <Input
                         type="time"
                         step="900" // 15 minute intervals
-                        {...register('time', { required: 'Seleccione una hora' })}
+                        {...register('time', {
+                          required: 'Seleccione una hora',
+                        })}
                       />
                     </FormControl>
                   </HStack>
@@ -271,13 +288,15 @@ export default function AppointmentModal({
 
               {/* Patient Selection */}
               <FormControl isRequired isInvalid={!!errors.patientId}>
-                  <HStack spacing={2}>
-                    <User size={16} />
-                    <FormLabel>Paciente</FormLabel>
-                  </HStack>
+                <HStack spacing={2}>
+                  <User size={16} />
+                  <FormLabel>Paciente</FormLabel>
+                </HStack>
                 <Select
                   placeholder="Seleccionar paciente"
-                  {...register('patientId', { required: 'Seleccione un paciente' })}
+                  {...register('patientId', {
+                    required: 'Seleccione un paciente',
+                  })}
                 >
                   {mockPatients.map((patient) => (
                     <option key={patient.id} value={patient.id}>
@@ -297,7 +316,9 @@ export default function AppointmentModal({
                 <FormLabel>Tipo de Terapia</FormLabel>
                 <Select
                   placeholder="Seleccionar tipo de terapia"
-                  {...register('therapyType', { required: 'Seleccione el tipo de terapia' })}
+                  {...register('therapyType', {
+                    required: 'Seleccione el tipo de terapia',
+                  })}
                 >
                   {therapyTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -317,7 +338,9 @@ export default function AppointmentModal({
                 <FormLabel>Tipo de Cita</FormLabel>
                 <Select
                   placeholder="Seleccionar tipo de cita"
-                  {...register('appointmentType', { required: 'Seleccione el tipo de cita' })}
+                  {...register('appointmentType', {
+                    required: 'Seleccione el tipo de cita',
+                  })}
                 >
                   {appointmentTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -377,7 +400,11 @@ export default function AppointmentModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

@@ -3,7 +3,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
-import { IAuthState, ILoginRequest } from '@/modules/shared/domain/types/auth.types';
+import {
+  IAuthState,
+  ILoginRequest,
+} from '@/modules/shared/domain/types/auth.types';
 
 export const useAuthStore = create<IAuthState>()(
   persist(
@@ -19,7 +22,7 @@ export const useAuthStore = create<IAuthState>()(
        */
       login: async (credentials: ILoginRequest) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -39,9 +42,9 @@ export const useAuthStore = create<IAuthState>()(
               isLoading: false,
               error: null,
             });
-            
+
             toast.success('¡Bienvenido de vuelta!');
-            
+
             // Redirect to dashboard
             window.location.href = '/crm';
           } else {
@@ -100,6 +103,6 @@ export const useAuthStore = create<IAuthState>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
-    }
-  )
+    },
+  ),
 );

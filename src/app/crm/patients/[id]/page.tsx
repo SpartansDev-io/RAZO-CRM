@@ -48,7 +48,7 @@ import {
   Cake,
   Briefcase,
   DollarSign,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -121,7 +121,8 @@ const getMockPatient = (id: string): Patient | null => {
       birthDate: new Date('1995-03-15'),
       occupation: 'Desarrolladora de Software',
       referredBy: 'Dr. Pérez',
-      notes: 'Paciente muy colaborativa, responde bien al tratamiento cognitivo-conductual.',
+      notes:
+        'Paciente muy colaborativa, responde bien al tratamiento cognitivo-conductual.',
       maritalStatus: 'Soltera',
       educationLevel: 'Licenciatura',
       nationality: 'Española',
@@ -129,13 +130,17 @@ const getMockPatient = (id: string): Patient | null => {
       livingSituation: 'Vive sola',
       hasChildren: false,
       childrenCount: 0,
-      reasonForTherapy: 'Ansiedad relacionada con el trabajo y dificultades para manejar el estrés. Ha experimentado ataques de pánico ocasionales en el último año, especialmente durante períodos de alta carga laboral. También menciona dificultad para establecer límites en el trabajo.',
+      reasonForTherapy:
+        'Ansiedad relacionada con el trabajo y dificultades para manejar el estrés. Ha experimentado ataques de pánico ocasionales en el último año, especialmente durante períodos de alta carga laboral. También menciona dificultad para establecer límites en el trabajo.',
       previousTherapy: true,
-      previousTherapyDetails: 'Asistió a terapia hace 3 años durante 6 meses para trabajar temas de autoestima',
+      previousTherapyDetails:
+        'Asistió a terapia hace 3 años durante 6 meses para trabajar temas de autoestima',
       currentMedications: 'Ninguna',
       medicalConditions: 'Migraña ocasional',
-      familyHistory: 'Madre con historial de trastorno de ansiedad. Padre sin antecedentes psiquiátricos.',
-      expectations: 'Aprender técnicas para manejar la ansiedad, mejorar la gestión del estrés laboral, y desarrollar habilidades de comunicación asertiva.',
+      familyHistory:
+        'Madre con historial de trastorno de ansiedad. Padre sin antecedentes psiquiátricos.',
+      expectations:
+        'Aprender técnicas para manejar la ansiedad, mejorar la gestión del estrés laboral, y desarrollar habilidades de comunicación asertiva.',
       totalDebt: 2500,
     },
     {
@@ -165,18 +170,20 @@ const getMockPatient = (id: string): Patient | null => {
       livingSituation: 'Vive con su esposa',
       hasChildren: true,
       childrenCount: 2,
-      reasonForTherapy: 'Problemas de comunicación en la relación de pareja. Discusiones frecuentes sobre la crianza de los hijos y distribución de responsabilidades domésticas. Busca mejorar la conexión emocional con su pareja.',
+      reasonForTherapy:
+        'Problemas de comunicación en la relación de pareja. Discusiones frecuentes sobre la crianza de los hijos y distribución de responsabilidades domésticas. Busca mejorar la conexión emocional con su pareja.',
       previousTherapy: false,
       previousTherapyDetails: '',
       currentMedications: 'Ninguna',
       medicalConditions: 'Ninguna',
       familyHistory: 'Sin antecedentes psiquiátricos familiares conocidos',
-      expectations: 'Mejorar la comunicación con su pareja, aprender a resolver conflictos de manera constructiva, y fortalecer la relación.',
+      expectations:
+        'Mejorar la comunicación con su pareja, aprender a resolver conflictos de manera constructiva, y fortalecer la relación.',
       totalDebt: 0,
     },
   ];
 
-  return patients.find(p => p.id === id) || null;
+  return patients.find((p) => p.id === id) || null;
 };
 
 export default function PatientProfilePage() {
@@ -186,23 +193,23 @@ export default function PatientProfilePage() {
   const patient = getMockPatient(patientId);
 
   const [activeTab, setActiveTab] = useState(0);
-  
+
   const {
     isOpen: isAppointmentOpen,
     onOpen: onAppointmentOpen,
-    onClose: onAppointmentClose
+    onClose: onAppointmentClose,
   } = useDisclosure();
 
   const {
     isOpen: isSessionOpen,
     onOpen: onSessionOpen,
-    onClose: onSessionClose
+    onClose: onSessionClose,
   } = useDisclosure();
 
   const {
     isOpen: isPaymentOpen,
     onOpen: onPaymentOpen,
-    onClose: onPaymentClose
+    onClose: onPaymentClose,
   } = useDisclosure();
 
   const bg = useColorModeValue('white', 'gray.800');
@@ -218,7 +225,10 @@ export default function PatientProfilePage() {
             <Text fontSize="xl" color="gray.500">
               Paciente no encontrado
             </Text>
-            <Button leftIcon={<ArrowLeft size={16} />} onClick={() => router.back()}>
+            <Button
+              leftIcon={<ArrowLeft size={16} />}
+              onClick={() => router.back()}
+            >
               Volver
             </Button>
           </VStack>
@@ -229,28 +239,40 @@ export default function PatientProfilePage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'pending': return 'yellow';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'pending':
+        return 'yellow';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'inactive': return 'Inactivo';
-      case 'pending': return 'Pendiente';
-      default: return 'Desconocido';
+      case 'active':
+        return 'Activo';
+      case 'inactive':
+        return 'Inactivo';
+      case 'pending':
+        return 'Pendiente';
+      default:
+        return 'Desconocido';
     }
   };
 
   const getGenderText = (gender: string) => {
     switch (gender) {
-      case 'M': return 'Masculino';
-      case 'F': return 'Femenino';
-      case 'Other': return 'Otro';
-      default: return 'No especificado';
+      case 'M':
+        return 'Masculino';
+      case 'F':
+        return 'Femenino';
+      case 'Other':
+        return 'Otro';
+      default:
+        return 'No especificado';
     }
   };
 
@@ -278,7 +300,12 @@ export default function PatientProfilePage() {
 
           {/* Debt Alert */}
           {patient.totalDebt && patient.totalDebt > 0 && (
-            <Card bg="orange.50" borderWidth="2px" borderColor="orange.400" shadow="md">
+            <Card
+              bg="orange.50"
+              borderWidth="2px"
+              borderColor="orange.400"
+              shadow="md"
+            >
               <CardBody>
                 <HStack spacing={4} align="center">
                   <Box bg="orange.500" p={3} borderRadius="full">
@@ -324,11 +351,7 @@ export default function PatientProfilePage() {
                   gap={6}
                 >
                   <HStack spacing={6} flex="1">
-                    <Avatar
-                      size="2xl"
-                      name={patient.name}
-                      bg="blue.500"
-                    />
+                    <Avatar size="2xl" name={patient.name} bg="blue.500" />
                     <VStack spacing={2} align="start">
                       <HStack spacing={3}>
                         <Text fontSize="2xl" fontWeight="bold" color="gray.800">
@@ -348,13 +371,20 @@ export default function PatientProfilePage() {
                         {patient.age} años • {getGenderText(patient.gender)}
                       </Text>
                       <Text color="gray.500" fontSize="sm">
-                        Paciente desde {format(patient.registrationDate, 'MMMM yyyy', { locale: es })}
+                        Paciente desde{' '}
+                        {format(patient.registrationDate, 'MMMM yyyy', {
+                          locale: es,
+                        })}
                       </Text>
                     </VStack>
                   </HStack>
 
                   {/* Action Buttons - Top Right */}
-                  <HStack spacing={3} flexWrap="wrap" justify={{ base: 'center', md: 'flex-end' }}>
+                  <HStack
+                    spacing={3}
+                    flexWrap="wrap"
+                    justify={{ base: 'center', md: 'flex-end' }}
+                  >
                     <Button
                       leftIcon={<Calendar size={16} />}
                       colorScheme="blue"
@@ -383,7 +413,10 @@ export default function PatientProfilePage() {
                 </Flex>
 
                 {/* Bottom Row - Statistics Cards */}
-                <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                <Grid
+                  templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                  gap={4}
+                >
                   <Card bg={cardBg}>
                     <CardBody>
                       <Stat>
@@ -410,10 +443,11 @@ export default function PatientProfilePage() {
                           </HStack>
                         </StatLabel>
                         <StatNumber fontSize="lg" color="green.600">
-                          {patient.lastSession 
-                            ? format(patient.lastSession, 'dd/MM/yyyy', { locale: es })
-                            : 'Sin sesiones'
-                          }
+                          {patient.lastSession
+                            ? format(patient.lastSession, 'dd/MM/yyyy', {
+                                locale: es,
+                              })
+                            : 'Sin sesiones'}
                         </StatNumber>
                         {patient.lastSession && (
                           <StatHelpText fontSize="xs">
@@ -447,7 +481,11 @@ export default function PatientProfilePage() {
           {/* Tabs Section */}
           <Card bg={bg} shadow="md">
             <CardBody p={0}>
-              <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
+              <Tabs
+                index={activeTab}
+                onChange={setActiveTab}
+                variant="enclosed"
+              >
                 <TabList>
                   <Tab>
                     <HStack spacing={2}>
@@ -478,40 +516,62 @@ export default function PatientProfilePage() {
                 <TabPanels>
                   {/* General Information Tab */}
                   <TabPanel p={6}>
-                    <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={8}>
+                    <Grid
+                      templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+                      gap={8}
+                    >
                       {/* Personal Information */}
                       <VStack spacing={6} align="stretch">
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Información Personal
                           </Text>
                           <VStack spacing={4} align="stretch">
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Fecha de Nacimiento:</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Fecha de Nacimiento:
+                              </Text>
                               <HStack spacing={1}>
                                 <Cake size={14} color="#718096" />
                                 <Text fontWeight="medium">
-                                  {format(patient.birthDate, 'dd MMMM yyyy', { locale: es })}
+                                  {format(patient.birthDate, 'dd MMMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </Text>
                               </HStack>
                             </HStack>
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Ocupación:</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Ocupación:
+                              </Text>
                               <HStack spacing={1}>
                                 <Briefcase size={14} color="#718096" />
-                                <Text fontWeight="medium">{patient.occupation}</Text>
+                                <Text fontWeight="medium">
+                                  {patient.occupation}
+                                </Text>
                               </HStack>
                             </HStack>
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Empresa:</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Empresa:
+                              </Text>
                               <HStack spacing={1}>
                                 <Building size={14} color="#718096" />
-                                <Text fontWeight="medium">{patient.company}</Text>
+                                <Text fontWeight="medium">
+                                  {patient.company}
+                                </Text>
                               </HStack>
                             </HStack>
                             {patient.address && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Dirección:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Dirección:
+                                </Text>
                                 <HStack spacing={1}>
                                   <Home size={14} color="#718096" />
                                   <Text fontWeight="medium" fontSize="sm">
@@ -527,45 +587,74 @@ export default function PatientProfilePage() {
 
                         {/* Sociodemographic Information */}
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Datos Sociodemográficos
                           </Text>
                           <VStack spacing={4} align="stretch">
                             {patient.maritalStatus && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Estado Civil:</Text>
-                                <Text fontWeight="medium">{patient.maritalStatus}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Estado Civil:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.maritalStatus}
+                                </Text>
                               </HStack>
                             )}
                             {patient.educationLevel && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Nivel Educativo:</Text>
-                                <Text fontWeight="medium">{patient.educationLevel}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Nivel Educativo:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.educationLevel}
+                                </Text>
                               </HStack>
                             )}
                             {patient.nationality && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Nacionalidad:</Text>
-                                <Text fontWeight="medium">{patient.nationality}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Nacionalidad:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.nationality}
+                                </Text>
                               </HStack>
                             )}
                             {patient.religion && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Religión:</Text>
-                                <Text fontWeight="medium">{patient.religion}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Religión:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.religion}
+                                </Text>
                               </HStack>
                             )}
                             {patient.livingSituation && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Situación de Vivienda:</Text>
-                                <Text fontWeight="medium">{patient.livingSituation}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Situación de Vivienda:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.livingSituation}
+                                </Text>
                               </HStack>
                             )}
                             {patient.hasChildren !== undefined && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Hijos:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Hijos:
+                                </Text>
                                 <Text fontWeight="medium">
-                                  {patient.hasChildren ? `Sí (${patient.childrenCount})` : 'No'}
+                                  {patient.hasChildren
+                                    ? `Sí (${patient.childrenCount})`
+                                    : 'No'}
                                 </Text>
                               </HStack>
                             )}
@@ -576,21 +665,30 @@ export default function PatientProfilePage() {
 
                         {/* Contact Information */}
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Información de Contacto
                           </Text>
                           <VStack spacing={4} align="stretch">
                             <HStack justify="space-between">
                               <HStack spacing={2}>
                                 <Mail size={14} color="#718096" />
-                                <Text color="gray.600" fontSize="sm">Email:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Email:
+                                </Text>
                               </HStack>
                               <Text fontWeight="medium">{patient.email}</Text>
                             </HStack>
                             <HStack justify="space-between">
                               <HStack spacing={2}>
                                 <Phone size={14} color="#718096" />
-                                <Text color="gray.600" fontSize="sm">Teléfono:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Teléfono:
+                                </Text>
                               </HStack>
                               <Text fontWeight="medium">{patient.phone}</Text>
                             </HStack>
@@ -601,23 +699,36 @@ export default function PatientProfilePage() {
                       {/* Emergency Contact & Additional Info */}
                       <VStack spacing={6} align="stretch">
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Contacto de Emergencia
                           </Text>
                           <VStack spacing={4} align="stretch">
                             <HStack justify="space-between">
                               <HStack spacing={2}>
                                 <AlertCircle size={14} color="#E53E3E" />
-                                <Text color="gray.600" fontSize="sm">Nombre:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Nombre:
+                                </Text>
                               </HStack>
-                              <Text fontWeight="medium">{patient.emergencyContact}</Text>
+                              <Text fontWeight="medium">
+                                {patient.emergencyContact}
+                              </Text>
                             </HStack>
                             <HStack justify="space-between">
                               <HStack spacing={2}>
                                 <Phone size={14} color="#E53E3E" />
-                                <Text color="gray.600" fontSize="sm">Teléfono:</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Teléfono:
+                                </Text>
                               </HStack>
-                              <Text fontWeight="medium">{patient.emergencyPhone}</Text>
+                              <Text fontWeight="medium">
+                                {patient.emergencyPhone}
+                              </Text>
                             </HStack>
                           </VStack>
                         </Box>
@@ -626,20 +737,35 @@ export default function PatientProfilePage() {
 
                         {/* Additional Information */}
                         <Box>
-                          <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            mb={4}
+                            color="gray.800"
+                          >
                             Información Adicional
                           </Text>
                           <VStack spacing={4} align="stretch">
                             {patient.referredBy && (
                               <HStack justify="space-between">
-                                <Text color="gray.600" fontSize="sm">Referido por:</Text>
-                                <Text fontWeight="medium">{patient.referredBy}</Text>
+                                <Text color="gray.600" fontSize="sm">
+                                  Referido por:
+                                </Text>
+                                <Text fontWeight="medium">
+                                  {patient.referredBy}
+                                </Text>
                               </HStack>
                             )}
                             <HStack justify="space-between">
-                              <Text color="gray.600" fontSize="sm">Fecha de Registro:</Text>
+                              <Text color="gray.600" fontSize="sm">
+                                Fecha de Registro:
+                              </Text>
                               <Text fontWeight="medium">
-                                {format(patient.registrationDate, 'dd MMMM yyyy', { locale: es })}
+                                {format(
+                                  patient.registrationDate,
+                                  'dd MMMM yyyy',
+                                  { locale: es },
+                                )}
                               </Text>
                             </HStack>
                           </VStack>
@@ -650,12 +776,21 @@ export default function PatientProfilePage() {
                           <>
                             <Divider />
                             <Box>
-                              <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                              <Text
+                                fontSize="lg"
+                                fontWeight="semibold"
+                                mb={4}
+                                color="gray.800"
+                              >
                                 Notas
                               </Text>
                               <Card bg={cardBg}>
                                 <CardBody>
-                                  <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                                  <Text
+                                    fontSize="sm"
+                                    lineHeight="1.6"
+                                    color="gray.700"
+                                  >
                                     {patient.notes}
                                   </Text>
                                 </CardBody>
@@ -671,7 +806,12 @@ export default function PatientProfilePage() {
                     {/* Therapy Intake Section */}
                     <VStack spacing={6} align="stretch">
                       <Box>
-                        <Text fontSize="xl" fontWeight="bold" mb={2} color="gray.800">
+                        <Text
+                          fontSize="xl"
+                          fontWeight="bold"
+                          mb={2}
+                          color="gray.800"
+                        >
                           Evaluación Inicial de Terapia
                         </Text>
                         <Text fontSize="sm" color="gray.600">
@@ -679,20 +819,40 @@ export default function PatientProfilePage() {
                         </Text>
                       </Box>
 
-                      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={8}>
+                      <Grid
+                        templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+                        gap={8}
+                      >
                         {/* Reason for Therapy */}
                         <Box>
-                          <Card bg={cardBg} borderLeft="4px" borderLeftColor="blue.500">
+                          <Card
+                            bg={cardBg}
+                            borderLeft="4px"
+                            borderLeftColor="blue.500"
+                          >
                             <CardBody>
-                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                              <Text
+                                fontSize="md"
+                                fontWeight="semibold"
+                                mb={3}
+                                color="gray.800"
+                              >
                                 Motivo de Consulta
                               </Text>
                               {patient.reasonForTherapy ? (
-                                <Text fontSize="sm" lineHeight="1.8" color="gray.700">
+                                <Text
+                                  fontSize="sm"
+                                  lineHeight="1.8"
+                                  color="gray.700"
+                                >
                                   {patient.reasonForTherapy}
                                 </Text>
                               ) : (
-                                <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.500"
+                                  fontStyle="italic"
+                                >
                                   No especificado
                                 </Text>
                               )}
@@ -702,17 +862,34 @@ export default function PatientProfilePage() {
 
                         {/* Expectations */}
                         <Box>
-                          <Card bg={cardBg} borderLeft="4px" borderLeftColor="green.500">
+                          <Card
+                            bg={cardBg}
+                            borderLeft="4px"
+                            borderLeftColor="green.500"
+                          >
                             <CardBody>
-                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                              <Text
+                                fontSize="md"
+                                fontWeight="semibold"
+                                mb={3}
+                                color="gray.800"
+                              >
                                 Expectativas del Tratamiento
                               </Text>
                               {patient.expectations ? (
-                                <Text fontSize="sm" lineHeight="1.8" color="gray.700">
+                                <Text
+                                  fontSize="sm"
+                                  lineHeight="1.8"
+                                  color="gray.700"
+                                >
                                   {patient.expectations}
                                 </Text>
                               ) : (
-                                <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.500"
+                                  fontStyle="italic"
+                                >
                                   No especificado
                                 </Text>
                               )}
@@ -727,35 +904,60 @@ export default function PatientProfilePage() {
                           <CardBody>
                             <VStack spacing={3} align="stretch">
                               <HStack justify="space-between">
-                                <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                                <Text
+                                  fontSize="md"
+                                  fontWeight="semibold"
+                                  color="gray.800"
+                                >
                                   Historial de Terapia Previa
                                 </Text>
                               </HStack>
-                              {patient.previousTherapy && patient.previousTherapyDetails ? (
-                                  <Text fontSize="sm" lineHeight="1.6" color="gray.700">
-                                    {patient.previousTherapyDetails}
-                                  </Text>
-                                ) : (
-                                  <Text fontSize="sm" lineHeight="1.6" color="gray.500" fontStyle="italic">
-                                    No tiene historial de terapia previa
-                                  </Text>
-                                )
-                              }
+                              {patient.previousTherapy &&
+                              patient.previousTherapyDetails ? (
+                                <Text
+                                  fontSize="sm"
+                                  lineHeight="1.6"
+                                  color="gray.700"
+                                >
+                                  {patient.previousTherapyDetails}
+                                </Text>
+                              ) : (
+                                <Text
+                                  fontSize="sm"
+                                  lineHeight="1.6"
+                                  color="gray.500"
+                                  fontStyle="italic"
+                                >
+                                  No tiene historial de terapia previa
+                                </Text>
+                              )}
                             </VStack>
                           </CardBody>
                         </Card>
                       )}
 
                       {/* Medical Information */}
-                      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+                      <Grid
+                        templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+                        gap={6}
+                      >
                         {/* Current Medications */}
                         {patient.currentMedications && (
                           <Card bg={cardBg}>
                             <CardBody>
-                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                              <Text
+                                fontSize="md"
+                                fontWeight="semibold"
+                                mb={3}
+                                color="gray.800"
+                              >
                                 Medicación Actual
                               </Text>
-                              <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                              <Text
+                                fontSize="sm"
+                                lineHeight="1.6"
+                                color="gray.700"
+                              >
                                 {patient.currentMedications}
                               </Text>
                             </CardBody>
@@ -766,10 +968,19 @@ export default function PatientProfilePage() {
                         {patient.medicalConditions && (
                           <Card bg={cardBg}>
                             <CardBody>
-                              <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                              <Text
+                                fontSize="md"
+                                fontWeight="semibold"
+                                mb={3}
+                                color="gray.800"
+                              >
                                 Condiciones Médicas
                               </Text>
-                              <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                              <Text
+                                fontSize="sm"
+                                lineHeight="1.6"
+                                color="gray.700"
+                              >
                                 {patient.medicalConditions}
                               </Text>
                             </CardBody>
@@ -779,12 +990,25 @@ export default function PatientProfilePage() {
 
                       {/* Family History */}
                       {patient.familyHistory && (
-                        <Card bg={cardBg} borderLeft="4px" borderLeftColor="orange.500">
+                        <Card
+                          bg={cardBg}
+                          borderLeft="4px"
+                          borderLeftColor="orange.500"
+                        >
                           <CardBody>
-                            <Text fontSize="md" fontWeight="semibold" mb={3} color="gray.800">
+                            <Text
+                              fontSize="md"
+                              fontWeight="semibold"
+                              mb={3}
+                              color="gray.800"
+                            >
                               Historial Familiar Psiquiátrico
                             </Text>
-                            <Text fontSize="sm" lineHeight="1.6" color="gray.700">
+                            <Text
+                              fontSize="sm"
+                              lineHeight="1.6"
+                              color="gray.700"
+                            >
                               {patient.familyHistory}
                             </Text>
                           </CardBody>

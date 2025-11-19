@@ -33,7 +33,14 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@chakra-ui/react';
-import { FileText, Calendar, DollarSign, Users, TrendingUp, AlertCircle } from 'lucide-react';
+import {
+  FileText,
+  Calendar,
+  DollarSign,
+  Users,
+  TrendingUp,
+  AlertCircle,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
@@ -70,7 +77,11 @@ interface ReportPreview {
 }
 
 // Mock data - replace with actual API call
-const getMockSessionsForPeriod = (contractId: string, month: number, year: number): SessionData[] => {
+const getMockSessionsForPeriod = (
+  contractId: string,
+  month: number,
+  year: number,
+): SessionData[] => {
   return [
     {
       id: '1',
@@ -125,7 +136,9 @@ export default function GenerateMonthlyReportModal({
 }: GenerateMonthlyReportModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const [reportPreview, setReportPreview] = useState<ReportPreview | null>(null);
+  const [reportPreview, setReportPreview] = useState<ReportPreview | null>(
+    null,
+  );
   const toast = useToast();
 
   const currentDate = new Date();
@@ -158,10 +171,10 @@ export default function GenerateMonthlyReportModal({
     setIsLoadingPreview(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const sessions = getMockSessionsForPeriod(contractId, month, year);
-      const uniquePatients = new Set(sessions.map(s => s.patientId)).size;
+      const uniquePatients = new Set(sessions.map((s) => s.patientId)).size;
       const totalAmount = sessions.reduce((sum, s) => sum + s.sessionCost, 0);
 
       setReportPreview({
@@ -181,7 +194,8 @@ export default function GenerateMonthlyReportModal({
     if (!reportPreview || reportPreview.totalSessions === 0) {
       toast({
         title: 'No hay sesiones',
-        description: 'No se encontraron sesiones para generar el reporte en el período seleccionado.',
+        description:
+          'No se encontraron sesiones para generar el reporte en el período seleccionado.',
         status: 'warning',
         duration: 5000,
         isClosable: true,
@@ -193,7 +207,7 @@ export default function GenerateMonthlyReportModal({
 
     try {
       // Simulate API call to generate report
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast({
         title: 'Reporte generado exitosamente',
@@ -207,7 +221,8 @@ export default function GenerateMonthlyReportModal({
     } catch (error) {
       toast({
         title: 'Error al generar el reporte',
-        description: 'Hubo un problema al generar el reporte. Intente nuevamente.',
+        description:
+          'Hubo un problema al generar el reporte. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -245,7 +260,12 @@ export default function GenerateMonthlyReportModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="4xl" scrollBehavior="inside">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="4xl"
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.600" />
       <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -260,7 +280,13 @@ export default function GenerateMonthlyReportModal({
           <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
             <VStack spacing={6} align="stretch">
               {/* Contract Info */}
-              <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+              <Box
+                p={4}
+                bg="blue.50"
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <VStack spacing={2} align="stretch">
                   <HStack justify="space-between">
                     <Text fontSize="sm" fontWeight="semibold" color="gray.700">
@@ -283,7 +309,12 @@ export default function GenerateMonthlyReportModal({
 
               {/* Period Selection */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   <HStack spacing={2}>
                     <Calendar size={20} />
                     <Text>Seleccionar Período</Text>
@@ -293,7 +324,12 @@ export default function GenerateMonthlyReportModal({
                 <HStack spacing={4}>
                   <FormControl isRequired flex="1">
                     <FormLabel>Mes</FormLabel>
-                    <Select {...register('month', { required: true, valueAsNumber: true })}>
+                    <Select
+                      {...register('month', {
+                        required: true,
+                        valueAsNumber: true,
+                      })}
+                    >
                       {generateMonths().map((month) => (
                         <option key={month.value} value={month.value}>
                           {month.label}
@@ -304,7 +340,12 @@ export default function GenerateMonthlyReportModal({
 
                   <FormControl isRequired flex="1">
                     <FormLabel>Año</FormLabel>
-                    <Select {...register('year', { required: true, valueAsNumber: true })}>
+                    <Select
+                      {...register('year', {
+                        required: true,
+                        valueAsNumber: true,
+                      })}
+                    >
                       {generateYears().map((year) => (
                         <option key={year} value={year}>
                           {year}
@@ -336,12 +377,19 @@ export default function GenerateMonthlyReportModal({
                 <Box py={10}>
                   <VStack spacing={4}>
                     <Spinner size="lg" color="blue.500" />
-                    <Text color="gray.600">Cargando vista previa del reporte...</Text>
+                    <Text color="gray.600">
+                      Cargando vista previa del reporte...
+                    </Text>
                   </VStack>
                 </Box>
               ) : reportPreview ? (
                 <Box>
-                  <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                  <Text
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    mb={4}
+                    color="gray.800"
+                  >
                     Vista Previa del Reporte
                   </Text>
 
@@ -351,7 +399,8 @@ export default function GenerateMonthlyReportModal({
                       <Box>
                         <AlertTitle fontSize="sm">Sin sesiones</AlertTitle>
                         <AlertDescription fontSize="xs">
-                          No se encontraron sesiones bajo este contrato para el período seleccionado.
+                          No se encontraron sesiones bajo este contrato para el
+                          período seleccionado.
                         </AlertDescription>
                       </Box>
                     </Alert>
@@ -359,48 +408,87 @@ export default function GenerateMonthlyReportModal({
                     <>
                       {/* Summary Cards */}
                       <HStack spacing={4} mb={6}>
-                        <Card flex="1" bg="green.50" borderWidth="1px" borderColor="green.200">
+                        <Card
+                          flex="1"
+                          bg="green.50"
+                          borderWidth="1px"
+                          borderColor="green.200"
+                        >
                           <CardBody>
                             <VStack spacing={2}>
                               <HStack spacing={2}>
                                 <FileText size={20} color="#38A169" />
-                                <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.600"
+                                  fontWeight="medium"
+                                >
                                   Sesiones
                                 </Text>
                               </HStack>
-                              <Text fontSize="2xl" fontWeight="bold" color="green.700">
+                              <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="green.700"
+                              >
                                 {reportPreview.totalSessions}
                               </Text>
                             </VStack>
                           </CardBody>
                         </Card>
 
-                        <Card flex="1" bg="blue.50" borderWidth="1px" borderColor="blue.200">
+                        <Card
+                          flex="1"
+                          bg="blue.50"
+                          borderWidth="1px"
+                          borderColor="blue.200"
+                        >
                           <CardBody>
                             <VStack spacing={2}>
                               <HStack spacing={2}>
                                 <Users size={20} color="#3182CE" />
-                                <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.600"
+                                  fontWeight="medium"
+                                >
                                   Pacientes
                                 </Text>
                               </HStack>
-                              <Text fontSize="2xl" fontWeight="bold" color="blue.700">
+                              <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="blue.700"
+                              >
                                 {reportPreview.totalPatients}
                               </Text>
                             </VStack>
                           </CardBody>
                         </Card>
 
-                        <Card flex="1" bg="orange.50" borderWidth="1px" borderColor="orange.200">
+                        <Card
+                          flex="1"
+                          bg="orange.50"
+                          borderWidth="1px"
+                          borderColor="orange.200"
+                        >
                           <CardBody>
                             <VStack spacing={2}>
                               <HStack spacing={2}>
                                 <DollarSign size={20} color="#DD6B20" />
-                                <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.600"
+                                  fontWeight="medium"
+                                >
                                   Total
                                 </Text>
                               </HStack>
-                              <Text fontSize="2xl" fontWeight="bold" color="orange.700">
+                              <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="orange.700"
+                              >
                                 ${reportPreview.totalAmount.toLocaleString()}
                               </Text>
                             </VStack>
@@ -409,7 +497,11 @@ export default function GenerateMonthlyReportModal({
                       </HStack>
 
                       {/* Sessions Table */}
-                      <Box borderWidth="1px" borderRadius="md" overflow="hidden">
+                      <Box
+                        borderWidth="1px"
+                        borderRadius="md"
+                        overflow="hidden"
+                      >
                         <Table size="sm" variant="simple">
                           <Thead bg="gray.50">
                             <Tr>
@@ -429,7 +521,11 @@ export default function GenerateMonthlyReportModal({
                                 </Td>
                                 <Td>
                                   <Text fontSize="sm">
-                                    {format(session.sessionDate, 'dd MMM yyyy', { locale: es })}
+                                    {format(
+                                      session.sessionDate,
+                                      'dd MMM yyyy',
+                                      { locale: es },
+                                    )}
                                   </Text>
                                   <Text fontSize="xs" color="gray.500">
                                     {format(session.sessionDate, 'HH:mm')}
@@ -441,7 +537,11 @@ export default function GenerateMonthlyReportModal({
                                   </Text>
                                 </Td>
                                 <Td isNumeric>
-                                  <Text fontSize="sm" fontWeight="medium" color="green.600">
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    color="green.600"
+                                  >
                                     ${session.sessionCost.toLocaleString()}
                                   </Text>
                                 </Td>
@@ -452,12 +552,26 @@ export default function GenerateMonthlyReportModal({
                       </Box>
 
                       {/* Total Footer */}
-                      <Box mt={4} p={4} bg="gray.50" borderRadius="md" borderWidth="1px">
+                      <Box
+                        mt={4}
+                        p={4}
+                        bg="gray.50"
+                        borderRadius="md"
+                        borderWidth="1px"
+                      >
                         <HStack justify="space-between">
-                          <Text fontSize="md" fontWeight="semibold" color="gray.700">
+                          <Text
+                            fontSize="md"
+                            fontWeight="semibold"
+                            color="gray.700"
+                          >
                             Total a Cobrar:
                           </Text>
-                          <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                          <Text
+                            fontSize="2xl"
+                            fontWeight="bold"
+                            color="green.600"
+                          >
                             ${reportPreview.totalAmount.toLocaleString()} MXN
                           </Text>
                         </HStack>
@@ -471,7 +585,11 @@ export default function GenerateMonthlyReportModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

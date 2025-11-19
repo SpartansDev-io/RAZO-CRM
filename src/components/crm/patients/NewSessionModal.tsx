@@ -27,7 +27,17 @@ import {
   Card,
   CardBody,
 } from '@chakra-ui/react';
-import { FileText, Calendar, Clock, User, Target, Zap, DollarSign, CreditCard, Banknote } from 'lucide-react';
+import {
+  FileText,
+  Calendar,
+  Clock,
+  User,
+  Target,
+  Zap,
+  DollarSign,
+  CreditCard,
+  Banknote,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
@@ -107,10 +117,30 @@ const progressOptions = [
 ];
 
 const mockPatients: Patient[] = [
-  { id: '1', name: 'María González', company: 'Tech Solutions SA', lastSession: new Date('2024-01-15') },
-  { id: '2', name: 'Carlos Rodríguez', company: 'Innovate Industries', lastSession: new Date('2024-01-14') },
-  { id: '3', name: 'Ana López', company: 'Tech Solutions SA', lastSession: new Date('2024-01-16') },
-  { id: '4', name: 'Pedro Martínez', company: 'Tech Solutions SA', lastSession: new Date('2024-01-10') },
+  {
+    id: '1',
+    name: 'María González',
+    company: 'Tech Solutions SA',
+    lastSession: new Date('2024-01-15'),
+  },
+  {
+    id: '2',
+    name: 'Carlos Rodríguez',
+    company: 'Innovate Industries',
+    lastSession: new Date('2024-01-14'),
+  },
+  {
+    id: '3',
+    name: 'Ana López',
+    company: 'Tech Solutions SA',
+    lastSession: new Date('2024-01-16'),
+  },
+  {
+    id: '4',
+    name: 'Pedro Martínez',
+    company: 'Tech Solutions SA',
+    lastSession: new Date('2024-01-10'),
+  },
   { id: '5', name: 'Laura Sánchez', company: 'Innovate Industries' },
 ];
 
@@ -123,10 +153,34 @@ interface Contract {
 }
 
 const mockContracts: Contract[] = [
-  { id: '1', contractName: 'Contrato Premium - Tech Solutions', costPerSession: 1500, companyId: 'tech-solutions', companyName: 'Tech Solutions SA' },
-  { id: '2', contractName: 'Contrato Básico - Tech Solutions', costPerSession: 1000, companyId: 'tech-solutions', companyName: 'Tech Solutions SA' },
-  { id: '3', contractName: 'Contrato Ejecutivo - Innovate', costPerSession: 2000, companyId: 'innovate', companyName: 'Innovate Industries' },
-  { id: '4', contractName: 'Contrato Estándar - Innovate', costPerSession: 1200, companyId: 'innovate', companyName: 'Innovate Industries' },
+  {
+    id: '1',
+    contractName: 'Contrato Premium - Tech Solutions',
+    costPerSession: 1500,
+    companyId: 'tech-solutions',
+    companyName: 'Tech Solutions SA',
+  },
+  {
+    id: '2',
+    contractName: 'Contrato Básico - Tech Solutions',
+    costPerSession: 1000,
+    companyId: 'tech-solutions',
+    companyName: 'Tech Solutions SA',
+  },
+  {
+    id: '3',
+    contractName: 'Contrato Ejecutivo - Innovate',
+    costPerSession: 2000,
+    companyId: 'innovate',
+    companyName: 'Innovate Industries',
+  },
+  {
+    id: '4',
+    contractName: 'Contrato Estándar - Innovate',
+    costPerSession: 1200,
+    companyId: 'innovate',
+    companyName: 'Innovate Industries',
+  },
 ];
 
 export default function NewSessionModal({
@@ -136,7 +190,9 @@ export default function NewSessionModal({
   showPatientSelector = false,
 }: NewSessionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patient || null);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(
+    patient || null,
+  );
   const [availableContracts, setAvailableContracts] = useState<Contract[]>([]);
   const [showCustomAmount, setShowCustomAmount] = useState(false);
   const toast = useToast();
@@ -166,13 +222,13 @@ export default function NewSessionModal({
 
   const handlePatientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const patientId = e.target.value;
-    const foundPatient = mockPatients.find(p => p.id === patientId);
+    const foundPatient = mockPatients.find((p) => p.id === patientId);
     setSelectedPatient(foundPatient || null);
     setValue('patientId', patientId);
 
     if (foundPatient?.company) {
       const companyContracts = mockContracts.filter(
-        c => c.companyName === foundPatient.company
+        (c) => c.companyName === foundPatient.company,
       );
       setAvailableContracts(companyContracts);
       setValue('paymentType', '');
@@ -199,17 +255,17 @@ export default function NewSessionModal({
 
   const getSelectedContractAmount = () => {
     if (watchedPaymentType === 'other' || !watchedPaymentType) return null;
-    const contract = mockContracts.find(c => c.id === watchedPaymentType);
+    const contract = mockContracts.find((c) => c.id === watchedPaymentType);
     return contract?.costPerSession || null;
   };
 
   const onSubmit = async (data: SessionFormData) => {
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast({
         title: 'Registro de sesión creado',
         description: `El registro de la sesión del ${format(new Date(data.sessionDate), 'dd/MM/yyyy', { locale: es })} ha sido guardado exitosamente.`,
@@ -222,7 +278,8 @@ export default function NewSessionModal({
     } catch (error) {
       toast({
         title: 'Error al guardar el registro',
-        description: 'Hubo un problema al guardar el registro de la sesión. Intente nuevamente.',
+        description:
+          'Hubo un problema al guardar el registro de la sesión. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -241,12 +298,12 @@ export default function NewSessionModal({
   };
 
   const getMoodColor = (mood: string) => {
-    const option = moodOptions.find(opt => opt.value === mood);
+    const option = moodOptions.find((opt) => opt.value === mood);
     return option?.color || 'gray';
   };
 
   const getProgressColor = (progress: string) => {
-    const option = progressOptions.find(opt => opt.value === progress);
+    const option = progressOptions.find((opt) => opt.value === progress);
     return option?.color || 'gray';
   };
 
@@ -284,7 +341,11 @@ export default function NewSessionModal({
                     </FormLabel>
                     <Select
                       placeholder="Selecciona un paciente"
-                      {...register('patientId', { required: showPatientSelector ? 'Seleccione un paciente' : false })}
+                      {...register('patientId', {
+                        required: showPatientSelector
+                          ? 'Seleccione un paciente'
+                          : false,
+                      })}
                       onChange={handlePatientChange}
                       defaultValue={patient?.id}
                     >
@@ -302,21 +363,44 @@ export default function NewSessionModal({
                   </FormControl>
 
                   {selectedPatient && (
-                    <Box mt={3} p={3} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+                    <Box
+                      mt={3}
+                      p={3}
+                      bg="blue.50"
+                      borderRadius="md"
+                      borderWidth="1px"
+                      borderColor="blue.200"
+                    >
                       <Grid templateColumns="repeat(2, 1fr)" gap={2}>
                         {selectedPatient.company && (
                           <Box>
-                            <Text fontSize="xs" color="gray.600">Empresa</Text>
-                            <Text fontSize="sm" fontWeight="medium" color="blue.700">
+                            <Text fontSize="xs" color="gray.600">
+                              Empresa
+                            </Text>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color="blue.700"
+                            >
                               {selectedPatient.company}
                             </Text>
                           </Box>
                         )}
                         {selectedPatient.lastSession && (
                           <Box>
-                            <Text fontSize="xs" color="gray.600">Última Sesión</Text>
-                            <Text fontSize="sm" fontWeight="medium" color="blue.700">
-                              {format(selectedPatient.lastSession, "dd 'de' MMMM, yyyy", { locale: es })}
+                            <Text fontSize="xs" color="gray.600">
+                              Última Sesión
+                            </Text>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color="blue.700"
+                            >
+                              {format(
+                                selectedPatient.lastSession,
+                                "dd 'de' MMMM, yyyy",
+                                { locale: es },
+                              )}
                             </Text>
                           </Box>
                         )}
@@ -330,18 +414,28 @@ export default function NewSessionModal({
 
               {/* Session Basic Info */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Información Básica de la Sesión
                 </Text>
-                <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: '1fr 1fr 1fr' }}
+                  gap={4}
+                >
                   <FormControl isRequired isInvalid={!!errors.sessionDate}>
-                      <HStack spacing={2}>
-                        <Calendar size={16} />
-                        <FormLabel>Fecha</FormLabel>
-                      </HStack>
+                    <HStack spacing={2}>
+                      <Calendar size={16} />
+                      <FormLabel>Fecha</FormLabel>
+                    </HStack>
                     <Input
                       type="date"
-                      {...register('sessionDate', { required: 'Seleccione una fecha' })}
+                      {...register('sessionDate', {
+                        required: 'Seleccione una fecha',
+                      })}
                     />
                     {errors.sessionDate && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -351,13 +445,15 @@ export default function NewSessionModal({
                   </FormControl>
 
                   <FormControl isRequired isInvalid={!!errors.sessionTime}>
-                      <HStack spacing={2}>
-                        <Clock size={16} />
-                        <FormLabel>Hora</FormLabel>
-                      </HStack>
+                    <HStack spacing={2}>
+                      <Clock size={16} />
+                      <FormLabel>Hora</FormLabel>
+                    </HStack>
                     <Input
                       type="time"
-                      {...register('sessionTime', { required: 'Seleccione una hora' })}
+                      {...register('sessionTime', {
+                        required: 'Seleccione una hora',
+                      })}
                     />
                     {errors.sessionTime && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -378,12 +474,18 @@ export default function NewSessionModal({
                   </FormControl>
                 </Grid>
 
-                <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} mt={4}>
+                <Grid
+                  templateColumns={{ base: '1fr', md: '1fr 1fr' }}
+                  gap={4}
+                  mt={4}
+                >
                   <FormControl isRequired isInvalid={!!errors.sessionType}>
                     <FormLabel>Tipo de Sesión</FormLabel>
                     <Select
                       placeholder="Seleccionar tipo de sesión"
-                      {...register('sessionType', { required: 'Seleccione el tipo de sesión' })}
+                      {...register('sessionType', {
+                        required: 'Seleccione el tipo de sesión',
+                      })}
                     >
                       {sessionTypes.map((type) => (
                         <option key={type.value} value={type.value}>
@@ -416,7 +518,10 @@ export default function NewSessionModal({
                         minW="80px"
                         textAlign="center"
                       >
-                        {moodOptions.find(opt => opt.value === watchedMood)?.label}
+                        {
+                          moodOptions.find((opt) => opt.value === watchedMood)
+                            ?.label
+                        }
                       </Badge>
                     </HStack>
                   </Box>
@@ -427,10 +532,15 @@ export default function NewSessionModal({
 
               {/* Session Content */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Contenido de la Sesión
                 </Text>
-                
+
                 <VStack spacing={4} align="stretch">
                   <FormControl isRequired isInvalid={!!errors.sessionNotes}>
                     <FormLabel>
@@ -442,7 +552,9 @@ export default function NewSessionModal({
                     <Textarea
                       placeholder="Describe lo que ocurrió durante la sesión, observaciones importantes, respuesta del paciente, etc."
                       rows={4}
-                      {...register('sessionNotes', { required: 'Las notas de la sesión son requeridas' })}
+                      {...register('sessionNotes', {
+                        required: 'Las notas de la sesión son requeridas',
+                      })}
                     />
                     {errors.sessionNotes && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -451,7 +563,10 @@ export default function NewSessionModal({
                     )}
                   </FormControl>
 
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                  <Grid
+                    templateColumns={{ base: '1fr', md: '1fr 1fr' }}
+                    gap={4}
+                  >
                     <FormControl>
                       <FormLabel>
                         <HStack spacing={2}>
@@ -487,10 +602,15 @@ export default function NewSessionModal({
 
               {/* Follow-up and Progress */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   Seguimiento y Progreso
                 </Text>
-                
+
                 <VStack spacing={4} align="stretch">
                   <FormControl>
                     <FormLabel>Tareas para Casa</FormLabel>
@@ -528,7 +648,11 @@ export default function NewSessionModal({
                         minW="100px"
                         textAlign="center"
                       >
-                        {progressOptions.find(opt => opt.value === watchedProgress)?.label}
+                        {
+                          progressOptions.find(
+                            (opt) => opt.value === watchedProgress,
+                          )?.label
+                        }
                       </Badge>
                     </HStack>
                   </FormControl>
@@ -539,7 +663,12 @@ export default function NewSessionModal({
 
               {/* Payment Section */}
               <Box>
-                <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.800">
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  mb={4}
+                  color="gray.800"
+                >
                   <HStack spacing={2}>
                     <DollarSign size={20} />
                     <Text>Información de Cobro</Text>
@@ -547,19 +676,25 @@ export default function NewSessionModal({
                 </Text>
 
                 <VStack spacing={4} align="stretch">
-                  <Grid templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap={4}>
+                  <Grid
+                    templateColumns={{ base: '1fr', md: '2fr 1fr' }}
+                    gap={4}
+                  >
                     <FormControl isRequired isInvalid={!!errors.paymentType}>
                       <FormLabel>Tipo de Cobro</FormLabel>
                       <Select
                         placeholder="Selecciona el tipo de cobro"
-                        {...register('paymentType', { required: 'Seleccione el tipo de cobro' })}
+                        {...register('paymentType', {
+                          required: 'Seleccione el tipo de cobro',
+                        })}
                         onChange={handlePaymentTypeChange}
                       >
                         {availableContracts.length > 0 && (
                           <optgroup label="Contratos de la Empresa">
                             {availableContracts.map((contract) => (
                               <option key={contract.id} value={contract.id}>
-                                {contract.contractName} - ${contract.costPerSession.toLocaleString()} MXN
+                                {contract.contractName} - $
+                                {contract.costPerSession.toLocaleString()} MXN
                               </option>
                             ))}
                           </optgroup>
@@ -573,7 +708,8 @@ export default function NewSessionModal({
                       )}
                       {!selectedPatient?.company && (
                         <Text fontSize="xs" color="orange.600" mt={1}>
-                          Selecciona un paciente para ver los contratos disponibles
+                          Selecciona un paciente para ver los contratos
+                          disponibles
                         </Text>
                       )}
                     </FormControl>
@@ -588,13 +724,19 @@ export default function NewSessionModal({
                       <Select
                         {...register('paymentMethod')}
                         onChange={(e) => {
-                          const method = e.target.value as 'transfer' | 'cash' | 'none';
+                          const method = e.target.value as
+                            | 'transfer'
+                            | 'cash'
+                            | 'none';
                           setValue('paymentMethod', method);
                           if (method === 'none') {
                             setValue('paymentStatus', 'pending');
                             setValue('paidAmount', 0);
                           } else {
-                            const sessionCost = getSelectedContractAmount() || watchedCustomAmount || 0;
+                            const sessionCost =
+                              getSelectedContractAmount() ||
+                              watchedCustomAmount ||
+                              0;
                             setValue('paidAmount', sessionCost);
                           }
                         }}
@@ -607,20 +749,34 @@ export default function NewSessionModal({
                   </Grid>
 
                   {showCustomAmount && (
-                    <FormControl isRequired={showCustomAmount} isInvalid={!!errors.customAmount}>
-                      <FormLabel>Monto Personalizado (Costo de Sesión)</FormLabel>
+                    <FormControl
+                      isRequired={showCustomAmount}
+                      isInvalid={!!errors.customAmount}
+                    >
+                      <FormLabel>
+                        Monto Personalizado (Costo de Sesión)
+                      </FormLabel>
                       <HStack>
-                        <Text fontSize="lg" color="gray.600">$</Text>
+                        <Text fontSize="lg" color="gray.600">
+                          $
+                        </Text>
                         <Input
                           type="number"
                           placeholder="Ingresa el monto"
                           {...register('customAmount', {
-                            required: showCustomAmount ? 'Ingrese el monto' : false,
-                            min: { value: 0, message: 'El monto debe ser mayor a 0' },
+                            required: showCustomAmount
+                              ? 'Ingrese el monto'
+                              : false,
+                            min: {
+                              value: 0,
+                              message: 'El monto debe ser mayor a 0',
+                            },
                             valueAsNumber: true,
                           })}
                         />
-                        <Text fontSize="lg" color="gray.600">MXN</Text>
+                        <Text fontSize="lg" color="gray.600">
+                          MXN
+                        </Text>
                       </HStack>
                       {errors.customAmount && (
                         <Text fontSize="sm" color="red.500" mt={1}>
@@ -631,53 +787,86 @@ export default function NewSessionModal({
                   )}
 
                   {/* Payment Amount - Only show if payment method is selected */}
-                  {watchedPaymentMethod !== 'none' && (getSelectedContractAmount() || watchedCustomAmount) && (
-                    <FormControl isRequired isInvalid={!!errors.paidAmount}>
-                      <FormLabel>
-                        <HStack spacing={2}>
-                          <Banknote size={16} />
-                          <Text>Monto Pagado</Text>
+                  {watchedPaymentMethod !== 'none' &&
+                    (getSelectedContractAmount() || watchedCustomAmount) && (
+                      <FormControl isRequired isInvalid={!!errors.paidAmount}>
+                        <FormLabel>
+                          <HStack spacing={2}>
+                            <Banknote size={16} />
+                            <Text>Monto Pagado</Text>
+                          </HStack>
+                        </FormLabel>
+                        <HStack>
+                          <Text fontSize="lg" color="gray.600">
+                            $
+                          </Text>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            {...register('paidAmount', {
+                              required: 'El monto pagado es requerido',
+                              min: {
+                                value: 0.01,
+                                message: 'El monto debe ser mayor a 0',
+                              },
+                              max: {
+                                value:
+                                  getSelectedContractAmount() ||
+                                  watchedCustomAmount ||
+                                  0,
+                                message:
+                                  'El monto no puede exceder el costo de la sesión',
+                              },
+                              valueAsNumber: true,
+                            })}
+                          />
+                          <Text fontSize="lg" color="gray.600">
+                            MXN
+                          </Text>
                         </HStack>
-                      </FormLabel>
-                      <HStack>
-                        <Text fontSize="lg" color="gray.600">$</Text>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...register('paidAmount', {
-                            required: 'El monto pagado es requerido',
-                            min: { value: 0.01, message: 'El monto debe ser mayor a 0' },
-                            max: {
-                              value: getSelectedContractAmount() || watchedCustomAmount || 0,
-                              message: 'El monto no puede exceder el costo de la sesión'
-                            },
-                            valueAsNumber: true,
-                          })}
-                        />
-                        <Text fontSize="lg" color="gray.600">MXN</Text>
-                      </HStack>
-                      {errors.paidAmount && (
-                        <Text fontSize="sm" color="red.500" mt={1}>
-                          {errors.paidAmount.message}
-                        </Text>
-                      )}
-                      {(getSelectedContractAmount() || watchedCustomAmount) && (
-                        <Text fontSize="xs" color="gray.500" mt={1}>
-                          Costo de sesión: ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
-                        </Text>
-                      )}
-                      {watchedPaidAmount && watchedPaidAmount > 0 && watchedPaidAmount < (getSelectedContractAmount() || watchedCustomAmount || 0) && (
-                        <Badge colorScheme="orange" mt={2} fontSize="xs">
-                          Pago Parcial - Adeudo: ${((getSelectedContractAmount() || watchedCustomAmount || 0) - watchedPaidAmount).toLocaleString()} MXN
-                        </Badge>
-                      )}
-                      {watchedPaidAmount && watchedPaidAmount === (getSelectedContractAmount() || watchedCustomAmount) && (
-                        <Badge colorScheme="green" mt={2} fontSize="xs">
-                          Pago Completo
-                        </Badge>
-                      )}
-                    </FormControl>
-                  )}
+                        {errors.paidAmount && (
+                          <Text fontSize="sm" color="red.500" mt={1}>
+                            {errors.paidAmount.message}
+                          </Text>
+                        )}
+                        {(getSelectedContractAmount() ||
+                          watchedCustomAmount) && (
+                          <Text fontSize="xs" color="gray.500" mt={1}>
+                            Costo de sesión: $
+                            {(
+                              getSelectedContractAmount() ||
+                              watchedCustomAmount ||
+                              0
+                            ).toLocaleString()}{' '}
+                            MXN
+                          </Text>
+                        )}
+                        {watchedPaidAmount &&
+                          watchedPaidAmount > 0 &&
+                          watchedPaidAmount <
+                            (getSelectedContractAmount() ||
+                              watchedCustomAmount ||
+                              0) && (
+                            <Badge colorScheme="orange" mt={2} fontSize="xs">
+                              Pago Parcial - Adeudo: $
+                              {(
+                                (getSelectedContractAmount() ||
+                                  watchedCustomAmount ||
+                                  0) - watchedPaidAmount
+                              ).toLocaleString()}{' '}
+                              MXN
+                            </Badge>
+                          )}
+                        {watchedPaidAmount &&
+                          watchedPaidAmount ===
+                            (getSelectedContractAmount() ||
+                              watchedCustomAmount) && (
+                            <Badge colorScheme="green" mt={2} fontSize="xs">
+                              Pago Completo
+                            </Badge>
+                          )}
+                      </FormControl>
+                    )}
 
                   {/* Payment Notes */}
                   {watchedPaymentMethod !== 'none' && (
@@ -693,18 +882,36 @@ export default function NewSessionModal({
                   {/* Payment Summary */}
                   {(getSelectedContractAmount() || watchedCustomAmount) && (
                     <Card
-                      bg={watchedPaymentMethod === 'none' ? 'orange.50' : 'green.50'}
+                      bg={
+                        watchedPaymentMethod === 'none'
+                          ? 'orange.50'
+                          : 'green.50'
+                      }
                       borderWidth="1px"
-                      borderColor={watchedPaymentMethod === 'none' ? 'orange.200' : 'green.200'}
+                      borderColor={
+                        watchedPaymentMethod === 'none'
+                          ? 'orange.200'
+                          : 'green.200'
+                      }
                     >
                       <CardBody>
                         <VStack spacing={2} align="stretch">
                           <HStack justify="space-between">
-                            <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                              {watchedPaymentMethod === 'none' ? 'Estado: Pendiente de Pago' : 'Estado: Pago Registrado'}
+                            <Text
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              color="gray.700"
+                            >
+                              {watchedPaymentMethod === 'none'
+                                ? 'Estado: Pendiente de Pago'
+                                : 'Estado: Pago Registrado'}
                             </Text>
                             <Badge
-                              colorScheme={watchedPaymentMethod === 'none' ? 'orange' : 'green'}
+                              colorScheme={
+                                watchedPaymentMethod === 'none'
+                                  ? 'orange'
+                                  : 'green'
+                              }
                               variant="solid"
                               px={3}
                               py={1}
@@ -712,40 +919,65 @@ export default function NewSessionModal({
                               {watchedPaymentMethod === 'none'
                                 ? 'Pendiente'
                                 : watchedPaymentMethod === 'transfer'
-                                ? 'Transferencia'
-                                : 'Efectivo'}
+                                  ? 'Transferencia'
+                                  : 'Efectivo'}
                             </Badge>
                           </HStack>
                           <Divider />
                           <HStack justify="space-between" fontSize="sm">
                             <Text color="gray.600">Costo de sesión:</Text>
                             <Text fontWeight="bold">
-                              ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
+                              $
+                              {(
+                                getSelectedContractAmount() ||
+                                watchedCustomAmount ||
+                                0
+                              ).toLocaleString()}{' '}
+                              MXN
                             </Text>
                           </HStack>
-                          {watchedPaymentMethod !== 'none' && watchedPaidAmount !== undefined && (
-                            <>
-                              <HStack justify="space-between" fontSize="sm">
-                                <Text color="gray.600">Monto pagado:</Text>
-                                <Text fontWeight="bold" color="green.600">
-                                  ${(watchedPaidAmount || 0).toLocaleString()} MXN
-                                </Text>
-                              </HStack>
-                              {watchedPaidAmount < (getSelectedContractAmount() || watchedCustomAmount || 0) && (
+                          {watchedPaymentMethod !== 'none' &&
+                            watchedPaidAmount !== undefined && (
+                              <>
                                 <HStack justify="space-between" fontSize="sm">
-                                  <Text color="orange.600">Adeudo restante:</Text>
-                                  <Text fontWeight="bold" color="orange.600">
-                                    ${((getSelectedContractAmount() || watchedCustomAmount || 0) - watchedPaidAmount).toLocaleString()} MXN
+                                  <Text color="gray.600">Monto pagado:</Text>
+                                  <Text fontWeight="bold" color="green.600">
+                                    ${(watchedPaidAmount || 0).toLocaleString()}{' '}
+                                    MXN
                                   </Text>
                                 </HStack>
-                              )}
-                            </>
-                          )}
+                                {watchedPaidAmount <
+                                  (getSelectedContractAmount() ||
+                                    watchedCustomAmount ||
+                                    0) && (
+                                  <HStack justify="space-between" fontSize="sm">
+                                    <Text color="orange.600">
+                                      Adeudo restante:
+                                    </Text>
+                                    <Text fontWeight="bold" color="orange.600">
+                                      $
+                                      {(
+                                        (getSelectedContractAmount() ||
+                                          watchedCustomAmount ||
+                                          0) - watchedPaidAmount
+                                      ).toLocaleString()}{' '}
+                                      MXN
+                                    </Text>
+                                  </HStack>
+                                )}
+                              </>
+                            )}
                           {watchedPaymentMethod === 'none' && (
                             <HStack justify="space-between" fontSize="sm">
                               <Text color="orange.600">Adeudo total:</Text>
                               <Text fontWeight="bold" color="orange.600">
-                                ${(getSelectedContractAmount() || watchedCustomAmount || 0).toLocaleString()} MXN
+                                $
+                                {(
+                                  getSelectedContractAmount() ||
+                                  watchedCustomAmount ||
+                                  0
+                                ).toLocaleString()}{' '}
+                                MXN
                               </Text>
                             </HStack>
                           )}
@@ -757,10 +989,19 @@ export default function NewSessionModal({
               </Box>
 
               {/* Confidentiality Note */}
-              <Box bg="blue.50" p={4} borderRadius="md" borderWidth="1px" borderColor="blue.200">
+              <Box
+                bg="blue.50"
+                p={4}
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <Text fontSize="xs" color="blue.700" lineHeight="1.6">
-                  <strong>Nota de Confidencialidad:</strong> Esta información es confidencial y forma parte del expediente clínico del paciente.
-                  Asegúrate de que todos los datos sean precisos y completos. El acceso a esta información está protegido por las leyes de privacidad médica.
+                  <strong>Nota de Confidencialidad:</strong> Esta información es
+                  confidencial y forma parte del expediente clínico del
+                  paciente. Asegúrate de que todos los datos sean precisos y
+                  completos. El acceso a esta información está protegido por las
+                  leyes de privacidad médica.
                 </Text>
               </Box>
             </VStack>
@@ -768,7 +1009,11 @@ export default function NewSessionModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

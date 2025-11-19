@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     // Asegurar que estamos usando el día correcto en GMT-6
     const dateString = targetDate.toISOString().split('T')[0];
-    
+
     // Rango del día en GMT-6 convertido a UTC
     const dayStart = new Date(`${dateString}T00:00:00-06:00`);
     const dayEnd = new Date(`${dateString}T23:59:59.999-06:00`);
@@ -90,14 +90,14 @@ export async function GET(request: Request) {
       type: string;
       duration: number;
       appointmentType: string;
-      meetLink?: string;
+      meetLink?: string | null;
       status: string;
       confirmed: boolean;
       therapistId?: string;
       therapistName: string;
       therapistAvatar: string | null;
     };
-    
+
     // Transformar resultados
     // Define the type for the session object returned by Prisma
     type SessionWithRelations = {
@@ -169,12 +169,18 @@ export async function GET(request: Request) {
         deletedAt: null,
       },
     });
-    
+
     // Generar resumen
     const summary = {
-      confirmed: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'confirmed').length,
-      pending: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'scheduled').length,
-      inProgress: formattedAppointments.filter((a: FormattedAppointment) => a.status === 'in_progress').length,
+      confirmed: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'confirmed',
+      ).length,
+      pending: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'scheduled',
+      ).length,
+      inProgress: formattedAppointments.filter(
+        (a: FormattedAppointment) => a.status === 'in_progress',
+      ).length,
     };
 
     return NextResponse.json({
@@ -187,9 +193,9 @@ export async function GET(request: Request) {
         debug: {
           dateRange: {
             start: dayStart.toISOString(),
-            end: dayEnd.toISOString()
-          }
-        }
+            end: dayEnd.toISOString(),
+          },
+        },
       },
     });
   } catch (error) {

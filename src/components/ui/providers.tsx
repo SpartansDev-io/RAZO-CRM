@@ -4,9 +4,5 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { system } from '@/lib/theme';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <ChakraProvider theme={system.theme}>
-      {children}
-    </ChakraProvider>
-  );
+  return <ChakraProvider theme={system.theme}>{children}</ChakraProvider>;
 }

@@ -68,7 +68,8 @@ const mockProfile: UserProfile = {
   specialty: 'Psicología Clínica',
   licenseNumber: 'PSI-12345',
   bio: 'Psicóloga clínica especializada en terapia cognitivo-conductual con más de 10 años de experiencia. Enfoque en ansiedad, depresión y trastornos del estado de ánimo.',
-  avatarUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200',
+  avatarUrl:
+    'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200',
   notificationsEnabled: true,
   createdAt: new Date('2023-01-15'),
   updatedAt: new Date('2024-12-20'),
@@ -88,7 +89,12 @@ export default function ProfilePage() {
       therapist: { label: 'Terapeuta', color: 'blue' },
       assistant: { label: 'Asistente', color: 'green' },
     };
-    return roleConfig[role as keyof typeof roleConfig] || { label: role, color: 'gray' };
+    return (
+      roleConfig[role as keyof typeof roleConfig] || {
+        label: role,
+        color: 'gray',
+      }
+    );
   };
 
   const handleProfileUpdate = (updatedProfile: Partial<UserProfile>) => {
@@ -108,7 +114,9 @@ export default function ProfilePage() {
                   Mi Perfil
                 </Heading>
               </HStack>
-              <Text color="gray.600">Gestiona tu información personal y preferencias</Text>
+              <Text color="gray.600">
+                Gestiona tu información personal y preferencias
+              </Text>
             </Box>
           </Flex>
 
@@ -256,7 +264,12 @@ export default function ProfilePage() {
                   <TabPanel>
                     <VStack spacing={6} align="stretch">
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Nombre Completo
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -267,7 +280,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Correo Electrónico
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -278,7 +296,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Teléfono
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -289,7 +312,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Última Actualización
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -305,7 +333,12 @@ export default function ProfilePage() {
                   <TabPanel>
                     <VStack spacing={6} align="stretch">
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Especialidad
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -316,7 +349,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Número de Cédula Profesional
                         </Text>
                         <Text fontSize="md" color="gray.800">
@@ -327,7 +365,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Biografía Profesional
                         </Text>
                         <Text fontSize="md" color="gray.700" lineHeight="tall">
@@ -338,7 +381,12 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="sm" fontWeight="semibold" color="gray.600" mb={2}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="gray.600"
+                          mb={2}
+                        >
                           Rol en el Sistema
                         </Text>
                         <Badge
@@ -359,7 +407,12 @@ export default function ProfilePage() {
                       <Box>
                         <HStack justify="space-between">
                           <Box>
-                            <Text fontSize="md" fontWeight="semibold" color="gray.800" mb={1}>
+                            <Text
+                              fontSize="md"
+                              fontWeight="semibold"
+                              color="gray.800"
+                              mb={1}
+                            >
                               Notificaciones por Email
                             </Text>
                             <Text fontSize="sm" color="gray.600">
@@ -367,12 +420,16 @@ export default function ProfilePage() {
                             </Text>
                           </Box>
                           <Badge
-                            colorScheme={profile.notificationsEnabled ? 'green' : 'gray'}
+                            colorScheme={
+                              profile.notificationsEnabled ? 'green' : 'gray'
+                            }
                             fontSize="sm"
                             px={3}
                             py={1}
                           >
-                            {profile.notificationsEnabled ? 'Activadas' : 'Desactivadas'}
+                            {profile.notificationsEnabled
+                              ? 'Activadas'
+                              : 'Desactivadas'}
                           </Badge>
                         </HStack>
                       </Box>
@@ -381,7 +438,8 @@ export default function ProfilePage() {
 
                       <Box>
                         <Text fontSize="sm" color="gray.600">
-                          Más opciones de preferencias estarán disponibles próximamente.
+                          Más opciones de preferencias estarán disponibles
+                          próximamente.
                         </Text>
                       </Box>
                     </VStack>
@@ -391,11 +449,17 @@ export default function ProfilePage() {
                   <TabPanel>
                     <VStack spacing={6} align="stretch">
                       <Box>
-                        <Text fontSize="md" fontWeight="semibold" color="gray.800" mb={3}>
+                        <Text
+                          fontSize="md"
+                          fontWeight="semibold"
+                          color="gray.800"
+                          mb={3}
+                        >
                           Contraseña
                         </Text>
                         <Text fontSize="sm" color="gray.600" mb={4}>
-                          Cambia tu contraseña regularmente para mantener tu cuenta segura.
+                          Cambia tu contraseña regularmente para mantener tu
+                          cuenta segura.
                         </Text>
                         <Button
                           leftIcon={<Lock size={16} />}
@@ -411,25 +475,39 @@ export default function ProfilePage() {
                       <Divider />
 
                       <Box>
-                        <Text fontSize="md" fontWeight="semibold" color="gray.800" mb={2}>
+                        <Text
+                          fontSize="md"
+                          fontWeight="semibold"
+                          color="gray.800"
+                          mb={2}
+                        >
                           Sesión Activa
                         </Text>
                         <Text fontSize="sm" color="gray.600">
-                          Tu sesión está protegida y expirará automáticamente después de un
-                          período de inactividad.
+                          Tu sesión está protegida y expirará automáticamente
+                          después de un período de inactividad.
                         </Text>
                       </Box>
 
                       <Divider />
 
                       <Box>
-                        <Text fontSize="md" fontWeight="semibold" color="gray.800" mb={2}>
+                        <Text
+                          fontSize="md"
+                          fontWeight="semibold"
+                          color="gray.800"
+                          mb={2}
+                        >
                           Cuenta Creada
                         </Text>
                         <Text fontSize="sm" color="gray.600">
-                          {format(profile.createdAt, "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", {
-                            locale: es,
-                          })}
+                          {format(
+                            profile.createdAt,
+                            "dd 'de' MMMM 'de' yyyy 'a las' HH:mm",
+                            {
+                              locale: es,
+                            },
+                          )}
                         </Text>
                       </Box>
                     </VStack>

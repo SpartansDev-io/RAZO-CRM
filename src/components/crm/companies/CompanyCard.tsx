@@ -18,7 +18,21 @@ import {
   MenuList,
   MenuItem,
 } from '@chakra-ui/react';
-import { Building2, Users, Mail, Phone, Globe, MapPin, Briefcase, Eye, CreditCard as Edit, Trash2, MoveVertical as MoreVertical, UserPlus, FileText } from 'lucide-react';
+import {
+  Building2,
+  Users,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  Briefcase,
+  Eye,
+  CreditCard as Edit,
+  Trash2,
+  MoveVertical as MoreVertical,
+  UserPlus,
+  FileText,
+} from 'lucide-react';
 
 interface CompanyCardProps {
   id: string;

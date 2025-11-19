@@ -9,36 +9,38 @@ export class AuthService {
   /**
    * Authenticate user credentials
    */
-  async authenticateUser(credentials: ILoginRequest): Promise<{ user: IUser; token: string } | null> {
+  async authenticateUser(
+    credentials: ILoginRequest,
+  ): Promise<{ user: IUser; token: string } | null> {
     try {
       // Find user by email
-      const userProfile = await prisma.userProfile.findUnique({
+      const user = await prisma.userProfile.findUnique({
         where: {
           email: credentials.email,
-        }
+        },
       });
 
-      if (!userProfile || !userProfile.isActive) {
+      if (!user || !user.isActive) return null;
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(
+        credentials.password,
+        user.passwordHash,
+      );
+      if (!isValidPassword) {
         return null;
       }
 
       // Generate JWT token
-      const token = this.generateToken(userProfile);
+      const token = this.generateToken(user);
+
+      // Return user without password hash
+      const { passwordHash: _ignored, ...userWithoutPassword } = user;
 
       // Return user data
       return {
-        user: {
-          id: userProfile.id,
-          email: userProfile.email,
-          fullName: userProfile.fullName,
-          phone: userProfile.phone,
-          roleId: '',
-          role: userProfile.role as any,
-          isActive: userProfile.isActive,
-          createdAt: userProfile.createdAt,
-          updatedAt: userProfile.updatedAt,
-        } as IUser,
-        token
+        user: userWithoutPassword as IUser,
+        token,
       };
     } catch (error) {
       console.error('Authentication error:', error);
@@ -54,20 +56,20 @@ export class AuthService {
       {
         userId: userProfile.id,
         email: userProfile.email,
-        role: userProfile.role
+        roleId: userProfile.roleId,
       },
       this.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '24h' },
     );
   }
 
   /**
    * Verify JWT token
    */
-  verifyToken(token: string): any {
+  verifyToken(token: string): string | jwt.JwtPayload | null {
     try {
       return jwt.verify(token, this.JWT_SECRET);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

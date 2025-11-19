@@ -39,15 +39,16 @@ export default function StatisticsCard({
     <Card bg={bg} shadow="sm" borderRadius="lg">
       <CardBody>
         <Stat>
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={2}
+          >
             <StatLabel fontSize="sm" color="gray.600" fontWeight="medium">
               {title}
             </StatLabel>
-            <Box
-              p={2}
-              borderRadius="lg"
-              bg={iconBg}
-            >
+            <Box p={2} borderRadius="lg" bg={iconBg}>
               <Icon as={icon} boxSize={5} color={iconColor} />
             </Box>
           </Box>

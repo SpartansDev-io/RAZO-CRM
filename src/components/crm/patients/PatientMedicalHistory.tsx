@@ -75,19 +75,22 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       sessionType: 'Terapia Individual',
       duration: 60,
       therapistName: 'Dr. María González',
-      sessionNotes: 'La paciente mostró una actitud muy positiva durante la sesión. Continuamos trabajando en técnicas de manejo de ansiedad. Se observa una mejora significativa en la aplicación de técnicas de respiración profunda. La paciente reporta menos episodios de ansiedad durante la semana.',
+      sessionNotes:
+        'La paciente mostró una actitud muy positiva durante la sesión. Continuamos trabajando en técnicas de manejo de ansiedad. Se observa una mejora significativa en la aplicación de técnicas de respiración profunda. La paciente reporta menos episodios de ansiedad durante la semana.',
       objectives: [
         'Reducir niveles de ansiedad generalizada',
         'Mejorar técnicas de relajación',
-        'Fortalecer autoestima'
+        'Fortalecer autoestima',
       ],
       techniques: [
         'Respiración diafragmática',
         'Reestructuración cognitiva',
-        'Mindfulness'
+        'Mindfulness',
       ],
-      homework: 'Practicar ejercicios de respiración 10 minutos diarios. Llevar registro de pensamientos automáticos negativos.',
-      nextSessionPlan: 'Revisar registro de pensamientos. Introducir técnicas de exposición gradual.',
+      homework:
+        'Practicar ejercicios de respiración 10 minutos diarios. Llevar registro de pensamientos automáticos negativos.',
+      nextSessionPlan:
+        'Revisar registro de pensamientos. Introducir técnicas de exposición gradual.',
       patientMood: 'good',
       progress: 'moderate',
       paymentInfo: {
@@ -105,19 +108,22 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       sessionType: 'Evaluación de Seguimiento',
       duration: 90,
       therapistName: 'Dr. María González',
-      sessionNotes: 'Evaluación mensual del progreso terapéutico. La paciente ha mostrado avances consistentes en el manejo de situaciones estresantes. Se aplicaron escalas de evaluación de ansiedad y depresión. Los resultados muestran una reducción del 40% en los niveles de ansiedad comparado con la evaluación inicial.',
+      sessionNotes:
+        'Evaluación mensual del progreso terapéutico. La paciente ha mostrado avances consistentes en el manejo de situaciones estresantes. Se aplicaron escalas de evaluación de ansiedad y depresión. Los resultados muestran una reducción del 40% en los niveles de ansiedad comparado con la evaluación inicial.',
       objectives: [
         'Evaluar progreso terapéutico',
         'Ajustar plan de tratamiento',
-        'Establecer nuevas metas'
+        'Establecer nuevas metas',
       ],
       techniques: [
         'Entrevista clínica estructurada',
         'Escalas de evaluación',
-        'Análisis funcional'
+        'Análisis funcional',
       ],
-      homework: 'Completar cuestionario de seguimiento semanal. Continuar con técnicas aprendidas.',
-      nextSessionPlan: 'Trabajar en situaciones específicas de exposición social.',
+      homework:
+        'Completar cuestionario de seguimiento semanal. Continuar con técnicas aprendidas.',
+      nextSessionPlan:
+        'Trabajar en situaciones específicas de exposición social.',
       patientMood: 'good',
       progress: 'significant',
       paymentInfo: {
@@ -135,19 +141,22 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       sessionType: 'Terapia Individual',
       duration: 60,
       therapistName: 'Dr. María González',
-      sessionNotes: 'Primera sesión del mes. La paciente llegó con mayor energía y motivación. Trabajamos en identificar patrones de pensamiento negativos y su impacto en el estado emocional. Se establecieron nuevos objetivos terapéuticos para el próximo mes.',
+      sessionNotes:
+        'Primera sesión del mes. La paciente llegó con mayor energía y motivación. Trabajamos en identificar patrones de pensamiento negativos y su impacto en el estado emocional. Se establecieron nuevos objetivos terapéuticos para el próximo mes.',
       objectives: [
         'Identificar patrones de pensamiento',
         'Establecer rutinas saludables',
-        'Mejorar comunicación interpersonal'
+        'Mejorar comunicación interpersonal',
       ],
       techniques: [
         'Registro de pensamientos',
         'Técnicas de comunicación asertiva',
-        'Planificación de actividades'
+        'Planificación de actividades',
       ],
-      homework: 'Implementar rutina matutina. Practicar comunicación asertiva en situaciones cotidianas.',
-      nextSessionPlan: 'Revisar implementación de rutinas. Trabajar en habilidades sociales.',
+      homework:
+        'Implementar rutina matutina. Practicar comunicación asertiva en situaciones cotidianas.',
+      nextSessionPlan:
+        'Revisar implementación de rutinas. Trabajar en habilidades sociales.',
       patientMood: 'excellent',
       progress: 'moderate',
       paymentInfo: {
@@ -163,19 +172,22 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
       sessionType: 'Terapia Individual',
       duration: 60,
       therapistName: 'Dr. María González',
-      sessionNotes: 'Sesión enfocada en el procesamiento de eventos estresantes recientes en el trabajo. La paciente mostró buena capacidad de insight y disposición para aplicar las estrategias aprendidas. Se trabajó intensivamente en técnicas de afrontamiento.',
+      sessionNotes:
+        'Sesión enfocada en el procesamiento de eventos estresantes recientes en el trabajo. La paciente mostró buena capacidad de insight y disposición para aplicar las estrategias aprendidas. Se trabajó intensivamente en técnicas de afrontamiento.',
       objectives: [
         'Procesar eventos estresantes',
         'Desarrollar estrategias de afrontamiento',
-        'Fortalecer resiliencia'
+        'Fortalecer resiliencia',
       ],
       techniques: [
         'Procesamiento emocional',
         'Técnicas de afrontamiento',
-        'Reevaluación cognitiva'
+        'Reevaluación cognitiva',
       ],
-      homework: 'Aplicar técnicas de afrontamiento en situaciones laborales. Mantener diario emocional.',
-      nextSessionPlan: 'Evaluar efectividad de estrategias aplicadas. Reforzar técnicas exitosas.',
+      homework:
+        'Aplicar técnicas de afrontamiento en situaciones laborales. Mantener diario emocional.',
+      nextSessionPlan:
+        'Evaluar efectividad de estrategias aplicadas. Reforzar técnicas exitosas.',
       patientMood: 'neutral',
       progress: 'moderate',
       paymentInfo: {
@@ -189,18 +201,24 @@ const getMockMedicalRecords = (patientId: string): MedicalRecord[] => {
   ];
 };
 
-export default function PatientMedicalHistory({ patientId }: PatientMedicalHistoryProps) {
+export default function PatientMedicalHistory({
+  patientId,
+}: PatientMedicalHistoryProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
-  const [selectedSessionForPayment, setSelectedSessionForPayment] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(
+    null,
+  );
+  const [selectedSessionForPayment, setSelectedSessionForPayment] = useState<
+    string | null
+  >(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isPaymentOpen,
     onOpen: onPaymentOpen,
-    onClose: onPaymentClose
+    onClose: onPaymentClose,
   } = useDisclosure();
-  
+
   const bg = useColorModeValue('white', 'gray.800');
   const cardBg = useColorModeValue('gray.50', 'gray.700');
 
@@ -208,45 +226,69 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
 
   const getMoodColor = (mood: string) => {
     switch (mood) {
-      case 'excellent': return 'green';
-      case 'good': return 'blue';
-      case 'neutral': return 'yellow';
-      case 'poor': return 'orange';
-      case 'very_poor': return 'red';
-      default: return 'gray';
+      case 'excellent':
+        return 'green';
+      case 'good':
+        return 'blue';
+      case 'neutral':
+        return 'yellow';
+      case 'poor':
+        return 'orange';
+      case 'very_poor':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getMoodText = (mood: string) => {
     switch (mood) {
-      case 'excellent': return 'Excelente';
-      case 'good': return 'Bueno';
-      case 'neutral': return 'Neutral';
-      case 'poor': return 'Malo';
-      case 'very_poor': return 'Muy Malo';
-      default: return 'No especificado';
+      case 'excellent':
+        return 'Excelente';
+      case 'good':
+        return 'Bueno';
+      case 'neutral':
+        return 'Neutral';
+      case 'poor':
+        return 'Malo';
+      case 'very_poor':
+        return 'Muy Malo';
+      default:
+        return 'No especificado';
     }
   };
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
-      case 'significant': return 'green';
-      case 'moderate': return 'blue';
-      case 'minimal': return 'yellow';
-      case 'none': return 'gray';
-      case 'regression': return 'red';
-      default: return 'gray';
+      case 'significant':
+        return 'green';
+      case 'moderate':
+        return 'blue';
+      case 'minimal':
+        return 'yellow';
+      case 'none':
+        return 'gray';
+      case 'regression':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getProgressText = (progress: string) => {
     switch (progress) {
-      case 'significant': return 'Significativo';
-      case 'moderate': return 'Moderado';
-      case 'minimal': return 'Mínimo';
-      case 'none': return 'Sin cambios';
-      case 'regression': return 'Retroceso';
-      default: return 'No evaluado';
+      case 'significant':
+        return 'Significativo';
+      case 'moderate':
+        return 'Moderado';
+      case 'minimal':
+        return 'Mínimo';
+      case 'none':
+        return 'Sin cambios';
+      case 'regression':
+        return 'Retroceso';
+      default:
+        return 'No evaluado';
     }
   };
 
@@ -314,15 +356,22 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                       <VStack spacing={1} align="start">
                         <HStack spacing={2}>
                           <Calendar size={16} color="#3182CE" />
-                          <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-                            {format(record.sessionDate, 'dd MMMM yyyy', { locale: es })}
+                          <Text
+                            fontSize="lg"
+                            fontWeight="semibold"
+                            color="gray.800"
+                          >
+                            {format(record.sessionDate, 'dd MMMM yyyy', {
+                              locale: es,
+                            })}
                           </Text>
                         </HStack>
                         <HStack spacing={4}>
                           <HStack spacing={1}>
                             <Clock size={14} color="#718096" />
                             <Text fontSize="sm" color="gray.600">
-                              {format(record.sessionDate, 'HH:mm')} ({record.duration} min)
+                              {format(record.sessionDate, 'HH:mm')} (
+                              {record.duration} min)
                             </Text>
                           </HStack>
                           <HStack spacing={1}>
@@ -334,7 +383,7 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                         </HStack>
                       </VStack>
                     </HStack>
-                    
+
                     <HStack spacing={2}>
                       <Badge
                         colorScheme={getMoodColor(record.patientMood)}
@@ -366,7 +415,12 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
 
                   {/* Session Notes */}
                   <Box>
-                    <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="semibold"
+                      color="gray.700"
+                      mb={2}
+                    >
                       Notas de la Sesión:
                     </Text>
                     <Text fontSize="sm" color="gray.600" lineHeight="1.6">
@@ -375,9 +429,17 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                   </Box>
 
                   {/* Objectives and Techniques */}
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                  <Grid
+                    templateColumns={{ base: '1fr', md: '1fr 1fr' }}
+                    gap={4}
+                  >
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        color="gray.700"
+                        mb={2}
+                      >
                         Objetivos Trabajados:
                       </Text>
                       <VStack spacing={1} align="stretch">
@@ -388,9 +450,14 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                         ))}
                       </VStack>
                     </Box>
-                    
+
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        color="gray.700"
+                        mb={2}
+                      >
                         Técnicas Utilizadas:
                       </Text>
                       <VStack spacing={1} align="stretch">
@@ -407,13 +474,25 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                   {(record.homework || record.nextSessionPlan) && (
                     <>
                       <Divider />
-                      <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                      <Grid
+                        templateColumns={{ base: '1fr', md: '1fr 1fr' }}
+                        gap={4}
+                      >
                         {record.homework && (
                           <Box>
-                            <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              color="gray.700"
+                              mb={2}
+                            >
                               Tareas Asignadas:
                             </Text>
-                            <Text fontSize="xs" color="gray.600" lineHeight="1.5">
+                            <Text
+                              fontSize="xs"
+                              color="gray.600"
+                              lineHeight="1.5"
+                            >
                               {record.homework}
                             </Text>
                           </Box>
@@ -421,10 +500,19 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
 
                         {record.nextSessionPlan && (
                           <Box>
-                            <Text fontSize="sm" fontWeight="semibold" color="gray.700" mb={2}>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              color="gray.700"
+                              mb={2}
+                            >
                               Plan Próxima Sesión:
                             </Text>
-                            <Text fontSize="xs" color="gray.600" lineHeight="1.5">
+                            <Text
+                              fontSize="xs"
+                              color="gray.600"
+                              lineHeight="1.5"
+                            >
                               {record.nextSessionPlan}
                             </Text>
                           </Box>
@@ -444,29 +532,37 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                           record.paymentInfo.paymentStatus === 'paid'
                             ? 'green.50'
                             : record.paymentInfo.paymentStatus === 'partial'
-                            ? 'orange.50'
-                            : 'red.50'
+                              ? 'orange.50'
+                              : 'red.50'
                         }
                         borderWidth="1px"
                         borderColor={
                           record.paymentInfo.paymentStatus === 'paid'
                             ? 'green.200'
                             : record.paymentInfo.paymentStatus === 'partial'
-                            ? 'orange.200'
-                            : 'red.200'
+                              ? 'orange.200'
+                              : 'red.200'
                         }
                       >
                         <VStack spacing={2} align="stretch">
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <DollarSign size={16} color={
-                                record.paymentInfo.paymentStatus === 'paid'
-                                  ? '#38A169'
-                                  : record.paymentInfo.paymentStatus === 'partial'
-                                  ? '#DD6B20'
-                                  : '#E53E3E'
-                              } />
-                              <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                              <DollarSign
+                                size={16}
+                                color={
+                                  record.paymentInfo.paymentStatus === 'paid'
+                                    ? '#38A169'
+                                    : record.paymentInfo.paymentStatus ===
+                                        'partial'
+                                      ? '#DD6B20'
+                                      : '#E53E3E'
+                                }
+                              />
+                              <Text
+                                fontSize="sm"
+                                fontWeight="semibold"
+                                color="gray.700"
+                              >
                                 Información de Pago
                               </Text>
                             </HStack>
@@ -474,9 +570,10 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                               colorScheme={
                                 record.paymentInfo.paymentStatus === 'paid'
                                   ? 'green'
-                                  : record.paymentInfo.paymentStatus === 'partial'
-                                  ? 'orange'
-                                  : 'red'
+                                  : record.paymentInfo.paymentStatus ===
+                                      'partial'
+                                    ? 'orange'
+                                    : 'red'
                               }
                               variant="solid"
                               fontSize="xs"
@@ -487,13 +584,15 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                                   <Text>Pagado</Text>
                                 </HStack>
                               )}
-                              {record.paymentInfo.paymentStatus === 'partial' && (
+                              {record.paymentInfo.paymentStatus ===
+                                'partial' && (
                                 <HStack spacing={1}>
                                   <AlertCircle size={12} />
                                   <Text>Pago Parcial</Text>
                                 </HStack>
                               )}
-                              {record.paymentInfo.paymentStatus === 'pending' && (
+                              {record.paymentInfo.paymentStatus ===
+                                'pending' && (
                                 <HStack spacing={1}>
                                   <AlertCircle size={12} />
                                   <Text>Pendiente</Text>
@@ -502,11 +601,20 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                             </Badge>
                           </HStack>
 
-                          <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={3} fontSize="xs">
+                          <Grid
+                            templateColumns={{
+                              base: '1fr',
+                              md: 'repeat(3, 1fr)',
+                            }}
+                            gap={3}
+                            fontSize="xs"
+                          >
                             <HStack justify="space-between">
                               <Text color="gray.600">Costo de sesión:</Text>
                               <Text fontWeight="bold" color="gray.800">
-                                ${record.paymentInfo.sessionCost.toLocaleString()} MXN
+                                $
+                                {record.paymentInfo.sessionCost.toLocaleString()}{' '}
+                                MXN
                               </Text>
                             </HStack>
 
@@ -517,12 +625,15 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                                 color={
                                   record.paymentInfo.paymentStatus === 'paid'
                                     ? 'green.600'
-                                    : record.paymentInfo.paymentStatus === 'partial'
-                                    ? 'orange.600'
-                                    : 'gray.600'
+                                    : record.paymentInfo.paymentStatus ===
+                                        'partial'
+                                      ? 'orange.600'
+                                      : 'gray.600'
                                 }
                               >
-                                ${record.paymentInfo.paidAmount.toLocaleString()} MXN
+                                $
+                                {record.paymentInfo.paidAmount.toLocaleString()}{' '}
+                                MXN
                               </Text>
                             </HStack>
 
@@ -530,28 +641,42 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                               <HStack justify="space-between">
                                 <Text color="gray.600">Adeudo:</Text>
                                 <Text fontWeight="bold" color="red.600">
-                                  ${(record.paymentInfo.sessionCost - record.paymentInfo.paidAmount).toLocaleString()} MXN
+                                  $
+                                  {(
+                                    record.paymentInfo.sessionCost -
+                                    record.paymentInfo.paidAmount
+                                  ).toLocaleString()}{' '}
+                                  MXN
                                 </Text>
                               </HStack>
                             )}
                           </Grid>
 
-                          {record.paymentInfo.paymentMethod && record.paymentInfo.paymentMethod !== 'none' && (
-                            <HStack spacing={2} fontSize="xs">
-                              <Text color="gray.600">Método:</Text>
-                              <Badge colorScheme="blue" variant="subtle">
-                                {record.paymentInfo.paymentMethod === 'transfer' ? 'Transferencia' : 'Efectivo'}
-                              </Badge>
-                              {record.paymentInfo.paymentDate && (
-                                <>
-                                  <Text color="gray.600">•</Text>
-                                  <Text color="gray.600">
-                                    Pagado: {format(record.paymentInfo.paymentDate, 'dd/MM/yyyy HH:mm', { locale: es })}
-                                  </Text>
-                                </>
-                              )}
-                            </HStack>
-                          )}
+                          {record.paymentInfo.paymentMethod &&
+                            record.paymentInfo.paymentMethod !== 'none' && (
+                              <HStack spacing={2} fontSize="xs">
+                                <Text color="gray.600">Método:</Text>
+                                <Badge colorScheme="blue" variant="subtle">
+                                  {record.paymentInfo.paymentMethod ===
+                                  'transfer'
+                                    ? 'Transferencia'
+                                    : 'Efectivo'}
+                                </Badge>
+                                {record.paymentInfo.paymentDate && (
+                                  <>
+                                    <Text color="gray.600">•</Text>
+                                    <Text color="gray.600">
+                                      Pagado:{' '}
+                                      {format(
+                                        record.paymentInfo.paymentDate,
+                                        'dd/MM/yyyy HH:mm',
+                                        { locale: es },
+                                      )}
+                                    </Text>
+                                  </>
+                                )}
+                              </HStack>
+                            )}
 
                           {record.paymentInfo.paymentNotes && (
                             <HStack spacing={2} fontSize="xs">
@@ -569,20 +694,21 @@ export default function PatientMedicalHistory({ patientId }: PatientMedicalHisto
                   {/* Actions */}
                   <HStack spacing={2} justify="space-between" pt={2}>
                     <Box>
-                      {record.paymentInfo && record.paymentInfo.paymentStatus !== 'paid' && (
-                        <Button
-                          leftIcon={<DollarSign size={14} />}
-                          size="sm"
-                          colorScheme="orange"
-                          variant="solid"
-                          onClick={() => {
-                            setSelectedSessionForPayment(record.id);
-                            onPaymentOpen();
-                          }}
-                        >
-                          Registrar Pago
-                        </Button>
-                      )}
+                      {record.paymentInfo &&
+                        record.paymentInfo.paymentStatus !== 'paid' && (
+                          <Button
+                            leftIcon={<DollarSign size={14} />}
+                            size="sm"
+                            colorScheme="orange"
+                            variant="solid"
+                            onClick={() => {
+                              setSelectedSessionForPayment(record.id);
+                              onPaymentOpen();
+                            }}
+                          >
+                            Registrar Pago
+                          </Button>
+                        )}
                     </Box>
                     <HStack spacing={2}>
                       <IconButton
