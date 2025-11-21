@@ -15,13 +15,7 @@ import {
   Badge,
   useColorModeValue,
 } from '@chakra-ui/react';
-import {
-  Bell,
-  Settings,
-  LogOut,
-  User,
-  Menu as MenuIcon,
-} from 'lucide-react';
+import { Bell, Settings, LogOut, User, Menu as MenuIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDashboardStore } from '@/stores/dashboard.store';
 
@@ -35,7 +29,7 @@ export default function TopBar() {
   const user = {
     firstName: 'Dr. María',
     lastName: 'González',
-    role: { name: 'Psicólogo' }
+    role: { name: 'Psicólogo' },
   };
 
   const handleProfileClick = () => {

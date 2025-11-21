@@ -24,7 +24,15 @@ import {
   Td,
   Badge,
 } from '@chakra-ui/react';
-import { FileText, Calendar, DollarSign, Users, CheckCircle, Clock, Download } from 'lucide-react';
+import {
+  FileText,
+  Calendar,
+  DollarSign,
+  Users,
+  CheckCircle,
+  Clock,
+  Download,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -134,7 +142,10 @@ export default function ViewMonthlyReportModal({
         <ModalHeader>
           <HStack spacing={2}>
             <FileText size={24} color="#3182CE" />
-            <Text>Reporte Mensual - {getMonthName(report.reportMonth)} {report.reportYear}</Text>
+            <Text>
+              Reporte Mensual - {getMonthName(report.reportMonth)}{' '}
+              {report.reportYear}
+            </Text>
           </HStack>
         </ModalHeader>
         <ModalCloseButton />
@@ -142,7 +153,13 @@ export default function ViewMonthlyReportModal({
         <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
           <VStack spacing={6} align="stretch">
             {/* Company and Contract Info */}
-            <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+            <Box
+              p={4}
+              bg="blue.50"
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="blue.200"
+            >
               <VStack spacing={2} align="stretch">
                 <HStack justify="space-between">
                   <Text fontSize="sm" fontWeight="semibold" color="gray.700">
@@ -174,10 +191,13 @@ export default function ViewMonthlyReportModal({
             {/* Status Badge */}
             <HStack justify="space-between">
               <Text fontSize="sm" color="gray.600">
-                Generado el: {format(report.generatedAt, 'dd/MM/yyyy HH:mm', { locale: es })}
+                Generado el:{' '}
+                {format(report.generatedAt, 'dd/MM/yyyy HH:mm', { locale: es })}
               </Text>
               <Badge
-                colorScheme={report.paymentStatus === 'paid' ? 'green' : 'orange'}
+                colorScheme={
+                  report.paymentStatus === 'paid' ? 'green' : 'orange'
+                }
                 variant="solid"
                 fontSize="sm"
                 px={3}
@@ -191,7 +211,12 @@ export default function ViewMonthlyReportModal({
 
             {/* Summary Cards */}
             <HStack spacing={4}>
-              <Card flex="1" bg="green.50" borderWidth="1px" borderColor="green.200">
+              <Card
+                flex="1"
+                bg="green.50"
+                borderWidth="1px"
+                borderColor="green.200"
+              >
                 <CardBody>
                   <VStack spacing={2}>
                     <HStack spacing={2}>
@@ -207,7 +232,12 @@ export default function ViewMonthlyReportModal({
                 </CardBody>
               </Card>
 
-              <Card flex="1" bg="blue.50" borderWidth="1px" borderColor="blue.200">
+              <Card
+                flex="1"
+                bg="blue.50"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <CardBody>
                   <VStack spacing={2}>
                     <HStack spacing={2}>
@@ -223,7 +253,12 @@ export default function ViewMonthlyReportModal({
                 </CardBody>
               </Card>
 
-              <Card flex="1" bg="orange.50" borderWidth="1px" borderColor="orange.200">
+              <Card
+                flex="1"
+                bg="orange.50"
+                borderWidth="1px"
+                borderColor="orange.200"
+              >
                 <CardBody>
                   <VStack spacing={2}>
                     <HStack spacing={2}>
@@ -244,8 +279,19 @@ export default function ViewMonthlyReportModal({
             {report.paymentStatus === 'paid' && report.paidAt && (
               <>
                 <Divider />
-                <Box p={4} bg="green.50" borderRadius="md" borderWidth="1px" borderColor="green.200">
-                  <Text fontSize="md" fontWeight="semibold" mb={3} color="green.800">
+                <Box
+                  p={4}
+                  bg="green.50"
+                  borderRadius="md"
+                  borderWidth="1px"
+                  borderColor="green.200"
+                >
+                  <Text
+                    fontSize="md"
+                    fontWeight="semibold"
+                    mb={3}
+                    color="green.800"
+                  >
                     <HStack spacing={2}>
                       <CheckCircle size={20} />
                       <Text>Información de Pago</Text>
@@ -257,7 +303,9 @@ export default function ViewMonthlyReportModal({
                         Fecha de pago:
                       </Text>
                       <Text fontSize="sm" fontWeight="medium">
-                        {format(report.paidAt, 'dd/MM/yyyy HH:mm', { locale: es })}
+                        {format(report.paidAt, 'dd/MM/yyyy HH:mm', {
+                          locale: es,
+                        })}
                       </Text>
                     </HStack>
                     {report.paymentMethod && (
@@ -323,7 +371,9 @@ export default function ViewMonthlyReportModal({
                         <Td>
                           <VStack spacing={0} align="start">
                             <Text fontSize="sm">
-                              {format(session.sessionDate, 'dd MMM yyyy', { locale: es })}
+                              {format(session.sessionDate, 'dd MMM yyyy', {
+                                locale: es,
+                              })}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
                               {format(session.sessionDate, 'HH:mm')}
@@ -336,7 +386,11 @@ export default function ViewMonthlyReportModal({
                           </Text>
                         </Td>
                         <Td isNumeric>
-                          <Text fontSize="sm" fontWeight="medium" color="green.600">
+                          <Text
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="green.600"
+                          >
                             ${session.sessionCost.toLocaleString()}
                           </Text>
                         </Td>
@@ -351,9 +405,16 @@ export default function ViewMonthlyReportModal({
             <Box p={4} bg="gray.50" borderRadius="md" borderWidth="1px">
               <HStack justify="space-between">
                 <Text fontSize="md" fontWeight="semibold" color="gray.700">
-                  Total {report.paymentStatus === 'paid' ? 'Pagado' : 'a Cobrar'}:
+                  Total{' '}
+                  {report.paymentStatus === 'paid' ? 'Pagado' : 'a Cobrar'}:
                 </Text>
-                <Text fontSize="2xl" fontWeight="bold" color={report.paymentStatus === 'paid' ? 'green.600' : 'orange.600'}>
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  color={
+                    report.paymentStatus === 'paid' ? 'green.600' : 'orange.600'
+                  }
+                >
                   ${report.totalAmount.toLocaleString()} MXN
                 </Text>
               </HStack>

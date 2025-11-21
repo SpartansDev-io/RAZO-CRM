@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Box,
-  HStack,
-  Text,
-  Icon,
-  useColorModeValue,
-} from '@chakra-ui/react';
+import { Box, HStack, Text, Icon, useColorModeValue } from '@chakra-ui/react';
 import type { LucideIcon } from 'lucide-react';
 
 interface QuickActionButtonProps {

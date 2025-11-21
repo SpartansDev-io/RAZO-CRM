@@ -7,14 +7,14 @@ export interface IRole {
 
 export interface IUser {
   id: string;
-  roleId: string;
+  roleId?: string;
   email: string;
   fullName: string;
   phone?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  role?: IRole;
+  role?: IRole | string;
 }
 
 export interface ILoginRequest {

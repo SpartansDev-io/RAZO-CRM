@@ -3,9 +3,21 @@ import { prisma } from '@/modules/shared/infrastructure/database/prisma';
 export async function GET() {
   try {
     const currentDate = new Date();
-    const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+    const currentMonthStart = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+    );
+    const lastMonthStart = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1,
+    );
+    const lastMonthEnd = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      0,
+    );
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -26,9 +38,14 @@ export async function GET() {
       },
     });
 
-    const patientsChange = lastMonthPatientsCount > 0
-      ? (((activePatientsCount - lastMonthPatientsCount) / lastMonthPatientsCount) * 100).toFixed(1)
-      : '0';
+    const patientsChange =
+      lastMonthPatientsCount > 0
+        ? (
+            ((activePatientsCount - lastMonthPatientsCount) /
+              lastMonthPatientsCount) *
+            100
+          ).toFixed(1)
+        : '0';
 
     // 2️⃣ Citas de hoy
     const todayStart = new Date(currentDate);
@@ -61,7 +78,8 @@ export async function GET() {
       },
     });
 
-    const appointmentsChange = appointmentsTodayCount - yesterdayAppointmentsCount;
+    const appointmentsChange =
+      appointmentsTodayCount - yesterdayAppointmentsCount;
 
     // 3️⃣ Ingresos del mes actual
     const revenueThisMonth = await prisma.session.aggregate({
@@ -85,9 +103,14 @@ export async function GET() {
     const revenueThisMonthValue = revenueThisMonth._sum.sessionCost || 0;
     const revenueLastMonthValue = revenueLastMonth._sum.sessionCost || 0;
 
-    const revenueChange = Number(revenueLastMonthValue) > 0
-      ? ((Number(revenueThisMonthValue) - Number(revenueLastMonthValue)) / Number(revenueLastMonthValue) * 100).toFixed(1)
-      : '0';
+    const revenueChange =
+      Number(revenueLastMonthValue) > 0
+        ? (
+            ((Number(revenueThisMonthValue) - Number(revenueLastMonthValue)) /
+              Number(revenueLastMonthValue)) *
+            100
+          ).toFixed(1)
+        : '0';
 
     // 4️⃣ Tasa de asistencia últimos 30 días
     const attendanceData = await prisma.session.findMany({
@@ -102,10 +125,13 @@ export async function GET() {
     type SessionStatusOnly = { status: string };
 
     const totalSessionsLast30Days = attendanceData.length;
-    const completedSessions = attendanceData.filter((s: SessionStatusOnly) => s.status === 'completed').length;
-    const attendanceRate = totalSessionsLast30Days > 0
-      ? ((completedSessions / totalSessionsLast30Days) * 100).toFixed(1)
-      : '0';
+    const completedSessions = attendanceData.filter(
+      (s: SessionStatusOnly) => s.status === 'completed',
+    ).length;
+    const attendanceRate =
+      totalSessionsLast30Days > 0
+        ? ((completedSessions / totalSessionsLast30Days) * 100).toFixed(1)
+        : '0';
 
     // Tasa de asistencia período anterior (30-60 días atrás)
     const sixtyDaysAgo = new Date();
@@ -121,12 +147,17 @@ export async function GET() {
     });
 
     const previousTotalSessions = previousAttendanceData.length;
-    const previousCompletedSessions = previousAttendanceData.filter((s: SessionStatusOnly) => s.status === 'completed').length;
-    const previousAttendanceRate = previousTotalSessions > 0
-      ? (previousCompletedSessions / previousTotalSessions) * 100
-      : 0;
+    const previousCompletedSessions = previousAttendanceData.filter(
+      (s: SessionStatusOnly) => s.status === 'completed',
+    ).length;
+    const previousAttendanceRate =
+      previousTotalSessions > 0
+        ? (previousCompletedSessions / previousTotalSessions) * 100
+        : 0;
 
-    const attendanceChange = (parseFloat(attendanceRate) - previousAttendanceRate).toFixed(1);
+    const attendanceChange = (
+      parseFloat(attendanceRate) - previousAttendanceRate
+    ).toFixed(1);
 
     return NextResponse.json({
       success: true,
@@ -139,13 +170,20 @@ export async function GET() {
         },
         appointmentsToday: {
           value: appointmentsTodayCount,
-          change: appointmentsChange >= 0 ? `+${appointmentsChange}` : `${appointmentsChange}`,
+          change:
+            appointmentsChange >= 0
+              ? `+${appointmentsChange}`
+              : `${appointmentsChange}`,
           changeType: appointmentsChange >= 0 ? 'increase' : 'decrease',
           label: 'vs ayer',
         },
         revenueThisMonth: {
           value: revenueThisMonthValue,
-          formatted: new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(Number(revenueLastMonthValue)),
+          formatted: new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+            minimumFractionDigits: 0,
+          }).format(Number(revenueLastMonthValue)),
           change: revenueChange,
           changeType: parseFloat(revenueChange) >= 0 ? 'increase' : 'decrease',
           label: 'vs mes anterior',
@@ -154,17 +192,21 @@ export async function GET() {
           value: parseFloat(attendanceRate),
           formatted: `${attendanceRate}%`,
           change: attendanceChange,
-          changeType: parseFloat(attendanceChange) >= 0 ? 'increase' : 'decrease',
+          changeType:
+            parseFloat(attendanceChange) >= 0 ? 'increase' : 'decrease',
           label: 'últimos 30 días',
         },
       },
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Error al obtener estadísticas del dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Error al obtener estadísticas del dashboard',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }

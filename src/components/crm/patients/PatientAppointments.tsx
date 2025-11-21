@@ -63,7 +63,8 @@ const getMockAppointments = (patientId: string): Appointment[] => {
       endTime: new Date('2024-01-25T10:00:00'),
       meetLink: 'https://meet.google.com/abc-defg-hij',
       status: 'confirmed',
-      notes: 'Sesión de seguimiento para evaluar progreso en técnicas de relajación.',
+      notes:
+        'Sesión de seguimiento para evaluar progreso en técnicas de relajación.',
     },
     {
       id: '2',
@@ -73,7 +74,8 @@ const getMockAppointments = (patientId: string): Appointment[] => {
       startTime: new Date('2024-02-01T14:30:00'),
       endTime: new Date('2024-02-01T15:30:00'),
       status: 'confirmed',
-      notes: 'Sesión presencial para trabajar en técnicas cognitivo-conductuales.',
+      notes:
+        'Sesión presencial para trabajar en técnicas cognitivo-conductuales.',
     },
     {
       id: '3',
@@ -83,7 +85,8 @@ const getMockAppointments = (patientId: string): Appointment[] => {
       startTime: new Date('2024-01-15T11:00:00'),
       endTime: new Date('2024-01-15T12:00:00'),
       status: 'completed',
-      notes: 'Sesión completada. Paciente mostró buena respuesta a las técnicas aplicadas.',
+      notes:
+        'Sesión completada. Paciente mostró buena respuesta a las técnicas aplicadas.',
     },
     {
       id: '4',
@@ -94,7 +97,8 @@ const getMockAppointments = (patientId: string): Appointment[] => {
       endTime: new Date('2024-01-08T11:30:00'),
       meetLink: 'https://meet.google.com/xyz-uvwx-rst',
       status: 'completed',
-      notes: 'Evaluación mensual. Progreso satisfactorio en objetivos terapéuticos.',
+      notes:
+        'Evaluación mensual. Progreso satisfactorio en objetivos terapéuticos.',
     },
     {
       id: '5',
@@ -104,19 +108,23 @@ const getMockAppointments = (patientId: string): Appointment[] => {
       startTime: new Date('2023-12-20T16:00:00'),
       endTime: new Date('2023-12-20T17:00:00'),
       status: 'completed',
-      notes: 'Primera sesión del mes. Establecimiento de nuevos objetivos terapéuticos.',
+      notes:
+        'Primera sesión del mes. Establecimiento de nuevos objetivos terapéuticos.',
     },
   ];
 
   return baseAppointments;
 };
 
-export default function PatientAppointments({ patientId }: PatientAppointmentsProps) {
+export default function PatientAppointments({
+  patientId,
+}: PatientAppointmentsProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   const bg = useColorModeValue('white', 'gray.800');
   const cardBg = useColorModeValue('gray.50', 'gray.700');
 
@@ -125,53 +133,71 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
   // Separate future and past appointments
   const { futureAppointments, pastAppointments } = useMemo(() => {
     const now = new Date();
-    const future = appointments.filter(apt => isFuture(apt.startTime));
-    const past = appointments.filter(apt => isPast(apt.startTime));
-    
+    const future = appointments.filter((apt) => isFuture(apt.startTime));
+    const past = appointments.filter((apt) => isPast(apt.startTime));
+
     // Sort future appointments ascending (earliest first)
     future.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-    
+
     // Sort past appointments descending (most recent first)
     past.sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
-    
+
     return { futureAppointments: future, pastAppointments: past };
   }, [appointments]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'green';
-      case 'pending': return 'yellow';
-      case 'cancelled': return 'red';
-      case 'completed': return 'blue';
-      default: return 'gray';
+      case 'confirmed':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'cancelled':
+        return 'red';
+      case 'completed':
+        return 'blue';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmada';
-      case 'pending': return 'Pendiente';
-      case 'cancelled': return 'Cancelada';
-      case 'completed': return 'Completada';
-      default: return 'Desconocido';
+      case 'confirmed':
+        return 'Confirmada';
+      case 'pending':
+        return 'Pendiente';
+      case 'cancelled':
+        return 'Cancelada';
+      case 'completed':
+        return 'Completada';
+      default:
+        return 'Desconocido';
     }
   };
 
   const getAppointmentTypeIcon = (type: string) => {
     switch (type) {
-      case 'videollamada': return <Video size={16} color="#3182CE" />;
-      case 'visita': return <Home size={16} color="#38A169" />;
-      case 'presencial': return <Building size={16} color="#805AD5" />;
-      default: return <Calendar size={16} color="#718096" />;
+      case 'videollamada':
+        return <Video size={16} color="#3182CE" />;
+      case 'visita':
+        return <Home size={16} color="#38A169" />;
+      case 'presencial':
+        return <Building size={16} color="#805AD5" />;
+      default:
+        return <Calendar size={16} color="#718096" />;
     }
   };
 
   const getAppointmentTypeText = (type: string) => {
     switch (type) {
-      case 'videollamada': return 'Videollamada';
-      case 'visita': return 'Visita Domiciliaria';
-      case 'presencial': return 'Presencial';
-      default: return 'No especificado';
+      case 'videollamada':
+        return 'Videollamada';
+      case 'visita':
+        return 'Visita Domiciliaria';
+      case 'presencial':
+        return 'Presencial';
+      default:
+        return 'No especificado';
     }
   };
 
@@ -180,7 +206,13 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
     onOpen();
   };
 
-  const AppointmentCard = ({ appointment, isPastAppointment = false }: { appointment: Appointment; isPastAppointment?: boolean }) => (
+  const AppointmentCard = ({
+    appointment,
+    isPastAppointment = false,
+  }: {
+    appointment: Appointment;
+    isPastAppointment?: boolean;
+  }) => (
     <Card bg={cardBg} borderRadius="lg" shadow="sm">
       <CardBody p={4}>
         <VStack spacing={3} align="stretch">
@@ -212,7 +244,8 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
             <HStack spacing={1}>
               <Clock size={14} color="#718096" />
               <Text fontSize="sm" color="gray.600">
-                {format(appointment.startTime, 'HH:mm')} - {format(appointment.endTime, 'HH:mm')}
+                {format(appointment.startTime, 'HH:mm')} -{' '}
+                {format(appointment.endTime, 'HH:mm')}
               </Text>
             </HStack>
           </HStack>
@@ -279,16 +312,12 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
         <Text fontSize="lg" fontWeight="semibold" color="gray.800">
           Gestión de Citas
         </Text>
-        <Button
-          leftIcon={<Plus size={16} />}
-          colorScheme="blue"
-          size="sm"
-        >
+        <Button leftIcon={<Plus size={16} />} colorScheme="blue" size="sm">
           Nueva Cita
         </Button>
       </HStack>
 
-      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+      <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={6}>
         {/* Future Appointments */}
         <GridItem>
           <VStack spacing={4} align="stretch">
@@ -298,7 +327,7 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
                 Próximas Citas ({futureAppointments.length})
               </Text>
             </HStack>
-            
+
             {futureAppointments.length === 0 ? (
               <Card bg={cardBg}>
                 <CardBody>
@@ -343,7 +372,7 @@ export default function PatientAppointments({ patientId }: PatientAppointmentsPr
                 Historial de Citas ({pastAppointments.length})
               </Text>
             </HStack>
-            
+
             {pastAppointments.length === 0 ? (
               <Card bg={cardBg}>
                 <CardBody>

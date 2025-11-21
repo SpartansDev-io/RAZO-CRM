@@ -124,7 +124,12 @@ export default function EditProfileModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl" scrollBehavior="inside">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xl"
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.600" />
       <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -252,7 +257,12 @@ export default function EditProfileModal({
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} isDisabled={isLoading}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+              isDisabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button type="submit" colorScheme="blue" isLoading={isLoading}>

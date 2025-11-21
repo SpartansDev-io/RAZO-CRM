@@ -88,7 +88,7 @@ export default function MarkReportPaidModal({
 
     try {
       // Simulate API call to mark as paid
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast({
         title: 'Reporte marcado como pagado',
@@ -103,7 +103,8 @@ export default function MarkReportPaidModal({
     } catch (error) {
       toast({
         title: 'Error al marcar como pagado',
-        description: 'Hubo un problema al procesar el pago. Intente nuevamente.',
+        description:
+          'Hubo un problema al procesar el pago. Intente nuevamente.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -124,7 +125,12 @@ export default function MarkReportPaidModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl" scrollBehavior="inside">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xl"
+      scrollBehavior="inside"
+    >
       <ModalOverlay bg="blackAlpha.600" />
       <ModalContent maxH="90vh">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -139,7 +145,13 @@ export default function MarkReportPaidModal({
           <ModalBody overflowY="auto" maxH="calc(90vh - 140px)">
             <VStack spacing={6} align="stretch">
               {/* Report Info */}
-              <Box p={4} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+              <Box
+                p={4}
+                bg="blue.50"
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="blue.200"
+              >
                 <VStack spacing={2} align="stretch">
                   <HStack justify="space-between">
                     <Text fontSize="sm" fontWeight="semibold" color="gray.700">
@@ -191,8 +203,9 @@ export default function MarkReportPaidModal({
                 <Box>
                   <AlertTitle fontSize="sm">Importante</AlertTitle>
                   <AlertDescription fontSize="xs">
-                    Al marcar este reporte como pagado, todas las {report.totalSessions} sesiones
-                    incluidas se actualizarán automáticamente a estado "pagado".
+                    Al marcar este reporte como pagado, todas las{' '}
+                    {report.totalSessions} sesiones incluidas se actualizarán
+                    automáticamente a estado &quot;pagado&quot;.
                   </AlertDescription>
                 </Box>
               </Alert>
@@ -217,7 +230,9 @@ export default function MarkReportPaidModal({
                     <Input
                       type="date"
                       max={format(new Date(), 'yyyy-MM-dd')}
-                      {...register('paymentDate', { required: 'La fecha es requerida' })}
+                      {...register('paymentDate', {
+                        required: 'La fecha es requerida',
+                      })}
                     />
                     {errors.paymentDate && (
                       <Text fontSize="sm" color="red.500" mt={1}>
@@ -230,7 +245,9 @@ export default function MarkReportPaidModal({
                     <FormLabel>Hora</FormLabel>
                     <Input
                       type="time"
-                      {...register('paymentTime', { required: 'La hora es requerida' })}
+                      {...register('paymentTime', {
+                        required: 'La hora es requerida',
+                      })}
                     />
                   </FormControl>
                 </HStack>
@@ -281,7 +298,13 @@ export default function MarkReportPaidModal({
               </VStack>
 
               {/* Confirmation Summary */}
-              <Box p={4} bg="green.50" borderRadius="md" borderWidth="1px" borderColor="green.200">
+              <Box
+                p={4}
+                bg="green.50"
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="green.200"
+              >
                 <VStack spacing={2} align="stretch">
                   <Text fontSize="sm" fontWeight="semibold" color="green.800">
                     Resumen de Confirmación
@@ -291,11 +314,14 @@ export default function MarkReportPaidModal({
                     ✓ Se marcará el reporte como <strong>PAGADO</strong>
                   </Text>
                   <Text fontSize="xs" color="gray.700">
-                    ✓ Se actualizarán <strong>{report.totalSessions} sesiones</strong> a estado pagado
+                    ✓ Se actualizarán{' '}
+                    <strong>{report.totalSessions} sesiones</strong> a estado
+                    pagado
                   </Text>
                   <Text fontSize="xs" color="gray.700">
-                    ✓ El monto de <strong>${report.totalAmount.toLocaleString()} MXN</strong> se
-                    registrará como cobrado
+                    ✓ El monto de{' '}
+                    <strong>${report.totalAmount.toLocaleString()} MXN</strong>{' '}
+                    se registrará como cobrado
                   </Text>
                   <Text fontSize="xs" color="gray.700">
                     ✓ Esta acción quedará registrada en el historial
@@ -307,7 +333,11 @@ export default function MarkReportPaidModal({
 
           <ModalFooter>
             <HStack spacing={3}>
-              <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
               <Button

@@ -70,12 +70,14 @@ user_profiles (Terapeutas)
 **Propósito**: Almacena información de los terapeutas, administradores y personal del sistema.
 
 **¿Por qué existe?**
+
 - Centraliza la gestión de usuarios del sistema
 - Separa los usuarios del sistema de los pacientes
 - Permite diferentes roles (admin, terapeuta, asistente)
 - Facilita la asignación de pacientes y sesiones a terapeutas específicos
 
 **Campos clave:**
+
 - `id`: UUID - Identificador único (vinculado con auth.users de Supabase)
 - `full_name`: Nombre completo del terapeuta
 - `email`: Email único para login
@@ -85,12 +87,14 @@ user_profiles (Terapeutas)
 - `notifications_enabled`: Control de notificaciones
 
 **Relaciones:**
+
 - Crea y actualiza: companies, contracts, patients, sessions
 - Es terapeuta primario de: patients
 - Asignado a: sessions, clinical_notes
 - Recibe: notifications, tasks
 
 **Caso de uso:**
+
 ```sql
 -- Obtener todos los terapeutas activos con su carga de pacientes
 SELECT
@@ -113,12 +117,14 @@ GROUP BY up.id;
 **Propósito**: Registra las empresas que contratan servicios de terapia para sus empleados.
 
 **¿Por qué existe?**
+
 - Modelo B2B: empresas contratan servicios corporativos
 - Gestión de contratos empresariales
 - Facturación y reportes mensuales por empresa
 - Seguimiento de empleados beneficiarios
 
 **Campos clave:**
+
 - `name`: Nombre de la empresa
 - `email`: Email corporativo
 - `tax_id`: RFC o identificador fiscal
@@ -127,10 +133,12 @@ GROUP BY up.id;
 - `active_contracts_count`: Contratos vigentes
 
 **Relaciones:**
+
 - Tiene: contracts, patients, monthly_reports, company_employees
 - Creada/actualizada por: user_profiles
 
 **Caso de uso:**
+
 ```sql
 -- Dashboard de empresas: contratos activos y uso del servicio
 SELECT
@@ -155,6 +163,7 @@ GROUP BY c.id;
 **Propósito**: Define los términos y condiciones de servicios entre empresas y la consulta.
 
 **¿Por qué existe?**
+
 - Control de servicios empresariales
 - Pricing diferenciado por contrato
 - Límites mensuales de gasto
@@ -162,6 +171,7 @@ GROUP BY c.id;
 - Histórico de relaciones comerciales
 
 **Campos clave:**
+
 - `company_id`: Empresa contratante
 - `contract_number`: Número único de contrato
 - `start_date` / `end_date`: Vigencia
@@ -171,10 +181,12 @@ GROUP BY c.id;
 - `auto_renew`: Renovación automática
 
 **Relaciones:**
+
 - Pertenece a: companies
 - Genera: sessions, monthly_contract_reports, payment_transactions
 
 **Caso de uso:**
+
 ```sql
 -- Contratos próximos a vencer (30 días)
 SELECT
@@ -200,6 +212,7 @@ GROUP BY c.id, co.name;
 **Propósito**: Registro completo de pacientes en terapia (directos y corporativos).
 
 **¿Por qué existe?**
+
 - Base del sistema: sin pacientes no hay sesiones
 - Historial clínico completo
 - Información de contacto y emergencia
@@ -209,19 +222,23 @@ GROUP BY c.id, co.name;
 **Campos clave (56 total):**
 
 **Identificación:**
+
 - `name`, `email`, `phone`, `birth_date`, `gender`
 
 **Vinculación:**
+
 - `company_id`: Empresa (si es empleado)
 - `primary_therapist_id`: Terapeuta asignado
 
 **Información Terapéutica:**
+
 - `therapy_type`: individual, pareja, familiar, grupo
 - `reason_for_therapy`: Motivo de consulta
 - `therapeutic_goals_text`: Objetivos iniciales
 - `referral_source`: Cómo llegó al servicio
 
 **Historial Clínico:**
+
 - `previous_therapy`: Terapias previas
 - `current_medications`: Medicamentos actuales
 - `allergies`: Alergias
@@ -232,6 +249,7 @@ GROUP BY c.id, co.name;
 - `risk_assessment`: Evaluación de riesgo
 
 **Información Social:**
+
 - `marital_status`: Estado civil
 - `has_children` / `children_count`: Hijos
 - `occupation`: Ocupación
@@ -239,15 +257,18 @@ GROUP BY c.id, co.name;
 - `living_situation`: Situación de vivienda
 
 **Estado:**
+
 - `status`: active, inactive, discharged, pending, on_hold
 - `consent_signed` / `consent_date`: Consentimiento informado
 
 **Relaciones:**
+
 - Pertenece a: companies (opcional)
 - Tiene: sessions, attachments, clinical_notes, therapeutic_goals
 - Genera: appointment_reminders, payment_transactions
 
 **Caso de uso:**
+
 ```sql
 -- Pacientes de alto riesgo que necesitan seguimiento
 SELECT
@@ -275,6 +296,7 @@ ORDER BY MAX(s.session_date) DESC NULLS LAST;
 **Propósito**: Registro de cada sesión terapéutica realizada o programada.
 
 **¿Por qué existe?**
+
 - Core del negocio: facturación por sesión
 - Historial terapéutico del paciente
 - Agenda y calendario del terapeuta
@@ -284,11 +306,13 @@ ORDER BY MAX(s.session_date) DESC NULLS LAST;
 **Campos clave (43 total):**
 
 **Identificación:**
+
 - `patient_id`: Paciente atendido
 - `therapist_id`: Terapeuta que atiende
 - `session_number`: Número de sesión del paciente
 
 **Programación:**
+
 - `session_date`: Fecha y hora
 - `session_duration_minutes`: Duración (default 60)
 - `session_type`: Tipo de terapia
@@ -298,6 +322,7 @@ ORDER BY MAX(s.session_date) DESC NULLS LAST;
 - `location_address`: Dirección (si es visita)
 
 **Facturación:**
+
 - `session_cost`: Costo de la sesión
 - `billing_type`: contract, direct, insurance, pro_bono
 - `contract_id`: Contrato asociado (si aplica)
@@ -306,6 +331,7 @@ ORDER BY MAX(s.session_date) DESC NULLS LAST;
 - `payment_date`: Fecha de pago
 
 **Clínico:**
+
 - `session_notes`: Notas generales
 - `progress_notes`: Notas de progreso
 - `interventions`: Intervenciones aplicadas
@@ -314,17 +340,20 @@ ORDER BY MAX(s.session_date) DESC NULLS LAST;
 - `risk_level`: low, medium, high, crisis
 
 **Estado:**
+
 - `status`: scheduled, confirmed, in_progress, completed, cancelled, no_show, rescheduled
 - `confirmed_at` / `confirmed_by`: Confirmación
 - `reminders_sent`: Recordatorios enviados
 - `cancelled_reason` / `cancelled_by`: Cancelación
 
 **Relaciones:**
+
 - Pertenece a: patients, user_profiles (therapist), contracts
 - Tiene: clinical_notes, appointment_reminders, payment_transactions
 - Genera: diagnoses, monthly_report_sessions, session_techniques
 
 **Caso de uso:**
+
 ```sql
 -- Agenda del día del terapeuta
 SELECT
@@ -351,6 +380,7 @@ ORDER BY s.session_date ASC;
 **Propósito**: Almacena referencias a documentos y archivos del paciente.
 
 **¿Por qué existe?**
+
 - Requisitos legales: consentimientos firmados
 - Estudios médicos y laboratorios
 - Reportes de otros profesionales
@@ -358,6 +388,7 @@ ORDER BY s.session_date ASC;
 - Historia clínica completa
 
 **Campos clave:**
+
 - `file_name`: Nombre del archivo
 - `file_url`: URL en storage de Supabase
 - `file_type`: document, image, consent, medical_record, other
@@ -366,10 +397,12 @@ ORDER BY s.session_date ASC;
 - `uploaded_by`: Usuario que subió el archivo
 
 **Relaciones:**
+
 - Pertenece a: patients
 - Subido por: user_profiles
 
 **Caso de uso:**
+
 ```sql
 -- Pacientes sin consentimiento firmado
 SELECT
@@ -393,6 +426,7 @@ HAVING COUNT(pa.id) FILTER (WHERE pa.file_type = 'consent') = 0;
 **Propósito**: Reportes de facturación mensual por contrato para empresas.
 
 **¿Por qué existe?**
+
 - Facturación corporativa mensual
 - Transparencia con empresas cliente
 - Control de pagos pendientes
@@ -400,6 +434,7 @@ HAVING COUNT(pa.id) FILTER (WHERE pa.file_type = 'consent') = 0;
 - Base para reconciliación contable
 
 **Campos clave:**
+
 - `contract_id` / `company_id`: Identificadores
 - `report_month` / `report_year`: Período
 - `period_start_date` / `period_end_date`: Fechas exactas
@@ -414,11 +449,13 @@ HAVING COUNT(pa.id) FILTER (WHERE pa.file_type = 'consent') = 0;
 - `pdf_url`: URL del PDF generado
 
 **Relaciones:**
+
 - Pertenece a: contracts, companies
 - Tiene: monthly_report_sessions (detalle)
 - Genera: payment_transactions
 
 **Caso de uso:**
+
 ```sql
 -- Reportes pendientes de pago vencidos
 SELECT
@@ -445,12 +482,14 @@ ORDER BY mcr.due_date ASC;
 **Propósito**: Desglose de sesiones incluidas en cada reporte mensual.
 
 **¿Por qué existe?**
+
 - Transparencia total: qué sesiones se están cobrando
 - Evita disputas con empresas
 - Auditoría y trazabilidad
 - Permite regenerar reportes si es necesario
 
 **Campos clave:**
+
 - `report_id`: Reporte al que pertenece
 - `session_id`: Sesión específica
 - `patient_id` / `patient_name`: Paciente atendido
@@ -460,9 +499,11 @@ ORDER BY mcr.due_date ASC;
 - `session_cost`: Costo de esa sesión
 
 **Relaciones:**
+
 - Pertenece a: monthly_contract_reports, sessions, patients, user_profiles
 
 **Caso de uso:**
+
 ```sql
 -- Desglose detallado de un reporte mensual
 SELECT
@@ -485,6 +526,7 @@ ORDER BY mrs.session_date ASC;
 **Propósito**: Registro detallado de observaciones clínicas por sesión (formato SOAP).
 
 **¿Por qué existe?**
+
 - Documentación clínica profesional
 - Seguimiento del progreso terapéutico
 - Requisito ético y legal
@@ -492,12 +534,14 @@ ORDER BY mrs.session_date ASC;
 - Evaluación de riesgo
 
 **Formato SOAP:**
+
 - **S**ubjective: `subjective_note` - Lo que el paciente reporta
 - **O**bjective: `objective_note` - Observaciones del terapeuta
 - **A**ssessment: `assessment` - Evaluación y análisis
 - **P**lan: `plan` - Plan de tratamiento
 
 **Campos adicionales:**
+
 - `mood_assessment`: excellent, good, neutral, poor, critical
 - `anxiety_level` / `depression_level`: Escala 1-10
 - `risk_level`: none, low, medium, high, imminent
@@ -507,6 +551,7 @@ ORDER BY mrs.session_date ASC;
 - `homework_completion`: completed, partial, not_done
 
 **Caso de uso:**
+
 ```sql
 -- Evolución del estado de ánimo de un paciente
 SELECT
@@ -528,6 +573,7 @@ ORDER BY cn.created_at ASC;
 **Propósito**: Objetivos SMART del proceso terapéutico del paciente.
 
 **¿Por qué existe?**
+
 - Estructura el proceso terapéutico
 - Mide progreso objetivo
 - Motiva al paciente
@@ -535,6 +581,7 @@ ORDER BY cn.created_at ASC;
 - Base para evaluación de resultados
 
 **Metodología SMART:**
+
 - **S**pecific: `specific_criteria` - Criterios específicos
 - **M**easurable: `measurable_criteria` - Cómo se medirá
 - **A**chievable: `achievable_notes` - Por qué es alcanzable
@@ -542,6 +589,7 @@ ORDER BY cn.created_at ASC;
 - **T**ime-bound: `time_bound_date` - Fecha límite
 
 **Campos clave:**
+
 - `goal_title`: Título del objetivo
 - `goal_description`: Descripción detallada
 - `goal_category`: emotional, behavioral, cognitive, social
@@ -549,6 +597,7 @@ ORDER BY cn.created_at ASC;
 - `status`: active, in_progress, achieved, modified, abandoned
 
 **Caso de uso:**
+
 ```sql
 -- Objetivos próximos a cumplirse
 SELECT
@@ -572,6 +621,7 @@ ORDER BY tg.target_date ASC;
 **Propósito**: Registro de diagnósticos clínicos formales (DSM-5, CIE-10).
 
 **¿Por qué existe?**
+
 - Diagnóstico profesional formal
 - Codificación para seguros
 - Justificación del tratamiento
@@ -579,6 +629,7 @@ ORDER BY tg.target_date ASC;
 - Base para reportes médicos
 
 **Campos clave:**
+
 - `diagnosis_code`: Código DSM-5 o CIE-10
 - `diagnosis_name`: Nombre del diagnóstico
 - `diagnosis_category`: Categoría diagnóstica
@@ -589,6 +640,7 @@ ORDER BY tg.target_date ASC;
 - `treatment_plan`: Plan de tratamiento
 
 **Caso de uso:**
+
 ```sql
 -- Distribución de diagnósticos activos
 SELECT
@@ -609,6 +661,7 @@ ORDER BY patient_count DESC;
 **Propósito**: Registro de técnicas terapéuticas aplicadas en cada sesión.
 
 **¿Por qué existe?**
+
 - Documentación de intervenciones
 - Evaluación de efectividad
 - Aprendizaje y mejora continua
@@ -616,6 +669,7 @@ ORDER BY patient_count DESC;
 - Justificación de abordaje terapéutico
 
 **Campos clave:**
+
 - `technique_name`: Nombre de la técnica
 - `technique_category`: cognitive, behavioral, psychodynamic, mindfulness
 - `effectiveness_rating`: Calificación 1-10
@@ -623,6 +677,7 @@ ORDER BY patient_count DESC;
 - `notes`: Notas adicionales
 
 **Caso de uso:**
+
 ```sql
 -- Técnicas más efectivas por categoría
 SELECT
@@ -648,6 +703,7 @@ ORDER BY avg_effectiveness DESC, times_used DESC;
 **Propósito**: Registro detallado de todos los movimientos financieros.
 
 **¿Por qué existe?**
+
 - Control financiero completo
 - Conciliación bancaria
 - Auditoría de pagos
@@ -655,6 +711,7 @@ ORDER BY avg_effectiveness DESC, times_used DESC;
 - Reportes fiscales
 
 **Campos clave:**
+
 - `transaction_type`: payment, refund, adjustment, discount
 - `amount`: Monto de la transacción
 - `payment_method`: cash, card, transfer, check, online
@@ -666,9 +723,11 @@ ORDER BY avg_effectiveness DESC, times_used DESC;
 - `processed_by`: Usuario que procesó
 
 **Relaciones:**
+
 - Relacionado con: sessions, patients, contracts, monthly_contract_reports
 
 **Caso de uso:**
+
 ```sql
 -- Conciliación diaria de pagos
 SELECT
@@ -695,12 +754,14 @@ ORDER BY payment_date DESC, pt.payment_method;
 **Propósito**: Sistema de notificaciones internas para usuarios.
 
 **¿Por qué existe?**
+
 - Comunicación interna efectiva
 - Alertas de tareas pendientes
 - Recordatorios automáticos
 - Seguimiento de eventos importantes
 
 **Campos clave:**
+
 - `user_id`: Usuario destinatario
 - `title` / `message`: Contenido
 - `type`: info, warning, error, success, reminder, task, payment
@@ -710,6 +771,7 @@ ORDER BY payment_date DESC, pt.payment_method;
 - `action_url` / `action_label`: Acción asociada
 
 **Caso de uso:**
+
 ```sql
 -- Notificaciones urgentes no leídas
 SELECT
@@ -734,12 +796,14 @@ ORDER BY n.created_at DESC;
 **Propósito**: Gestión de tareas y pendientes del equipo.
 
 **¿Por qué existe?**
+
 - Organización del trabajo
 - Seguimiento de pendientes
 - Asignación de responsabilidades
 - Control de vencimientos
 
 **Campos clave:**
+
 - `assigned_to` / `created_by`: Asignación
 - `title` / `description`: Contenido
 - `priority`: low, medium, high, urgent
@@ -749,6 +813,7 @@ ORDER BY n.created_at DESC;
 - `tags`: Etiquetas para organización
 
 **Caso de uso:**
+
 ```sql
 -- Tareas vencidas por usuario
 SELECT
@@ -771,12 +836,14 @@ ORDER BY overdue_tasks DESC;
 **Propósito**: Sistema automatizado de recordatorios de citas.
 
 **¿Por qué existe?**
+
 - Reduce no-shows
 - Mejora la asistencia
 - Automatización de comunicación
 - Mejor experiencia del paciente
 
 **Campos clave:**
+
 - `session_id` / `patient_id`: Cita y paciente
 - `reminder_type`: email, sms, whatsapp, push
 - `scheduled_for`: Cuándo enviar
@@ -786,6 +853,7 @@ ORDER BY overdue_tasks DESC;
 - `retry_count`: Intentos de reenvío
 
 **Caso de uso:**
+
 ```sql
 -- Recordatorios pendientes para hoy
 SELECT
@@ -812,12 +880,14 @@ ORDER BY ar.scheduled_for ASC;
 **Propósito**: Horarios de disponibilidad de cada terapeuta.
 
 **¿Por qué existe?**
+
 - Gestión de agenda
 - Previene conflictos de horarios
 - Facilita agendamiento
 - Respeta horarios laborales
 
 **Campos clave:**
+
 - `therapist_id`: Terapeuta
 - `day_of_week`: Día (0-6, 0=Domingo)
 - `start_time` / `end_time`: Horario
@@ -826,6 +896,7 @@ ORDER BY ar.scheduled_for ASC;
 - `effective_from` / `effective_until`: Vigencia
 
 **Caso de uso:**
+
 ```sql
 -- Disponibilidad de la semana actual
 SELECT
@@ -857,12 +928,14 @@ ORDER BY ta.day_of_week, ta.start_time;
 **Propósito**: Contactos de emergencia de cada paciente.
 
 **¿Por qué existe?**
+
 - Seguridad del paciente
 - Protocolo de crisis
 - Requisito ético
 - Acceso rápido en emergencias
 
 **Campos clave:**
+
 - `patient_id`: Paciente
 - `contact_name` / `relationship`: Información del contacto
 - `phone` / `alternate_phone` / `email`: Medios de contacto
@@ -870,6 +943,7 @@ ORDER BY ta.day_of_week, ta.start_time;
 - `priority`: Orden de contacto
 
 **Caso de uso:**
+
 ```sql
 -- Contactos de emergencia de pacientes de alto riesgo
 SELECT
@@ -893,12 +967,14 @@ ORDER BY pec.is_primary DESC, pec.priority ASC;
 **Propósito**: Registro de empleados de empresas cliente.
 
 **¿Por qué existe?**
+
 - Control de beneficiarios
 - Vinculación empleado-paciente
 - Validación de acceso a servicios
 - Reportes corporativos
 
 **Campos clave:**
+
 - `company_id`: Empresa
 - `patient_id`: Paciente (si ya está en terapia)
 - `employee_name` / `employee_email`: Datos del empleado
@@ -908,6 +984,7 @@ ORDER BY pec.is_primary DESC, pec.priority ASC;
 - `start_date` / `end_date`: Periodo laboral
 
 **Caso de uso:**
+
 ```sql
 -- Empleados sin asignar a paciente
 SELECT
@@ -931,12 +1008,14 @@ ORDER BY ce.start_date ASC;
 **Propósito**: Plantillas reutilizables para documentos comunes.
 
 **¿Por qué existe?**
+
 - Estandarización de documentos
 - Ahorro de tiempo
 - Consistencia profesional
 - Personalización con variables
 
 **Campos clave:**
+
 - `template_name`: Nombre descriptivo
 - `template_type`: clinical_note, consent_form, report, letter, invoice
 - `content`: Contenido del template
@@ -945,6 +1024,7 @@ ORDER BY ce.start_date ASC;
 - `usage_count`: Veces usado
 
 **Caso de uso:**
+
 ```sql
 -- Plantillas más usadas
 SELECT
@@ -967,12 +1047,14 @@ LIMIT 10;
 **Propósito**: Configuraciones globales del sistema.
 
 **¿Por qué existe?**
+
 - Centralización de configuraciones
 - Parámetros modificables sin código
 - Control de comportamiento del sistema
 - Personalización por instalación
 
 **Campos clave:**
+
 - `setting_key`: Clave única
 - `setting_value`: Valor (JSON)
 - `setting_type`: string, number, boolean, json, array
@@ -981,6 +1063,7 @@ LIMIT 10;
 - `is_public`: Visible en frontend
 
 **Ejemplos de configuraciones:**
+
 - Costos por defecto
 - Horarios de atención
 - Emails de notificación
@@ -994,6 +1077,7 @@ LIMIT 10;
 **Propósito**: Log completo de acciones importantes en el sistema.
 
 **¿Por qué existe?**
+
 - Trazabilidad completa
 - Seguridad y compliance
 - Investigación de incidentes
@@ -1001,6 +1085,7 @@ LIMIT 10;
 - Análisis de uso
 
 **Campos clave:**
+
 - `user_id`: Usuario que realizó la acción
 - `action`: Acción realizada
 - `entity_type` / `entity_id`: Entidad afectada
@@ -1009,6 +1094,7 @@ LIMIT 10;
 - `severity`: info, warning, error, critical
 
 **Caso de uso:**
+
 ```sql
 -- Acciones de alto riesgo recientes
 SELECT
@@ -1034,6 +1120,7 @@ ORDER BY al.created_at DESC;
 Cada tabla tiene índices estratégicos para optimizar las consultas más frecuentes:
 
 **Búsquedas comunes:**
+
 ```sql
 -- patients
 CREATE INDEX idx_patients_name ON patients(name);
@@ -1053,6 +1140,7 @@ CREATE INDEX idx_notifications_priority ON notifications(priority);
 ```
 
 **Índices compuestos para queries complejas:**
+
 ```sql
 -- Sesiones del mes por terapeuta
 CREATE INDEX idx_sessions_therapist_date
@@ -1072,6 +1160,7 @@ CREATE INDEX idx_reports_company_status
 Todas las tablas implementan **Row Level Security** con políticas restrictivas:
 
 **1. Políticas por Defecto:**
+
 ```sql
 -- Habilitar RLS
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
@@ -1081,6 +1170,7 @@ ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ```
 
 **2. Políticas de Lectura (SELECT):**
+
 ```sql
 -- Los terapeutas solo ven a sus pacientes
 CREATE POLICY "Therapists can view their patients"
@@ -1104,6 +1194,7 @@ CREATE POLICY "Admins can view all patients"
 ```
 
 **3. Políticas de Escritura (INSERT/UPDATE):**
+
 ```sql
 -- Solo usuarios autenticados pueden crear sesiones
 CREATE POLICY "Authenticated users can create sessions"
@@ -1123,6 +1214,7 @@ CREATE POLICY "Therapists can update their sessions"
 ```
 
 **4. Políticas de Eliminación (DELETE):**
+
 ```sql
 -- Soft delete: solo marcar como eliminado
 -- Solo admins pueden eliminar físicamente
@@ -1216,7 +1308,9 @@ GROUP BY DATE_TRUNC('month', s.session_date);
 ## 🚀 Mejores Prácticas
 
 ### 1. **Soft Deletes**
+
 Todas las tablas principales usan `deleted_at` en lugar de DELETE físico:
+
 ```sql
 -- Mal
 DELETE FROM patients WHERE id = 'uuid';
@@ -1226,20 +1320,26 @@ UPDATE patients SET deleted_at = NOW() WHERE id = 'uuid';
 ```
 
 ### 2. **Timestamps Automáticos**
+
 Todas las tablas tienen `created_at` y `updated_at`:
+
 ```sql
 created_at TIMESTAMPTZ DEFAULT NOW()
 updated_at TIMESTAMPTZ DEFAULT NOW()
 ```
 
 ### 3. **UUIDs como IDs**
+
 Uso de UUIDs en lugar de integers secuenciales:
+
 ```sql
 id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 ```
 
 ### 4. **Validación en Base de Datos**
+
 Constraints y checks en la BD:
+
 ```sql
 ALTER TABLE sessions
   ADD CONSTRAINT check_session_cost_positive
@@ -1247,6 +1347,7 @@ ALTER TABLE sessions
 ```
 
 ### 5. **Valores Default Significativos**
+
 ```sql
 status VARCHAR DEFAULT 'active'
 is_active BOOLEAN DEFAULT true
