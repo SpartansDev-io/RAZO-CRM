@@ -54,17 +54,23 @@ export async function POST(request: NextRequest) {
     const body: CreatePatientRequest = await request.json();
 
     // Validate required fields
-    if (!body.name || !body.email || !body.phone || !body.birthDate || !body.gender) {
+    if (
+      !body.name ||
+      !body.email ||
+      !body.phone ||
+      !body.birthDate ||
+      !body.gender
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!body.reasonForTherapy || !body.therapyType) {
       return NextResponse.json(
         { error: 'Therapy information is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -76,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (existingPatient) {
       return NextResponse.json(
         { error: 'A patient with this email already exists' },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -85,7 +91,7 @@ export async function POST(request: NextRequest) {
     if (isNaN(birthDate.getTime())) {
       return NextResponse.json(
         { error: 'Invalid birth date format' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -150,7 +156,7 @@ export async function POST(request: NextRequest) {
         message: `Patient ${result.name} created successfully`,
         data: result,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error('Error creating patient:', error);
@@ -158,13 +164,13 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { error: 'Internal server error while creating patient' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -227,14 +233,14 @@ export async function GET(request: NextRequest) {
           total,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error('Error fetching patients:', error);
 
     return NextResponse.json(
       { error: 'Internal server error while fetching patients' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

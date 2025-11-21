@@ -76,7 +76,7 @@ interface NewPatientFormData {
 
   // Additional Notes
   notes?: string;
-   supportNetwork?: Array<{
+  supportNetwork?: Array<{
     fullName: string;
     relationship: string;
     phone?: string;
@@ -174,7 +174,10 @@ export default function NewPatientModal({
 
       handleClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Hubo un problema al guardar la información';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Hubo un problema al guardar la información';
 
       toast({
         title: 'Error al registrar el paciente',
