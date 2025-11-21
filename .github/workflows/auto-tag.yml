@@ -1,12 +1,78 @@
-name: Auto Tag on Merge
+name: Tag on Merge to Main
 
 on:
   pull_request:
     types: [closed]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  auto-tag:
-    uses: SpartansDev-io/dev-tools/.github/workflows/auto-tag.yml@main
+  tag-on-merge:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # importante para acceder a todos los tags
+
+      - name: Set up Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Determine bump type from labels
+        id: bump
+        run: |
+          labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
+          bump_type="patch"
+          for label in $labels; do
+            if [[ "$label" == "version:major" ]]; then
+              bump_type="major"
+              break
+            elif [[ "$label" == "version:minor" ]]; then
+              bump_type="minor"
+            fi
+          done
+          echo "Bump type: $bump_type"
+          echo "bump_type=$bump_type" >> $GITHUB_OUTPUT
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+      - name: Calculate next version
+        id: next_tag
+        run: |
+          latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
+          version="${latest_tag#v}"
+          IFS='.' read -r major minor patch <<< "$version"
+
+          case "${{ steps.bump.outputs.bump_type }}" in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          new_tag="v${major}.${minor}.${patch}"
+          echo "New tag: $new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.next_tag.outputs.new_tag }}
+          git push origin ${{ steps.next_tag.outputs.new_tag }}
