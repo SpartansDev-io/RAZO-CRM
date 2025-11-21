@@ -9,4 +9,4 @@ permissions:
 
 jobs:
   auto-tag:
-    uses: SpartansDev/dev-tools/.github/workflows/auto-tag.yml@main
+    uses: SpartansDev-io/dev-tools/.github/workflows/auto-tag.yml@main
