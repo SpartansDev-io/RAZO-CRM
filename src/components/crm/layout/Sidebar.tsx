@@ -1,5 +1,5 @@
 'use client';
-
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Box,
   VStack,
@@ -15,15 +15,13 @@ import {
   Home,
   Users,
   Calendar,
-  FileText,
   BarChart3,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Brain,
   Building2,
 } from 'lucide-react';
-import { useRouter, usePathname } from 'next/navigation';
+
 import { useDashboardStore } from '@/stores/dashboard.store';
 
 interface NavItemProps {
@@ -172,7 +170,12 @@ export default function Sidebar() {
         </Box>
 
         {/* Toggle Button - Desktop only */}
-        <Box px={4} py={2} display={{ base: 'none', md: 'block' }}>
+        <Box
+          px={4}
+          py={2}
+          display={{ base: 'none', md: 'flex' }}
+          justifyContent={'flex-end'}
+        >
           <IconButton
             aria-label={isSidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'}
             icon={
@@ -184,7 +187,6 @@ export default function Sidebar() {
             }
             size="sm"
             variant="ghost"
-            w="full"
             onClick={toggleSidebar}
             _hover={{ bg: 'gray.100' }}
           />
