@@ -148,7 +148,7 @@ export async function GET(request: Request) {
           type: apt.sessionType,
           duration: apt.sessionDurationMinutes,
           appointmentType: apt.appointmentType || 'presencial',
-          meetLink: apt.meetLink,
+          meetLink: apt.meetLink ?? undefined,
           status: apt.status,
           confirmed: apt.confirmedAt ? true : false,
           therapistId: apt.therapist?.id,
