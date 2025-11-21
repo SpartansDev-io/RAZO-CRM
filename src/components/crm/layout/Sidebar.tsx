@@ -141,7 +141,7 @@ export default function Sidebar() {
       <VStack spacing={0} align="stretch" h="full">
         {/* Logo - Always show full on mobile */}
         <Box
-          p={{ base: 4, md: 6 }}
+          p={{ base: 4 }}
           borderBottom="1px"
           borderColor={borderColor}
         >
@@ -164,7 +164,7 @@ export default function Sidebar() {
             display={{ base: 'none', md: !isSidebarOpen ? 'block' : 'none' }}
           >
             <Flex justify="center">
-              <Brain size={32} color="#2196F3" />
+              <Brain size={48} color="#2196F3" />
             </Flex>
           </Box>
         </Box>
