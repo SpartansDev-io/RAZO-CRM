@@ -1,0 +1,12 @@
+name: Auto Tag on Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  auto-tag:
+    uses: SpartansDev/dev-tools/.github/workflows/auto-tag.yml@main
